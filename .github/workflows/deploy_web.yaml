@@ -16,19 +16,21 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          # Tady používám tvůj název SSH_KEY
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          # Tady používám tvůj název HOST
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
       
-      - name: Execute Remote Commands
+      - name: Deploy and Restart Docker
         run: |
           ssh -i ~/.ssh/id_ed25519 ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
-            export PATH=$PATH:/usr/bin:/usr/local/bin
+            # 1. Nastavení cest pro ARM64 a Docker pluginy
+            export PATH=$PATH:/usr/bin:/usr/local/bin:/usr/libexec/docker/cli-plugins
             export LD_LIBRARY_PATH=/lib/aarch64-linux-gnu:$LD_LIBRARY_PATH
+            
+            # 2. Samotný deployment
             cd /root/master-project
             git pull origin main
-            # Teď už bez absolutní cesty, ať si to Linux přebere sám
+            
+            # 3. Spuštění (zkusíme volat přímo docker compose)
             docker compose up -d --build
           EOF
