@@ -32,10 +32,13 @@ jobs:
           DB_PASS: ${{ secrets.DB_PASS }}
           DB_PORT: ${{ secrets.DB_PORT }}
         run: |
-          ssh -i ~/.ssh/id_ed25519 ${{ secrets.USERNAME }}@${{ secrets.HOST }} "mkdir -p /opt/bridge-api && cp /opt/bridge-api/bridge.py /opt/bridge-api/bridge.py.backup || true"
+          # 1. Příprava složky a záloha starého bridge (pokud existuje)
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.USERNAME }}@${{ secrets.HOST }} "mkdir -p /opt/bridge-api && [ -f /opt/bridge-api/bridge.py ] && cp /opt/bridge-api/bridge.py /opt/bridge-api/bridge.py.backup || true"
           
+          # 2. Kopírování nového souboru
           scp -i ~/.ssh/id_ed25519 agents/ollama_bridge/bridge.py ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/opt/bridge-api/
           
+          # 3. Vytvoření .env souboru a restart služby
           ssh -i ~/.ssh/id_ed25519 ${{ secrets.USERNAME }}@${{ secrets.HOST }} << EOF
           cat > /opt/bridge-api/.env << 'ENVEOF'
           DB_HOST=${DB_HOST}
@@ -45,13 +48,13 @@ jobs:
           DB_PORT=${DB_PORT}
           ENVEOF
           
-          systemctl stop bridge-api || true
-          pkill -9 gunicorn || true
-          systemctl start bridge-api || true
+          # Pokus o restart - pokud služba ještě neexistuje, nesmí to shodit celý build (proto || true)
+          systemctl restart bridge-api || echo "Service bridge-api not found yet, skipping restart."
           EOF
-      
+
       - name: Verify deployment
         run: |
+          echo "Waiting for bridge to start..."
           sleep 5
-          # OPRAVENO NA PORT 5002
-          curl -f http://${{ secrets.HOST }}:5002/api/version || exit 1
+          # Kontrola verze na portu 5002
+          curl -f http://${{ secrets.HOST }}:5002/api/version || (echo "Bridge is not responding on port 5002" && exit 1)
