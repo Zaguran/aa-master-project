@@ -1,20 +1,19 @@
-name: Deploy Bridge API to Hetzner
+name: Deploy Hetzner Resource Monitor
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'agents/ollama_bridge/**'
-      - '.github/workflows/deploy-bridge-ollama.yaml'
-  workflow_dispatch:
+      - 'agents/ollama_monitor/**'
+  workflow_dispatch:  
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
       
       - name: Setup SSH
@@ -24,37 +23,13 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
       
-      - name: Deploy Bridge API
-        env:
-          DB_HOST: ${{ secrets.DB_HOST }}
-          DB_NAME: ${{ secrets.DB_NAME }}
-          DB_USER: ${{ secrets.DB_USER }}
-          DB_PASS: ${{ secrets.DB_PASS }}
-          DB_PORT: ${{ secrets.DB_PORT }}
+      - name: Deploy
         run: |
-          # 1. Příprava složky a záloha starého bridge (pokud existuje)
-          ssh -i ~/.ssh/id_ed25519 ${{ secrets.USERNAME }}@${{ secrets.HOST }} "mkdir -p /opt/bridge-api && [ -f /opt/bridge-api/bridge.py ] && cp /opt/bridge-api/bridge.py /opt/bridge-api/bridge.py.backup || true"
+          # 1. Příprava složky a práv na serveru
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.USERNAME }}@${{ secrets.HOST }} "sudo mkdir -p /opt/hetzner-monitor && sudo chown ${{ secrets.USERNAME }}:${{ secrets.USERNAME }} /opt/hetzner-monitor"
           
-          # 2. Kopírování nového souboru
-          scp -i ~/.ssh/id_ed25519 agents/ollama_bridge/bridge.py ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/opt/bridge-api/
+          # 2. Kopírování skriptu do domovské složky a pak přesun (kvůli právům scp)
+          scp -i ~/.ssh/id_ed25519 agents/ollama_monitor/resource_monitor.py ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/opt/hetzner-monitor/
           
-          # 3. Vytvoření .env souboru a restart služby
-          ssh -i ~/.ssh/id_ed25519 ${{ secrets.USERNAME }}@${{ secrets.HOST }} << EOF
-          cat > /opt/bridge-api/.env << 'ENVEOF'
-          DB_HOST=${DB_HOST}
-          DB_NAME=${DB_NAME}
-          DB_USER=${DB_USER}
-          DB_PASS=${DB_PASS}
-          DB_PORT=${DB_PORT}
-          ENVEOF
-          
-          # Pokus o restart - pokud služba ještě neexistuje, nesmí to shodit celý build (proto || true)
-          systemctl restart bridge-api || echo "Service bridge-api not found yet, skipping restart."
-          EOF
-
-      - name: Verify deployment
-        run: |
-          echo "Waiting for bridge to start..."
-          sleep 5
-          # Kontrola verze na portu 5002
-          curl -f http://${{ secrets.HOST }}:5002/api/version || (echo "Bridge is not responding on port 5002" && exit 1)
+          # 3. Restart služby přes sudo (aby build nevisel)
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.USERNAME }}@${{ secrets.HOST }} "sudo systemctl restart hetzner-monitor || echo 'Služba zatím neexistuje.'"

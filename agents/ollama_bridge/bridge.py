@@ -1,65 +1,48 @@
 from flask import Flask, request, jsonify
-from flask_cors import CORS
-from sqlalchemy import create_engine, text
 import os
+from dotenv import load_dotenv
+
+# Načtení proměnných z .env (pro databázi, pokud ji používáš)
+load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
 
-# Databázové připojení (přebírá se z .env souboru přes GitHub Action)
-
-def get_db_engine():
-    db_user = os.environ.get("DB_USER")
-    db_pass = os.environ.get("DB_PASS")
-    db_name = os.environ.get("DB_NAME")
-    db_host = os.environ.get("DB_HOST", "localhost")
-    db_port = os.environ.get("DB_PORT", "5432")
-    return create_engine(f"postgresql+psycopg2://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}")
-
-engine = get_db_engine()
+# Úložiště pro data z monitoru (v paměti)
+system_stats = {}
 
 @app.route('/api/version', methods=['GET'])
 def get_version():
-    return jsonify({"version": "1.0.0-ollama", "status": "running"}), 200
+    """Základní test funkčnosti Bridge"""
+    return jsonify({
+        "status": "running",
+        "version": "1.0.0-ollama",
+        "node": "Hetzner-OL-02"
+    })
 
 @app.route('/system-status', methods=['POST'])
-def receive_telemetry():
-    """
-    Endpoint pro příjem dat z resource_monitor.py
-    """
-    data = request.get_json(silent=True)
+def update_status():
+    """Endpoint pro příjem dat z resource_monitor.py"""
+    global system_stats
+    data = request.json
     if not data:
-        return "No data received", 400
-        
-    try:
-        with engine.connect() as conn:
-            conn.execute(
-                text("""
-                    INSERT INTO system_telemetry_v1 
-                    (node_name, cpu_usage, ram_usage, disk_free_gb, last_update) 
-                    VALUES (:node, :cpu, :ram, :disk, CURRENT_TIMESTAMP) 
-                    ON CONFLICT (node_name) 
-                    DO UPDATE SET 
-                        cpu_usage = :cpu, 
-                        ram_usage = :ram, 
-                        disk_free_gb = :disk, 
-                        last_update = CURRENT_TIMESTAMP
-                """), 
-                {
-                    "node": data.get('node'), 
-                    "cpu": data.get('cpu'), 
-                    "ram": data.get('ram'), 
-                    "disk": data.get('disk')
-                }
-            )
-            conn.commit()
-        return "OK", 200
-    except Exception as e:
-        return str(e), 500
+        return jsonify({"error": "No data received"}), 400
+    
+    node_name = data.get("node", "unknown")
+    system_stats[node_name] = {
+        "cpu": data.get("cpu"),
+        "ram": data.get("ram"),
+        "disk": data.get("disk"),
+        "last_update": data.get("timestamp")
+    }
+    
+    print(f"Příjata data z uzlu: {node_name}")
+    return jsonify({"status": "success"}), 200
+
+@app.route('/system-status', methods=['GET'])
+def get_status():
+    """Zobrazení aktuálních posbíraných dat"""
+    return jsonify(system_stats)
 
 if __name__ == '__main__':
-    print("=" * 60)
-    print("Ollama Bridge API v1.0.0")
-    print("Starting on http://0.0.0.0:5002")
-    print("=" * 60)
+    # Port 5002 podle tvé konfigurace
     app.run(host='0.0.0.0', port=5002)
