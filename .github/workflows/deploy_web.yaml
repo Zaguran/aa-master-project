@@ -19,12 +19,11 @@ jobs:
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
-      
       - name: Deploy and Restart Docker
         run: |
           ssh -i ~/.ssh/id_ed25519 ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
             cd /root/master-project
             git pull origin main
-            # Teď už to poletí!
-            docker compose up -d --build
+            # Použijeme absolutní cestu k binárce, kterou jsme nainstalovali
+            /usr/bin/docker compose up -d --build
           EOF
