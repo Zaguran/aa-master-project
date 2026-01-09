@@ -4,7 +4,11 @@ on:
   push:
     branches:
       - main
-
+    paths:
+      - 'web/**'              # Spustí se jen při změně v aplikaci
+      - 'docker-compose.yml'  # Nebo při změně dockeru
+      - 'Dockerfile'  
+      
 jobs:
   deploy:
     runs-on: ubuntu-latest

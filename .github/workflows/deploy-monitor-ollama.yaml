@@ -19,14 +19,14 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          # Používáme SSH_KEY místo SSH_PRIVATE_KEY
+          # POUŽÍVÁME SSH_KEY MÍSTO SSH_PRIVATE_KEY
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          # Používáme HOST místo SSH_HOST
+          # POUŽÍVÁME HOST MÍSTO SSH_HOST
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
       
       - name: Deploy
         run: |
-          # Používáme USERNAME a HOST
+          # POUŽÍVÁME USERNAME A HOST
           scp -i ~/.ssh/id_ed25519 agents/ollama_monitor/resource_monitor.py ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/opt/hetzner-monitor/
           ssh -i ~/.ssh/id_ed25519 ${{ secrets.USERNAME }}@${{ secrets.HOST }} "systemctl restart hetzner-monitor"

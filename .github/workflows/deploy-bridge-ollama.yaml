@@ -32,7 +32,6 @@ jobs:
           DB_PASS: ${{ secrets.DB_PASS }}
           DB_PORT: ${{ secrets.DB_PORT }}
         run: |
-          # Nejdřív vytvoříme backup a nahrajeme nový soubor
           ssh -i ~/.ssh/id_ed25519 ${{ secrets.USERNAME }}@${{ secrets.HOST }} "mkdir -p /opt/bridge-api && cp /opt/bridge-api/bridge.py /opt/bridge-api/bridge.py.backup || true"
           
           scp -i ~/.ssh/id_ed25519 agents/ollama_bridge/bridge.py ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/opt/bridge-api/
@@ -54,5 +53,5 @@ jobs:
       - name: Verify deployment
         run: |
           sleep 5
-          # Opraveno na port 5002
+          # OPRAVENO NA PORT 5002
           curl -f http://${{ secrets.HOST }}:5002/api/version || exit 1
