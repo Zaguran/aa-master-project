@@ -2,23 +2,13 @@ version: '3.8'
 
 services:
   aat-web:
-    # Kontext nastavíme na tečku (aktuální složka), aby Docker viděl všechno
     build:
       context: .
       dockerfile: web/Dockerfile
     container_name: aat-web-container
-    # Mapování portů: tvoje aplikace běží uvnitř na 8501, ven ji pustíme taky na 8501
-    ports:
-      - "8501:8501"
-    
-    # --- KLÍČOVÁ ZMĚNA PRO OLLAMU ---
-    # Toto umožní aplikaci uvnitř Dockeru komunikovat s hostitelem přes host.docker.internal
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    
-    # Restartování kontejneru při pádu nebo restartu serveru
+    # SÍŤOVÝ REŽIM HOST: Kontejner přestane mít vlastní izolovanou síť 
+    # a začne používat přímo síť serveru (jako by v Dockeru nebyl).
+    network_mode: "host" 
     restart: always
-    
-    # Proměnné prostředí
     environment:
       - PYTHONUNBUFFERED=1
