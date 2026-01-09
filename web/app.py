@@ -22,7 +22,7 @@ def get_ollama_response(user_input):
     Komunikace s Ollamou běžící na hostitelském serveru.
     IP 172.17.0.1 je výchozí brána Dockeru k hostiteli.
     """
-    url = "http://172.17.0.1:11434/api/generate"
+    rl = "http://host.docker.internal:11434/api/generate"
     payload = {
         "model": "llama3.1:8b",
         "prompt": user_input,

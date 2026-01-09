@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   aat-web:
     # Kontext nastavíme na tečku (aktuální složka), aby Docker viděl všechno
@@ -8,8 +10,15 @@ services:
     # Mapování portů: tvoje aplikace běží uvnitř na 8501, ven ji pustíme taky na 8501
     ports:
       - "8501:8501"
+    
+    # --- KLÍČOVÁ ZMĚNA PRO OLLAMU ---
+    # Toto umožní aplikaci uvnitř Dockeru komunikovat s hostitelem přes host.docker.internal
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    
     # Restartování kontejneru při pádu nebo restartu serveru
     restart: always
-    # Proměnné prostředí (pokud bys je časem potřeboval)
+    
+    # Proměnné prostředí
     environment:
       - PYTHONUNBUFFERED=1
