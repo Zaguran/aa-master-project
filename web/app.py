@@ -29,3 +29,5 @@ with tabs[2]:
 with tabs[3]:
     st.header("AI Code Review")
     st.write("Analýza souladu kódu s požadavky pomocí Gemini/Ollama.")
+
+# Konec souboru
