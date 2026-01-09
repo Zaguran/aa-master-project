@@ -4,8 +4,8 @@ import time
 
 # Správná konfigurace pro Ollama VM
 NODE_NAME = "Hetzner-Ollama-02"
-# Opravená IP adresa a port 5002
-BRIDGE_URL = "http://168.119.122.36:5002/system-status"
+
+BRIDGE_URL = "http://128.140.108.240:5002/system-status"
 
 def collect_and_send():
     stats = {
