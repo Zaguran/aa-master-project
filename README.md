@@ -11,6 +11,10 @@ Projekt pro správu kvality a monitorování automotive projektů.
   - [x] Implementace GitHub Actions pro automatický deploy na Hetzner VPS
   - [x] Vyřešení konfliktů portu 8501 (automatické ukončení visících Python procesů)
   - [x] Funkční verze dostupná na iPhonu, notebooku i VM
+## Aktuální stav (v0.3.2)
+- **Framework:** Streamlit (běžící v Dockeru)
+- **AI Engine:** Ollama (Llama 3.1 8B)
+- **Síťování:** Režim `host` (přímý přístup ke službám serveru)  
 
 ## 🏗️ Architektura Nasazení (v0.2.0)
 1. **Frontend/Backend**: Streamlit aplikace běžící v Dockeru.
@@ -22,6 +26,7 @@ Projekt pro správu kvality a monitorování automotive projektů.
 
 | Tag | Datum | Popis změn |
 | :--- | :--- | :--- |
+| **v0.3.0** | 2026-01-09 | **Ollama Chat online**. První chat s Ollamou. |
 | **v0.2.0** | 2026-01-09 | **Docker Build & Deploy**. První stabilní verze běžící v izolovaném kontejneru s automatickým deployem. |
 | **v0.1.0** | 2026-01-08 | **Initial Layout**. Základní struktura aplikace a dashboardu. |
 
@@ -33,13 +38,15 @@ Projekt pro správu kvality a monitorování automotive projektů.
 3. `git tag -a v0.2.1 -m "Krátký popis verze"`
 4. `git push origin v0.2.1`
 
-### Ruční údržba na serveru (Troubleshooting):
-Pokud se port 8501 zasekne, použij tyto "F12" příkazy:
-```bash
-# Zabití procesu na portu
-fuser -k 8501/tcp
+
 
 # Restart celého stacku
 cd ~/master-project
 docker compose down
 docker compose up -d --build
+
+## Instalace a spuštění
+1. Ujistěte se, že na hostitelském serveru běží Ollama:
+   ```bash
+   ollama serve
+   ollama pull llama3.1:8b
