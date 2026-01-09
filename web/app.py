@@ -1,0 +1,1 @@
+print("Automotive Assistant v0.1.0")
