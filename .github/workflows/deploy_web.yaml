@@ -22,11 +22,13 @@ jobs:
           # Tady používám tvůj název HOST
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
       
-      - name: Deploy and Restart Docker
+      - name: Execute Remote Commands
         run: |
-          # Tady používám tvůj USERNAME a HOST
           ssh -i ~/.ssh/id_ed25519 ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
+            export PATH=$PATH:/usr/bin:/usr/local/bin
+            export LD_LIBRARY_PATH=/lib/aarch64-linux-gnu:$LD_LIBRARY_PATH
             cd /root/master-project
             git pull origin main
-            /usr/bin/docker compose up -d --build
+            # Teď už bez absolutní cesty, ať si to Linux přebere sám
+            docker compose up -d --build
           EOF
