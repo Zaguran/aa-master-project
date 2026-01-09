@@ -20,15 +20,9 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            # Najdeme cestu dynamicky a provedeme update
-            mkdir -p ~/master-project
-            cd ~/master-project
+            cd /root/master-project
             git config --global --add safe.directory /root/master-project
-            
-            # Pokud složka není git repozitář, inicializujeme ji (pro jistotu)
-            if [ ! -d .git ]; then
-              git clone https://github.com/Zaguran/aa-master-project.git .
-            fi
-            
             git pull origin main
-            docker compose up -d --build
+            
+            # Použijeme absolutní cestu k docker compose pro jistotu
+            /usr/bin/docker compose up -d --build
