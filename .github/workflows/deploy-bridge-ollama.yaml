@@ -1,0 +1,60 @@
+name: Deploy Bridge API to Hetzner
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'agents/ollama_bridge/**'
+      - '.github/workflows/deploy-bridge-ollama.yaml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+      
+      - name: Deploy Bridge API
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASS: ${{ secrets.DB_PASS }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+        run: |
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cp /opt/bridge-api/bridge.py /opt/bridge-api/bridge.py.backup"
+          
+          scp -i ~/.ssh/id_ed25519 agents/ollama_bridge/bridge.py ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/opt/bridge-api/
+          
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
+          cat > /opt/bridge-api/.env << 'ENVEOF'
+          DB_HOST=${DB_HOST}
+          DB_NAME=${DB_NAME}
+          DB_USER=${DB_USER}
+          DB_PASS=${DB_PASS}
+          DB_PORT=${DB_PORT}
+          ENVEOF
+          
+          systemctl stop bridge-api
+          sleep 2
+          rm -rf /opt/bridge-api/__pycache__
+          pkill -9 gunicorn || true
+          systemctl start bridge-api
+          sleep 3
+          systemctl status bridge-api --no-pager
+          EOF
+      
+      - name: Verify deployment
+        run: |
+          sleep 5
+          curl -f http://${{ secrets.SSH_HOST }}:5000/api/version || exit 1
