@@ -26,7 +26,7 @@ def get_ollama_response(user_input):
     }
     
     try:
-        response = requests.post(url, json=payload, timeout=45)
+        response = requests.post(url, json=payload, timeout=300)
         if response.status_code == 200:
             return response.json().get("response", "Chyba: Prázdná odpověď.")
         else:
