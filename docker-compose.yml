@@ -1,14 +1,15 @@
-version: '3.8'
-
 services:
   aat-web:
-    build: 
+    # Kontext nastavíme na tečku (aktuální složka), aby Docker viděl všechno
+    build:
       context: .
       dockerfile: web/Dockerfile
+    container_name: aat-web-container
+    # Mapování portů: tvoje aplikace běží uvnitř na 8501, ven ji pustíme taky na 8501
     ports:
       - "8501:8501"
+    # Restartování kontejneru při pádu nebo restartu serveru
     restart: always
-    volumes:
-      - .:/app
-
-  # Později sem přidáme bridge k DB
+    # Proměnné prostředí (pokud bys je časem potřeboval)
+    environment:
+      - PYTHONUNBUFFERED=1
