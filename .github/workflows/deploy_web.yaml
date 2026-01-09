@@ -20,4 +20,5 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            /root/deploy.sh
+            cd /root/master-project
+            sh ./deploy.sh
