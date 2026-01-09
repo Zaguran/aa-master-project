@@ -1,19 +1,16 @@
-name: Deploy Hetzner Resource Monitor
+name: Deploy Bridge API to Hetzner
 
 on:
   push:
     branches:
       - main
-    paths:
-      - 'agents/ollama_monitor/**'
-  workflow_dispatch:  
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
       
       - name: Setup SSH
@@ -23,13 +20,8 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
       
-      - name: Deploy
+      - name: Deploy Bridge API
         run: |
-          # 1. Příprava složky a práv na serveru
-          ssh -i ~/.ssh/id_ed25519 ${{ secrets.USERNAME }}@${{ secrets.HOST }} "sudo mkdir -p /opt/hetzner-monitor && sudo chown ${{ secrets.USERNAME }}:${{ secrets.USERNAME }} /opt/hetzner-monitor"
-          
-          # 2. Kopírování skriptu do domovské složky a pak přesun (kvůli právům scp)
-          scp -i ~/.ssh/id_ed25519 agents/ollama_monitor/resource_monitor.py ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/opt/hetzner-monitor/
-          
-          # 3. Restart služby přes sudo (aby build nevisel)
-          ssh -i ~/.ssh/id_ed25519 ${{ secrets.USERNAME }}@${{ secrets.HOST }} "sudo systemctl restart hetzner-monitor || echo 'Služba zatím neexistuje.'"
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.USERNAME }}@${{ secrets.HOST }} "sudo mkdir -p /opt/bridge-api && sudo chown -R ${{ secrets.USERNAME }}:${{ secrets.USERNAME }} /opt/bridge-api"
+          scp -i ~/.ssh/id_ed25519 agents/ollama_bridge/bridge.py ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/opt/bridge-api/
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.USERNAME }}@${{ secrets.HOST }} "sudo systemctl restart bridge-api || true"
