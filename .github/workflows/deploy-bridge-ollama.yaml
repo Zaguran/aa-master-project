@@ -20,9 +20,9 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
       
       - name: Deploy Bridge API
         env:
@@ -32,11 +32,12 @@ jobs:
           DB_PASS: ${{ secrets.DB_PASS }}
           DB_PORT: ${{ secrets.DB_PORT }}
         run: |
-          ssh -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cp /opt/bridge-api/bridge.py /opt/bridge-api/bridge.py.backup"
+          # Nejdřív vytvoříme backup a nahrajeme nový soubor
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.USERNAME }}@${{ secrets.HOST }} "mkdir -p /opt/bridge-api && cp /opt/bridge-api/bridge.py /opt/bridge-api/bridge.py.backup || true"
           
-          scp -i ~/.ssh/id_ed25519 agents/ollama_bridge/bridge.py ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/opt/bridge-api/
+          scp -i ~/.ssh/id_ed25519 agents/ollama_bridge/bridge.py ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/opt/bridge-api/
           
-          ssh -i ~/.ssh/id_ed25519 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << EOF
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.USERNAME }}@${{ secrets.HOST }} << EOF
           cat > /opt/bridge-api/.env << 'ENVEOF'
           DB_HOST=${DB_HOST}
           DB_NAME=${DB_NAME}
@@ -45,16 +46,13 @@ jobs:
           DB_PORT=${DB_PORT}
           ENVEOF
           
-          systemctl stop bridge-api
-          sleep 2
-          rm -rf /opt/bridge-api/__pycache__
+          systemctl stop bridge-api || true
           pkill -9 gunicorn || true
-          systemctl start bridge-api
-          sleep 3
-          systemctl status bridge-api --no-pager
+          systemctl start bridge-api || true
           EOF
       
       - name: Verify deployment
         run: |
           sleep 5
-          curl -f http://${{ secrets.SSH_HOST }}:5000/api/version || exit 1
+          # Opraveno na port 5002
+          curl -f http://${{ secrets.HOST }}:5002/api/version || exit 1
