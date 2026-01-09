@@ -3,50 +3,41 @@
 Projekt pro správu kvality a monitorování automotive projektů.
 
 ## 🚀 Aktuální stav (Change Log)
+- [x] **v0.4.0** (2026-01-09) - **Multi-Node Resource Monitoring**
+  - [x] Implementace distribuovaného monitoringu (CPU, RAM, Disk)
+  - [x] Zprovoznění Bridge API na portu 5000 pro sběr telemetrie
+  - [x] Automatizace nasazení agentů přes GitHub Actions na více VM
+  - [x] Vizualizace stavu uzlu Hetzner-Ollama-02 na centrálním dashboardu
+- [x] **v0.3.0** - Ollama Chat online. První chat s Ollamou.
+- [x] **v0.2.0** - Docker Migration & CI/CD Setup
 - [x] **v0.1.0** - Inicializace projektu, základní Streamlit layout
-- [x] **v0.2.0** (2026-01-09) - **Docker Migration & CI/CD Setup**
-  - [x] Migrace z lokálního spouštění na Docker kontejnerizaci
-  - [x] Nastavení `docker-compose.yml` s automatickým restartem
-  - [x] Oprava Docker kontextu pro přístup k `requirements.txt`
-  - [x] Implementace GitHub Actions pro automatický deploy na Hetzner VPS
-  - [x] Vyřešení konfliktů portu 8501 (automatické ukončení visících Python procesů)
-  - [x] Funkční verze dostupná na iPhonu, notebooku i VM
-## Aktuální stav (v0.3.2)
-- **Framework:** Streamlit (běžící v Dockeru)
-- **AI Engine:** Ollama (Llama 3.1 8B)
-- **Síťování:** Režim `host` (přímý přístup ke službám serveru)  
 
-## 🏗️ Architektura Nasazení (v0.2.0)
-1. **Frontend/Backend**: Streamlit aplikace běžící v Dockeru.
-2. **Kontejner**: Python 3.11-slim (minimalizovaná velikost obrazu).
-3. **Port**: `8501` mapovaný 1:1 na hostitelský systém.
-4. **CI/CD**: GitHub Actions komunikující přes SSH s Hetzner VPS.
+## 🏗️ Architektura Systému (v0.4.0)
+Systém nyní běží v distribuovaném režimu napříč Hetzner Cloud uzly:
+
+1. **Centrální Dashboard & Bridge (`hetzner-vm-1`)**:
+   - **IP**: `128.140.108.240`
+   - **Port**: `5000` (Bridge API přijímající JSON data)
+   - **Role**: Agregace dat a vizualizace stavu všech serverů.
+
+2. **Monitorovaný AI Uzel (`Hetzner-OL-02`)**:
+   - **IP**: `168.119.122.36`
+   - **Služba**: `hetzner-monitor.service` (Python agent)
+   - **Role**: Sběr systémových metrik a odesílání na Bridge přes HTTP POST.
 
 ## 🏷️ Release History & Tags
 
 | Tag | Datum | Popis změn |
 | :--- | :--- | :--- |
-| **v0.3.0** | 2026-01-09 | **Ollama Chat online**. První chat s Ollamou. |
-| **v0.2.0** | 2026-01-09 | **Docker Build & Deploy**. První stabilní verze běžící v izolovaném kontejneru s automatickým deployem. |
-| **v0.1.0** | 2026-01-08 | **Initial Layout**. Základní struktura aplikace a dashboardu. |
+| **v0.4.0** | 2026-01-09 | **Resource Monitoring**. Propojení uzlů a real-time monitoring HW prostředků. |
+| **v0.3.0** | 2026-01-09 | **Ollama Chat online**. První funkční integrace LLM. |
+| **v0.2.0** | 2026-01-09 | **Docker Build & Deploy**. Automatizace nasazení přes GitHub Actions. |
+| **v0.1.0** | 2026-01-08 | **Initial Layout**. Základní struktura aplikace. |
 
-## 🛠️ Administrace (Build Process)
+## 🛠️ Administrace (Monitoring Setup)
 
-### Jak vytvořit nový release tag:
-1. `git add .`
-2. `git commit -m "popis tvé změny"`
-3. `git tag -a v0.2.1 -m "Krátký popis verze"`
-4. `git push origin v0.2.1`
-
-
-
-# Restart celého stacku
-cd ~/master-project
-docker compose down
-docker compose up -d --build
-
-## Instalace a spuštění
-1. Ujistěte se, že na hostitelském serveru běží Ollama:
-   ```bash
-   ollama serve
-   ollama pull llama3.1:8b
+### Instalace agenta na nový uzel:
+Služba monitoru běží jako systemd unit:
+```bash
+# Sledování logů odesílání dat
+sudo journalctl -u hetzner-monitor -f
