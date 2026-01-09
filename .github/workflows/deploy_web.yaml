@@ -19,6 +19,4 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
-          script: |
-            cd /root/master-project
-            sh ./deploy.sh
+          script: script: cd /root/master-project && sh deploy.sh
