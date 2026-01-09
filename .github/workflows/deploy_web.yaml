@@ -20,9 +20,4 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /root/master-project
-            git config --global --add safe.directory /root/master-project
-            git pull origin main
-            
-            # Použijeme úplnou absolutní cestu k dockeru pro spuštění pluginu compose
-            /usr/bin/docker compose up -d --build
+            /root/deploy.sh
