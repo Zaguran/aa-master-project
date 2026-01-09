@@ -24,8 +24,5 @@ jobs:
             git config --global --add safe.directory /root/master-project
             git pull origin main
             
-            # Nastavíme cestu, aby robot viděl docker
-            export PATH=$PATH:/usr/bin
-            
-            # Spustíme docker compose (bez pomlčky)
-            docker compose up -d --build
+            # Použijeme úplnou absolutní cestu k dockeru pro spuštění pluginu compose
+            /usr/bin/docker compose up -d --build
