@@ -1,20 +1,33 @@
 name: Deploy AA Tool
+
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Deploy to Server via SSH
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            cd /root/master-project
+            # Najdeme cestu dynamicky a provedeme update
+            mkdir -p ~/master-project
+            cd ~/master-project
             git config --global --add safe.directory /root/master-project
-            git pull
-            # Sem pozdeji pridame restart Dockeru
+            
+            # Pokud složka není git repozitář, inicializujeme ji (pro jistotu)
+            if [ ! -d .git ]; then
+              git clone https://github.com/Zaguran/aa-master-project.git .
+            fi
+            
+            git pull origin main
