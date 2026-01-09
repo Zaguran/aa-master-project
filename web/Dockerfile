@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Instalace systémových závislostí
+# 1. Instalace systémových nástrojů
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
@@ -10,16 +10,16 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Kopírujeme soubor z lokálního adresáře do kontejneru
-# Tečka na konci je důležitá - znamená "tento adresář v kontejneru"
-COPY requirements.txt . 
+# 2. Kopírování requirements
+# V kontextu ./web je requirements.txt přímo "po ruce"
+COPY requirements.txt .
 
+# 3. Instalace python balíčků
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Kopírujeme zbytek souborů (app.py atd.)
+# 4. Kopírování všeho ostatního ze složky web/ (app.py atd.)
 COPY . .
 
+# 5. Spuštění
 EXPOSE 8501
-
-# Tady pozor: tvůj soubor se jmenuje app.py, nikoliv main.py
 CMD ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
