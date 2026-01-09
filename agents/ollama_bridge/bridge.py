@@ -7,6 +7,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Databázové připojení (přebírá se z .env souboru přes GitHub Action)
+
 def get_db_engine():
     db_user = os.environ.get("DB_USER")
     db_pass = os.environ.get("DB_PASS")
