@@ -1,4 +1,4 @@
-name: Deploy AA Tool - Sjednocený
+name: Deploy AA Tool - Final
 
 on:
   push:
@@ -25,6 +25,6 @@ jobs:
           ssh -i ~/.ssh/id_ed25519 ${{ secrets.USERNAME }}@${{ secrets.HOST }} << 'EOF'
             cd /root/master-project
             git pull origin main
-            # Tohle vynutí spuštění přes správný zavaděč pro tvou architekturu
-            /lib/ld-linux-aarch64.so.1 /usr/bin/docker compose up -d --build
+            # Teď už to poletí!
+            docker compose up -d --build
           EOF
