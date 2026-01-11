@@ -13,24 +13,49 @@ def get_connection():
         options="-c search_path=work_aa"
     )
 
-# ... (tady zůstávají funkce get_table_data a get_aa_stats, které už máš) ...
+def get_aa_stats():
+    """Vrací statistiky tabulek pro Dashboard"""
+    try:
+        conn = get_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        tables = ['projects', 'nodes', 'links', 'customer']
+        stats = []
+        for table in tables:
+            cur.execute(f"SELECT COUNT(*) FROM {table}")
+            count = cur.fetchone()['count']
+            stats.append({"Tabulka": table, "Počet záznamů": count})
+        cur.close()
+        conn.close()
+        return stats
+    except Exception as e:
+        print(f"Chyba DB: {e}")
+        return []
+
+def get_table_data(table_name, limit=20, offset=0):
+    """Vrací data konkrétní tabulky pro Table View"""
+    try:
+        conn = get_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        cur.execute(f"SELECT COUNT(*) FROM {table_name}")
+        total = cur.fetchone()['count']
+        cur.execute(f"SELECT * FROM {table_name} LIMIT %s OFFSET %s", (limit, offset))
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return rows, total
+    except Exception as e:
+        return str(e), 0
 
 def agent_loop():
     """Tato funkce bude srdcem asynchronního agenta."""
     print("DB Bridge Agent startuje...")
     while True:
         try:
-            # Zde bude logika: 
-            # 1. Podívej se do tabulky 'nodes' na processing_status < 100
-            # 2. Pokud existuje, začni zpracovávat
-            # 3. Aktualizuj status v DB
-            # print("Checking for new tasks...") 
+            # Zde bude později logika pro zpracování úkolů
             pass
         except Exception as e:
             print(f"Chyba agenta: {e}")
-        
-        time.sleep(30) # Kontrola každých 30 vteřin
+        time.sleep(30)
 
 if __name__ == "__main__":
-    # Pokud soubor spustíš přímo (ne přes import v app.py), začne fungovat jako agent
     agent_loop()
