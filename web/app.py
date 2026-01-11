@@ -12,6 +12,7 @@ OLLAMA_MODEL = "llama3"
 
 def main():
     # --- SIDEBAR (Zde jsou ty přidané věci) ---
+    
     with st.sidebar:
         st.title(f"Verze: {VERSION}")
         st.markdown("---")
