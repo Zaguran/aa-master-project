@@ -1,0 +1,36 @@
+name: Deploy AA DB Bridge Agent
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'agents/db_bridge/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+      
+      - name: Transfer and Restart
+        run: |
+          # Vytvoření složky
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.USERNAME }}@${{ secrets.HOST }} "sudo mkdir -p /opt/aa-project/agents/db_bridge"
+          
+          # Kopírování kódu
+          scp -i ~/.ssh/id_ed25519 agents/db_bridge/database.py ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/opt/aa-project/agents/db_bridge/
+          
+          # Kopírování service souboru (pokud jsi ho změnil)
+          # scp -i ~/.ssh/id_ed25519 aa-db-bridge.service ${{ secrets.USERNAME }}@${{ secrets.HOST }}:/etc/systemd/system/
+          
+          # Restart agenta
+          ssh -i ~/.ssh/id_ed25519 ${{ secrets.USERNAME }}@${{ secrets.HOST }} "sudo systemctl daemon-reload && sudo systemctl restart aa-db-bridge || true"
