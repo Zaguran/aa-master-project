@@ -1,72 +1,63 @@
 import streamlit as st
 import pandas as pd
-import requests
 import sys
 import os
 
-# Přidání cesty k agentům, aby Streamlit viděl database.py
-sys.path.append(os.path.join(os.path.dirname(__file__), 'agents', 'db_bridge'))
+# Importujeme funkce přímo ze souboru database.py, 
+# který bude nyní umístěn ve stejné složce jako tento skript.
 from database import get_aa_stats, get_table_data
 
-# --- KONFIGURACE ---
-st.set_page_config(page_title="AAT v0.4.0", page_icon="🚗", layout="wide")
+# Základní konfigurace stránky
+st.set_page_config(
+    page_title="AA Project Control Tower",
+    page_icon="🚀",
+    layout="wide"
+)
 
-st.sidebar.title("AAT Ovládání")
-st.sidebar.info("Verze: 0.4.1 (Refactored)")
-st.sidebar.write("🧠 **Model:** Llama 3.1 (8B)")
-
-# --- HLAVNÍ MENU ---
-tabs = st.tabs(["Dashboard", "Requirements", "Traceability", "Table View", "DB Status", "Chat"])
-
-# --- TAB: DASHBOARD ---
-with tabs[0]:
-    st.header("Systémový přehled")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.write("Vítejte v AA Proof of Concept. Systém je připraven pro sémantickou analýzu.")
-    with col2:
-        st.metric(label="DB Schéma", value="work_aa")
-
-# --- TAB: TABLE VIEW (Nové) ---
-with tabs[3]:
-    st.header("🔍 Data Explorer")
-    target_table = st.selectbox("Vyberte tabulku k zobrazení:", 
-                                ["projects", "nodes", "links", "customer", "ai_analysis"])
+def main():
+    st.title("🚀 AA Project Control Tower")
+    st.markdown("---")
     
-    # Session state pro stránkování
-    if f"off_{target_table}" not in st.session_state:
-        st.session_state[f"off_{target_table}"] = 0
+    # Definice záložek
+    tabs = st.tabs(["📊 Dashboard", "📅 Table View", "⚙️ Logs"])
     
-    limit = 20
-    rows, total = get_table_data(target_table, limit, st.session_state[f"off_{target_table}"])
-    
-    if isinstance(rows, str):
-        st.error(f"Chyba DB: {rows}")
-    else:
-        st.write(f"Zobrazeno {len(rows)} z celkem {total} záznamů")
-        st.dataframe(pd.DataFrame(rows), use_container_width=True)
+    # --- ZÁLOŽKA DASHBOARD ---
+    with tabs[0]:
+        st.header("Database Statistics")
+        stats = get_aa_stats()
+        if stats:
+            # Převedeme seznam slovníků na DataFrame pro hezké zobrazení
+            df_stats = pd.DataFrame(stats)
+            st.table(df_stats)
+        else:
+            st.error("Nepodařilo se načíst statistiky z databáze na Serveru A.")
+
+    # --- ZÁLOŽKA TABLE VIEW ---
+    with tabs[1]:
+        st.header("Table Data Explorer")
         
-        c1, c2, _ = st.columns([1, 1, 5])
-        with c1:
-            if st.button("⬅️ Předchozí") and st.session_state[f"off_{target_table}"] >= limit:
-                st.session_state[f"off_{target_table}"] -= limit
-                st.rerun()
-        with col2:
-            if st.button("Další ➡️") and st.session_state[f"off_{target_table}"] + limit < total:
-                st.session_state[f"off_{target_table}"] += limit
-                st.rerun()
+        # Výběr tabulky
+        table_name = st.selectbox(
+            "Vyber tabulku pro zobrazení dat:", 
+            ["projects", "nodes", "links", "customer"]
+        )
+        
+        # Načtení dat z vybrané tabulky
+        data, total = get_table_data(table_name)
+        
+        if isinstance(data, list):
+            st.success(f"Zobrazeno prvních 20 záznamů z celkem {total}.")
+            if len(data) > 0:
+                st.dataframe(pd.DataFrame(data), use_container_width=True)
+            else:
+                st.info("Tabulka je momentálně prázdná.")
+        else:
+            st.error(f"Chyba při načítání dat: {data}")
 
-# --- TAB: DB STATUS (Nové) ---
-with tabs[4]:
-    st.header("📊 Database Status")
-    stats_data = get_aa_stats()
-    if stats_data:
-        st.table(pd.DataFrame(stats_data))
-    else:
-        st.warning("Nepodařilo se načíst statistiky ze schématu work_aa.")
+    # --- ZÁLOŽKA LOGS ---
+    with tabs[2]:
+        st.header("System Logs")
+        st.info("Zde se brzy objeví logy z agenta běžícího na Serveru A.")
 
-# --- TAB: CHAT (AI ASISTENT) ---
-with tabs[5]:
-    st.header("💬 AI Asistent (Ollama)")
-    # (Zde zůstává tvoje původní logika chatu z app.py v0.3.4)
-    st.info("Chat je připraven k použití.")
+if __name__ == "__main__":
+    main()
