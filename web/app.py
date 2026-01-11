@@ -5,25 +5,34 @@ from database import get_aa_stats, get_table_data
 
 st.set_page_config(page_title="AA Project Control Tower", layout="wide", page_icon="🚀")
 
-# Konfigurace Ollama (Server B)
-OLLAMA_URL = "http://localhost:11434/api/generate" # Předpokládáme, že Ollama běží na stejném serveru jako web
+# Konfigurace
+VERSION = "0.5"
+OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_MODEL = "llama3"
 
 def main():
+    # --- SIDEBAR (Zde jsou ty přidané věci) ---
+    with st.sidebar:
+        st.title(f"Verze: {VERSION}")
+        st.markdown("---")
+        st.subheader("🤖 Ollama Status")
+        st.info(f"**Model:** {OLLAMA_MODEL}\n\n**Mód:** Generativní")
+    
     st.title("🚀 AA Project Control Tower")
     
-    # Všechny taby pohromadě
+    # Původní taby zůstávají beze změny
     tabs = st.tabs(["💬 Chat s Ollamou", "📊 Dashboard", "📅 Table View", "⚙️ Logs"])
     
     # --- TAB 1: CHAT S OLLAMOU ---
     with tabs[0]:
         st.header("Chat s AI (Ollama)")
-        user_input = st.text_input("Zadej otázku pro model Llama 3:")
+        user_input = st.text_input("Zadej otázku pro model Llama 3:", key="ollama_chat")
         if st.button("Odeslat"):
             if user_input:
                 with st.spinner("Přemýšlím..."):
                     try:
                         response = requests.post(OLLAMA_URL, json={
-                            "model": "llama3",
+                            "model": OLLAMA_MODEL,
                             "prompt": user_input,
                             "stream": False
                         })
