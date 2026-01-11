@@ -1,0 +1,35 @@
+graph TB
+    subgraph VM1 ["VM 1: Frontend & Inference"]
+        WEB[Webový Portál - UI]
+        OLLAMA[Ollama - LLM Engine]
+    end
+
+    subgraph VM2 ["VM 2: Data & Processing"]
+        DB[(PostgreSQL + pgvector)]
+        AGENT[Výpočetní Agenti / Scripts]
+        VECT[Vektorizační Engine - Embeddings]
+        
+        AGENT <--> VECT
+        VECT <--> DB
+        AGENT <--> DB
+    end
+
+    subgraph EXTERNAL ["Externí Vstupy / Zdroje"]
+        GIT[Git - Zdrojový kód]
+        DNG[IBM DOORS Next Gen - Req]
+        PDF[PDF Dokumenty - RFQ/Zadání]
+    end
+
+    %% Vazby mezi VM a externím světem
+    WEB <--> DB
+    WEB <--> OLLAMA
+    AGENT <--> OLLAMA
+    
+    AGENT <-- Import/Sync --> DNG
+    AGENT <-- Sync --> GIT
+    AGENT <-- OCR/Parse --> PDF
+
+    %% Stylizace
+    style VM1 fill:#f9f,stroke:#333,stroke-width:2px
+    style VM2 fill:#bbf,stroke:#333,stroke-width:2px
+    style OLLAMA fill:#dfd,stroke:#333,stroke-width:2px

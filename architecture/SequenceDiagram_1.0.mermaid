@@ -1,0 +1,30 @@
+sequenceDiagram
+    autonumber
+    actor CU as Customer
+    participant VM2 as VM2 (Agenti & DB)
+    participant AI as VM1 (Ollama AI)
+    participant RE as Requirements Engineer
+    participant AD as Architect / Developer
+
+    Note over CU, AD: FÁZE 1: IMPORT A ANALÝZA (RFQ)
+    CU->>VM2: Poskytne RFQ (PDF / DNG Link)
+    VM2->>AI: Požadavek na OCR a sémantický rozbor
+    AI-->>VM2: Strukturovaná data (CUST_REQ)
+    VM2->>VM2: Uložení do DB & Vektorizace
+
+    Note over VM2, RE: FÁZE 2: ZPRACOVÁNÍ (PROJECT START)
+    RE->>VM2: Definice dědičnosti (70% Inherited / 30% Deleted)
+    VM2->>AI: Kontrola konzistence s Platformou
+    AI-->>RE: Report rozdílů (Suggestions)
+    RE->>VM2: Potvrzení finální specifikace projektu
+
+    Note over RE, AD: FÁZE 3: VÝVOJ A TRACEABILITY
+    AD->>VM2: Vytvoření ARCH_ELEM a linkování na SYS_REQ
+    VM2->>AI: Automatický audit linků (AI Match Score)
+    AI-->>AD: Varování na chybějící nebo slabé vazby
+    AD->>VM2: Manuální override / fix vazeb
+
+    Note over VM2, CU: FÁZE 4: VALIDACE A EXPORT
+    VM2->>VM2: Agregace výsledků testů (HIL/SIL)
+    RE->>VM2: Generování Compliance Matrix
+    VM2-->>CU: Export finálního reportu k převzetí

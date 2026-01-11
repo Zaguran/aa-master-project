@@ -3,6 +3,8 @@
 Projekt pro správu kvality a monitorování automotive projektů.
 
 ## 🚀 Aktuální stav (Change Log)
+- [x] **v0.5.0** (2026-01-11) - **Add DB schema**
+
 - [x] **v0.4.0** (2026-01-09) - **Multi-Node Resource Monitoring**
   - [x] Implementace distribuovaného monitoringu (CPU, RAM, Disk)
   - [x] Zprovoznění Bridge API na portu 5000 pro sběr telemetrie
@@ -14,6 +16,13 @@ Projekt pro správu kvality a monitorování automotive projektů.
 
 ## 🏗️ Architektura Systému (v0.4.0)
 Systém nyní běží v distribuovaném režimu napříč Hetzner Cloud uzly:
+
+![Architektura Projektu](./architecture/Architecture_1.0.png)
+![Architektura Projektu](./architecture/Schema_1.0.png)
+![Architektura Projektu](./architecture/UseCase_1.0.png)
+![Architektura Projektu](./architecture/StateMachine_1.0.png)
+![Architektura Projektu](./architecture/SequenceDiagram_1.0.png)
+
 
 1. **Centrální Dashboard & Bridge (`hetzner-vm-1`)**:
    - **IP**: `128.140.108.240`
@@ -33,6 +42,9 @@ Systém nyní běží v distribuovaném režimu napříč Hetzner Cloud uzly:
 | **v0.3.0** | 2026-01-09 | **Ollama Chat online**. První funkční integrace LLM. |
 | **v0.2.0** | 2026-01-09 | **Docker Build & Deploy**. Automatizace nasazení přes GitHub Actions. |
 | **v0.1.0** | 2026-01-08 | **Initial Layout**. Základní struktura aplikace. |
+
+
+
 
 ## 🛠️ Administrace (Monitoring Setup)
 
