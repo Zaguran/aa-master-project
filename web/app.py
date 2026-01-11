@@ -1,63 +1,62 @@
 import streamlit as st
 import pandas as pd
-import sys
-import os
-
-# Importujeme funkce přímo ze souboru database.py, 
-# který bude nyní umístěn ve stejné složce jako tento skript.
+import requests
 from database import get_aa_stats, get_table_data
 
-# Základní konfigurace stránky
-st.set_page_config(
-    page_title="AA Project Control Tower",
-    page_icon="🚀",
-    layout="wide"
-)
+st.set_page_config(page_title="AA Project Control Tower", layout="wide", page_icon="🚀")
+
+# Konfigurace Ollama (Server B)
+OLLAMA_URL = "http://localhost:11434/api/generate" # Předpokládáme, že Ollama běží na stejném serveru jako web
 
 def main():
     st.title("🚀 AA Project Control Tower")
-    st.markdown("---")
     
-    # Definice záložek
-    tabs = st.tabs(["📊 Dashboard", "📅 Table View", "⚙️ Logs"])
+    # Všechny taby pohromadě
+    tabs = st.tabs(["💬 Chat s Ollamou", "📊 Dashboard", "📅 Table View", "⚙️ Logs"])
     
-    # --- ZÁLOŽKA DASHBOARD ---
+    # --- TAB 1: CHAT S OLLAMOU ---
     with tabs[0]:
+        st.header("Chat s AI (Ollama)")
+        user_input = st.text_input("Zadej otázku pro model Llama 3:")
+        if st.button("Odeslat"):
+            if user_input:
+                with st.spinner("Přemýšlím..."):
+                    try:
+                        response = requests.post(OLLAMA_URL, json={
+                            "model": "llama3",
+                            "prompt": user_input,
+                            "stream": False
+                        })
+                        st.write(response.json().get("response", "Chyba odpovědi"))
+                    except Exception as e:
+                        st.error(f"Nelze se spojit s Ollamou: {e}")
+            else:
+                st.warning("Napiš nejdříve text.")
+
+    # --- TAB 2: DASHBOARD ---
+    with tabs[1]:
         st.header("Database Statistics")
         stats = get_aa_stats()
         if stats:
-            # Převedeme seznam slovníků na DataFrame pro hezké zobrazení
-            df_stats = pd.DataFrame(stats)
-            st.table(df_stats)
+            st.table(pd.DataFrame(stats))
         else:
-            st.error("Nepodařilo se načíst statistiky z databáze na Serveru A.")
+            st.error("Nepodařilo se načíst statistiky ze Serveru A.")
 
-    # --- ZÁLOŽKA TABLE VIEW ---
-    with tabs[1]:
-        st.header("Table Data Explorer")
-        
-        # Výběr tabulky
-        table_name = st.selectbox(
-            "Vyber tabulku pro zobrazení dat:", 
-            ["projects", "nodes", "links", "customer"]
-        )
-        
-        # Načtení dat z vybrané tabulky
-        data, total = get_table_data(table_name)
-        
-        if isinstance(data, list):
-            st.success(f"Zobrazeno prvních 20 záznamů z celkem {total}.")
-            if len(data) > 0:
-                st.dataframe(pd.DataFrame(data), use_container_width=True)
-            else:
-                st.info("Tabulka je momentálně prázdná.")
-        else:
-            st.error(f"Chyba při načítání dat: {data}")
-
-    # --- ZÁLOŽKA LOGS ---
+    # --- TAB 3: TABLE VIEW ---
     with tabs[2]:
+        st.header("Table Data Explorer")
+        table_name = st.selectbox("Vyber tabulku", ["projects", "nodes", "links", "customer"])
+        data, total = get_table_data(table_name)
+        if isinstance(data, list):
+            st.write(f"Celkem záznamů: {total}")
+            st.dataframe(pd.DataFrame(data), use_container_width=True)
+        else:
+            st.error(f"Chyba připojení: {data}")
+
+    # --- TAB 4: LOGS ---
+    with tabs[3]:
         st.header("System Logs")
-        st.info("Zde se brzy objeví logy z agenta běžícího na Serveru A.")
+        st.info("Logy z agenta (Server A) se zde brzy objeví.")
 
 if __name__ == "__main__":
     main()
