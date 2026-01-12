@@ -1,13 +1,12 @@
 import streamlit as st
 import pandas as pd
 import requests
-from database import get_aa_stats, get_table_data
+import json
 
 st.set_page_config(page_title="AA Project Control Tower", layout="wide", page_icon="🚀")
 
 # --- KONFIGURACE ---
-VERSION = "0.5"
-# Ollama běží jako služba na této IP
+VERSION = "0.5.1"
 OLLAMA_IP = "168.119.122.36"
 OLLAMA_URL_BASE = f"http://{OLLAMA_IP}:11434"
 
@@ -17,11 +16,9 @@ OLLAMA_URL_PULL = f"{OLLAMA_URL_BASE}/api/pull"
 OLLAMA_MODEL = "llama3"
 
 def check_ollama():
-    """Zkontroluje, zda je Ollama API dostupné a vypíše seznam modelů."""
     try:
         resp = requests.get(OLLAMA_URL_TAGS, timeout=3)
         if resp.status_code == 200:
-            # Získáme jména všech stažených modelů
             models_data = resp.json().get('models', [])
             models = [m['name'] for m in models_data] if models_data else []
             return True, models
@@ -40,35 +37,27 @@ def main():
         
         if is_online:
             st.success("● Online (API dostupné)")
-            
-            # Kontrola, zda je konkrétní model (např. llama3) v seznamu
             model_exists = any(OLLAMA_MODEL in m for m in installed_models)
             
             if model_exists:
                 st.info(f"**Model:** {OLLAMA_MODEL} ✅")
             else:
                 st.warning(f"**Model:** {OLLAMA_MODEL} ❌ (Nenalezen)")
-                # Tlačítko pro stažení modelu, pokud chybí
                 if st.button("📥 Load Model (Pull)"):
-                    with st.spinner(f"Stahuji model {OLLAMA_MODEL} na server..."):
+                    with st.spinner(f"Stahuji model {OLLAMA_MODEL}..."):
                         try:
                             r = requests.post(OLLAMA_URL_PULL, json={"name": OLLAMA_MODEL, "stream": False})
-                            if r.status_code == 200:
-                                st.success("Model stažen!")
-                                st.rerun()
-                            else:
-                                st.error(f"Chyba při stahování: {r.status_code}")
+                            st.rerun()
                         except Exception as e:
                             st.error(f"Stažení selhalo: {e}")
         else:
-            st.error("● Offline (API na IP neodpovídá)")
-            st.warning(f"Zkontrolujte, zda Ollama běží na {OLLAMA_IP} a portu 11434.")
+            st.error("● Offline (API neodpovídá)")
+            st.warning(f"Zkontrolujte IP {OLLAMA_IP}")
             
         st.markdown(f"**Mód:** Generativní")
     
     st.title("🚀 AA Project Control Tower")
     
-    # Taby projektu
     tabs = st.tabs(["💬 Chat s Ollamou", "📊 Dashboard", "📅 Table View", "⚙️ Logs"])
     
     # --- TAB 1: CHAT S OLLAMOU ---
@@ -79,43 +68,55 @@ def main():
         if st.button("Odeslat"):
             if user_input:
                 if not is_online:
-                    st.error("Nelze odeslat dotaz, Ollama je offline.")
+                    st.error("Ollama je offline.")
                 else:
-                    with st.spinner("Přemýšlím..."):
+                    with st.spinner("Model generuje odpověď..."):
                         try:
-                            response = requests.post(OLLAMA_URL_GENERATE, json={
+                            # Posíláme JSON s vypnutým streamováním pro okamžitou odpověď
+                            payload = {
                                 "model": OLLAMA_MODEL,
                                 "prompt": user_input,
-                                "stream": False
-                            })
-                            answer = response.json().get("response", "Chyba: Prázdná odpověď od modelu.")
-                            st.write(answer)
+                                "stream": False,
+                                "options": {
+                                    "num_predict": 128 # Omezíme délku pro rychlost testu
+                                }
+                            }
+                            response = requests.post(OLLAMA_URL_GENERATE, json=payload, timeout=30)
+                            
+                            if response.status_code == 200:
+                                result = response.json()
+                                answer = result.get("response", "")
+                                if answer:
+                                    st.write("### Odpověď:")
+                                    st.write(answer)
+                                else:
+                                    st.warning("Model vrátil prázdný text. Zkuste jinou otázku.")
+                            else:
+                                st.error(f"Chyba API ({response.status_code}): {response.text}")
+                                
                         except Exception as e:
-                            st.error(f"Chyba při komunikaci: {e}")
+                            st.error(f"Chyba komunikace: {e}")
             else:
                 st.warning("Napiš nejdříve text.")
 
-    # --- TAB 2: DASHBOARD ---
+    # --- Ostatní taby zůstávají beze změn (z database.py) ---
     with tabs[1]:
         st.header("Database Statistics")
+        from database import get_aa_stats
         stats = get_aa_stats()
-        if stats:
-            st.table(pd.DataFrame(stats))
-        else:
-            st.error("Nepodařilo se načíst statistiky ze Serveru A.")
+        if stats: st.table(pd.DataFrame(stats))
+        else: st.error("Nepodařilo se načíst statistiky.")
 
-    # --- TAB 3: TABLE VIEW ---
     with tabs[2]:
         st.header("Table Data Explorer")
+        from database import get_table_data
         table_name = st.selectbox("Vyber tabulku", ["projects", "nodes", "links", "customer"])
         data, total = get_table_data(table_name)
         if isinstance(data, list):
             st.write(f"Celkem záznamů: {total}")
             st.dataframe(pd.DataFrame(data), use_container_width=True)
-        else:
-            st.error(f"Chyba připojení k DB: {data}")
+        else: st.error(f"Chyba DB: {data}")
 
-    # --- TAB 4: LOGS ---
     with tabs[3]:
         st.header("System Logs")
         st.info("Logy z agenta (Server A) se zde brzy objeví.")
