@@ -3,6 +3,16 @@
 Projekt pro správu kvality a monitorování automotive projektů.
 
 ## 🚀 Aktuální stav (Change Log)
+
+- [x] **v0.6.0** (2026-01-11) - **Add Conection to Ollama**
+  - [x] * **Externí konektivita**: Webová aplikace je nyní propojena s Ollama službou běžící na externí IP `168.119.122.36`.
+  - [x] * **Diagnostický Sidebar**: Přidán vizuální status spojení (Online/Offline) a kontrola přítomnosti modelu `llama3`.
+  - [x] * **Load Model Tool**: Integrované tlačítko pro automatické stažení modelu (Pull API), pokud na serveru chybí.
+  - [x] * **Optimalizace stability**: Oprava timeoutů a build skriptů pro úspěšný deploy.
+
+### Technické nastavení
+Pro správnou funkci musí mít cílový server s Ollamou povolený poslech na `0.0.0.0` a nastavené `OLLAMA_ORIGINS` pro IP adresu webového serveru.
+
 - [x] **v0.5.0** (2026-01-11) - **Add DB schema**
   - [x] DB conected, zobrazen počet tabulek i obsah první s nenulovmi daty
 - [x] **v0.4.0** (2026-01-09) - **Multi-Node Resource Monitoring**
@@ -38,6 +48,7 @@ Systém nyní běží v distribuovaném režimu napříč Hetzner Cloud uzly:
 
 | Tag | Datum | Popis změn |
 | :--- | :--- | :--- |
+| **v0.6.0** | 2026-01-11 | **OLLAMA conected**. Připojena Olama, jako jednoduché chatovaí okno. |
 | **v0.5.0** | 2026-01-11 | **DB conected**. Připojen DB a založeny tabulky. |
 | **v0.4.0** | 2026-01-09 | **Resource Monitoring**. Propojení uzlů a real-time monitoring HW prostředků. |
 | **v0.3.0** | 2026-01-09 | **Ollama Chat online**. První funkční integrace LLM. |

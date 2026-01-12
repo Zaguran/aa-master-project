@@ -5,7 +5,7 @@ import requests
 st.set_page_config(page_title="AA Project Control Tower", layout="wide", page_icon="🚀")
 
 # --- KONFIGURACE ---
-VERSION = "0.5.3"
+VERSION = "0.6"
 OLLAMA_IP = "168.119.122.36"
 OLLAMA_URL_BASE = f"http://{OLLAMA_IP}:11434"
 
