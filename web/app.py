@@ -5,22 +5,28 @@ from database import get_aa_stats, get_table_data
 
 st.set_page_config(page_title="AA Project Control Tower", layout="wide", page_icon="🚀")
 
-# Konfigurace
-VERSION = "0.51"
-OLLAMA_URL_GENERATE = "http://localhost:11434/api/generate"
-OLLAMA_URL_TAGS = "http://localhost:11434/api/tags"
-OLLAMA_URL_PULL = "http://localhost:11434/api/pull"
+# --- KONFIGURACE ---
+VERSION = "0.5"
+# Ollama běží jako služba na této IP
+OLLAMA_IP = "168.119.122.36"
+OLLAMA_URL_BASE = f"http://{OLLAMA_IP}:11434"
+
+OLLAMA_URL_GENERATE = f"{OLLAMA_URL_BASE}/api/generate"
+OLLAMA_URL_TAGS = f"{OLLAMA_URL_BASE}/api/tags"
+OLLAMA_URL_PULL = f"{OLLAMA_URL_BASE}/api/pull"
 OLLAMA_MODEL = "llama3"
 
 def check_ollama():
-    """Zkontroluje, zda Ollama běží a zda je model stažený."""
+    """Zkontroluje, zda je Ollama API dostupné a vypíše seznam modelů."""
     try:
-        resp = requests.get(OLLAMA_URL_TAGS, timeout=2)
+        resp = requests.get(OLLAMA_URL_TAGS, timeout=3)
         if resp.status_code == 200:
-            models = [m['name'] for m in resp.json().get('models', [])]
+            # Získáme jména všech stažených modelů
+            models_data = resp.json().get('models', [])
+            models = [m['name'] for m in models_data] if models_data else []
             return True, models
         return False, []
-    except:
+    except Exception:
         return False, []
 
 def main():
@@ -28,52 +34,64 @@ def main():
     with st.sidebar:
         st.title(f"Verze: {VERSION}")
         st.markdown("---")
-        st.subheader("🤖 Ollama Status")
+        st.subheader("🤖 Ollama Service")
         
         is_online, installed_models = check_ollama()
         
         if is_online:
-            st.success("● Online (API běží)")
+            st.success("● Online (API dostupné)")
+            
+            # Kontrola, zda je konkrétní model (např. llama3) v seznamu
             model_exists = any(OLLAMA_MODEL in m for m in installed_models)
             
             if model_exists:
                 st.info(f"**Model:** {OLLAMA_MODEL} ✅")
             else:
                 st.warning(f"**Model:** {OLLAMA_MODEL} ❌ (Nenalezen)")
+                # Tlačítko pro stažení modelu, pokud chybí
                 if st.button("📥 Load Model (Pull)"):
-                    with st.spinner(f"Stahuji {OLLAMA_MODEL}..."):
+                    with st.spinner(f"Stahuji model {OLLAMA_MODEL} na server..."):
                         try:
                             r = requests.post(OLLAMA_URL_PULL, json={"name": OLLAMA_MODEL, "stream": False})
-                            st.rerun()
-                        except:
-                            st.error("Stažení selhalo.")
+                            if r.status_code == 200:
+                                st.success("Model stažen!")
+                                st.rerun()
+                            else:
+                                st.error(f"Chyba při stahování: {r.status_code}")
+                        except Exception as e:
+                            st.error(f"Stažení selhalo: {e}")
         else:
-            st.error("● Offline (API nedostupné)")
-            st.warning("Ujistěte se, že Ollama kontejner běží.")
+            st.error("● Offline (API na IP neodpovídá)")
+            st.warning(f"Zkontrolujte, zda Ollama běží na {OLLAMA_IP} a portu 11434.")
             
         st.markdown(f"**Mód:** Generativní")
     
     st.title("🚀 AA Project Control Tower")
     
-    # Původní taby zůstávají beze změny
+    # Taby projektu
     tabs = st.tabs(["💬 Chat s Ollamou", "📊 Dashboard", "📅 Table View", "⚙️ Logs"])
     
     # --- TAB 1: CHAT S OLLAMOU ---
     with tabs[0]:
         st.header("Chat s AI (Ollama)")
         user_input = st.text_input("Zadej otázku pro model Llama 3:", key="ollama_chat")
+        
         if st.button("Odeslat"):
             if user_input:
-                with st.spinner("Přemýšlím..."):
-                    try:
-                        response = requests.post(OLLAMA_URL_GENERATE, json={
-                            "model": OLLAMA_MODEL,
-                            "prompt": user_input,
-                            "stream": False
-                        })
-                        st.write(response.json().get("response", "Chyba odpovědi"))
-                    except Exception as e:
-                        st.error(f"Nelze se spojit s Ollamou: {e}")
+                if not is_online:
+                    st.error("Nelze odeslat dotaz, Ollama je offline.")
+                else:
+                    with st.spinner("Přemýšlím..."):
+                        try:
+                            response = requests.post(OLLAMA_URL_GENERATE, json={
+                                "model": OLLAMA_MODEL,
+                                "prompt": user_input,
+                                "stream": False
+                            })
+                            answer = response.json().get("response", "Chyba: Prázdná odpověď od modelu.")
+                            st.write(answer)
+                        except Exception as e:
+                            st.error(f"Chyba při komunikaci: {e}")
             else:
                 st.warning("Napiš nejdříve text.")
 
@@ -95,7 +113,7 @@ def main():
             st.write(f"Celkem záznamů: {total}")
             st.dataframe(pd.DataFrame(data), use_container_width=True)
         else:
-            st.error(f"Chyba připojení: {data}")
+            st.error(f"Chyba připojení k DB: {data}")
 
     # --- TAB 4: LOGS ---
     with tabs[3]:
