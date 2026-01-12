@@ -6,18 +6,52 @@ from database import get_aa_stats, get_table_data
 st.set_page_config(page_title="AA Project Control Tower", layout="wide", page_icon="🚀")
 
 # Konfigurace
-VERSION = "0.5"
-OLLAMA_URL = "http://localhost:11434/api/generate"
+VERSION = "0.51"
+OLLAMA_URL_GENERATE = "http://localhost:11434/api/generate"
+OLLAMA_URL_TAGS = "http://localhost:11434/api/tags"
+OLLAMA_URL_PULL = "http://localhost:11434/api/pull"
 OLLAMA_MODEL = "llama3"
 
+def check_ollama():
+    """Zkontroluje, zda Ollama běží a zda je model stažený."""
+    try:
+        resp = requests.get(OLLAMA_URL_TAGS, timeout=2)
+        if resp.status_code == 200:
+            models = [m['name'] for m in resp.json().get('models', [])]
+            return True, models
+        return False, []
+    except:
+        return False, []
+
 def main():
-    # --- SIDEBAR (Zde jsou ty přidané věci) ---
-    
+    # --- SIDEBAR: Verze, Status a Ovládání ---
     with st.sidebar:
         st.title(f"Verze: {VERSION}")
         st.markdown("---")
         st.subheader("🤖 Ollama Status")
-        st.info(f"**Model:** {OLLAMA_MODEL}\n\n**Mód:** Generativní")
+        
+        is_online, installed_models = check_ollama()
+        
+        if is_online:
+            st.success("● Online (API běží)")
+            model_exists = any(OLLAMA_MODEL in m for m in installed_models)
+            
+            if model_exists:
+                st.info(f"**Model:** {OLLAMA_MODEL} ✅")
+            else:
+                st.warning(f"**Model:** {OLLAMA_MODEL} ❌ (Nenalezen)")
+                if st.button("📥 Load Model (Pull)"):
+                    with st.spinner(f"Stahuji {OLLAMA_MODEL}..."):
+                        try:
+                            r = requests.post(OLLAMA_URL_PULL, json={"name": OLLAMA_MODEL, "stream": False})
+                            st.rerun()
+                        except:
+                            st.error("Stažení selhalo.")
+        else:
+            st.error("● Offline (API nedostupné)")
+            st.warning("Ujistěte se, že Ollama kontejner běží.")
+            
+        st.markdown(f"**Mód:** Generativní")
     
     st.title("🚀 AA Project Control Tower")
     
@@ -32,7 +66,7 @@ def main():
             if user_input:
                 with st.spinner("Přemýšlím..."):
                     try:
-                        response = requests.post(OLLAMA_URL, json={
+                        response = requests.post(OLLAMA_URL_GENERATE, json={
                             "model": OLLAMA_MODEL,
                             "prompt": user_input,
                             "stream": False
