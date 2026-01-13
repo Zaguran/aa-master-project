@@ -6,7 +6,7 @@ import base64
 st.set_page_config(page_title="AA Project Control Tower", layout="wide", page_icon="🚀")
 
 # --- KONFIGURACE ---
-VERSION = "0.7"
+VERSION = "0.7.1"
 OLLAMA_IP = "168.119.122.36"
 OLLAMA_URL_BASE = f"http://{OLLAMA_IP}:11434"
 
