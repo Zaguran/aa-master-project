@@ -1,43 +1,87 @@
-# Automotive Assistance Tool (AAT)
+# AI Requirements Extractor
 
-Projekt pro správu kvality a monitorování automotive projektů.
+An AI-powered tool for extracting requirements from PDF documents using vision-based analysis.
 
-## 🚀 Aktuální stav (Change Log)
+## Current Version: 1.0.1
+
+## Change Log
+- [x] **v1.0.1** (2026-01-13) - **Stable Demo Version**
+  - [x] AI Requirements Extractor with llava vision model
+  - [x] Generic Customer ID system for privacy compliance
+  - [x] Low temperature (0.1) for stable, non-hallucinating output
+  - [x] PDF to image conversion with pdf2image (DPI: 150)
+  - [x] Strict extraction prompts - AI only reports visible text
+  - [x] Clean sidebar with Ollama status and Reset Session
+  - [x] Markdown table output for requirements
+- [x] **v0.5.0** (2026-01-13) - **Ollama Module + Performance Statistics**
+  - [x] AI Monitor: Run # column, Algo, Model, Type, Total Time columns
+  - [x] Performance Statistics dashboard: Initial Run Avg, Incremental Run Avg (The Gauss), Efficiency Gain
+  - [x] Header badge: Ollama module version (v1.3.0) and current mode display
+  - [x] AI Agent v1.3.0: run_number tracking, task_type logic (initial/incremental)
 - [x] **v0.4.0** (2026-01-09) - **Multi-Node Resource Monitoring**
-  - [x] Implementace distribuovaného monitoringu (CPU, RAM, Disk)
-  - [x] Zprovoznění Bridge API na portu 5000 pro sběr telemetrie
-  - [x] Automatizace nasazení agentů přes GitHub Actions na více VM
-  - [x] Vizualizace stavu uzlu Hetzner-Ollama-02 na centrálním dashboardu
-- [x] **v0.3.0** - Ollama Chat online. První chat s Ollamou.
+- [x] **v0.3.0** - Ollama Chat online
 - [x] **v0.2.0** - Docker Migration & CI/CD Setup
-- [x] **v0.1.0** - Inicializace projektu, základní Streamlit layout
+- [x] **v0.1.0** - Initial project setup
 
-## 🏗️ Architektura Systému (v0.4.0)
-Systém nyní běží v distribuovaném režimu napříč Hetzner Cloud uzly:
+## Features
 
-1. **Centrální Dashboard & Bridge (`hetzner-vm-1`)**:
-   - **IP**: `128.140.108.240`
-   - **Port**: `5000` (Bridge API přijímající JSON data)
-   - **Role**: Agregace dat a vizualizace stavu všech serverů.
+### AI Requirements Extraction
+- Upload PDF documents for automated requirements extraction
+- Uses **llava** vision model to analyze document images
+- Outputs structured Markdown tables with requirement IDs and text
+- Strict prompts ensure AI only extracts visible text (no hallucinations)
 
-2. **Monitorovaný AI Uzel (`Hetzner-OL-02`)**:
-   - **IP**: `168.119.122.36`
-   - **Služba**: `hetzner-monitor.service` (Python agent)
-   - **Role**: Sběr systémových metrik a odesílání na Bridge přes HTTP POST.
+### Privacy & Generic Customer IDs
+The system uses generic Customer IDs (e.g., `CUST-001`) instead of customer-specific identifiers. This ensures:
+- **Privacy compliance**: No customer names stored in extraction logs
+- **Data portability**: Results can be shared without exposing client identities
+- **Demo-safe**: Safe for presentations and demos
 
-## 🏷️ Release History & Tags
+### Technical Configuration
+| Parameter | Value | Purpose |
+|-----------|-------|---------|
+| Temperature | 0.1 | Low creativity for stable output |
+| Context Window | 4096 | Token context size |
+| Threads | 8 | Parallel processing threads |
+| PDF DPI | 150 | Image conversion quality |
+| Model | llava | Vision-capable LLM |
 
-| Tag | Datum | Popis změn |
-| :--- | :--- | :--- |
-| **v0.4.0** | 2026-01-09 | **Resource Monitoring**. Propojení uzlů a real-time monitoring HW prostředků. |
-| **v0.3.0** | 2026-01-09 | **Ollama Chat online**. První funkční integrace LLM. |
-| **v0.2.0** | 2026-01-09 | **Docker Build & Deploy**. Automatizace nasazení přes GitHub Actions. |
-| **v0.1.0** | 2026-01-08 | **Initial Layout**. Základní struktura aplikace. |
+## System Architecture
 
-## 🛠️ Administrace (Monitoring Setup)
+### Central Dashboard (`hetzner-vm-1`)
+- **IP**: `128.140.108.240`
+- **Port**: `5000` (Bridge API)
+- **Role**: Data aggregation and visualization
 
-### Instalace agenta na nový uzel:
-Služba monitoru běží jako systemd unit:
+### AI Node (`Hetzner-OL-02`)
+- **IP**: `168.119.122.36`
+- **Service**: `hetzner-monitor.service`
+- **Role**: System metrics collection
+
+## Docker Deployment
+
+The application requires `poppler-utils` for PDF processing:
+
 ```bash
-# Sledování logů odesílání dat
+# Build and run
+docker build -t ai-requirements-extractor .
+docker run -p 8501:8501 ai-requirements-extractor
+```
+
+## Release History
+
+| Tag | Date | Description |
+|-----|------|-------------|
+| **v1.0.1** | 2026-01-13 | **Stable Demo**. AI Requirements Extractor with generic Customer IDs, low temperature mode, strict extraction prompts. |
+| **v0.5.0** | 2026-01-13 | **Ollama Module + Performance Stats**. UI improvements and efficiency tracking. |
+| **v0.4.0** | 2026-01-09 | **Resource Monitoring**. Multi-node monitoring integration. |
+| **v0.3.0** | 2026-01-09 | **Ollama Chat**. First LLM integration. |
+| **v0.2.0** | 2026-01-09 | **Docker Build & Deploy**. CI/CD automation. |
+| **v0.1.0** | 2026-01-08 | **Initial Layout**. Basic application structure. |
+
+## Administration
+
+### Monitor Logs
+```bash
 sudo journalctl -u hetzner-monitor -f
+```

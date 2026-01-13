@@ -1,110 +1,257 @@
 import streamlit as st
 import requests
 import json
+import base64
+import io
+from pdf2image import convert_from_bytes
+from PIL import Image
 
-# --- NASTAVENÍ STRÁNKY ---
+# --- APP CONFIGURATION ---
+APP_VERSION = "1.0.1"
+OLLAMA_URL = "http://127.0.0.1:11434"
+MODEL_NAME = "llava"
+
 st.set_page_config(
-    page_title="AAT v0.3.4",
-    page_icon="🚗",
+    page_title=f"AI Requirements Extractor v{APP_VERSION}",
+    page_icon="📄",
     layout="wide"
 )
 
-# Sidebar s verzí
-st.sidebar.title("AAT Ovládání")
-st.sidebar.info("Nasazena verze: 0.3.4")
-st.sidebar.write("🧠 **Model:** Llama 3.1 (8B)")
-st.sidebar.write("⚡ **Režim:** Streaming")
-
-# --- FUNKCE PRO OLLAMU SE STREAMINGEM ---
-def get_ollama_response(user_input):
-    url = "http://127.0.0.1:11434/api/generate"
-    payload = {
-        "model": "llama3.1:8b",
-        "prompt": user_input,
-        "stream": True  # Povolujeme streaming na straně Ollamy
-    }
-    
-    full_response = ""
-    # Vytvoříme prázdný box v UI, do kterého budeme sypat text
-    message_placeholder = st.empty()
-    
+# --- HELPER FUNCTIONS ---
+def check_ollama_status():
+    """Check if Ollama service is running and responsive."""
     try:
-        # Nastavíme stream=True i pro HTTP požadavek
-        with requests.post(url, json=payload, timeout=300, stream=True) as response:
-            response.raise_for_status()
-            
-            for line in response.iter_lines():
-                if line:
-                    # Dekódujeme řádek z JSONu
-                    chunk = json.loads(line.decode('utf-8'))
-                    token = chunk.get("response", "")
-                    full_response += token
-                    
-                    # Okamžitě aktualizujeme UI (přidáme kurzor pro efekt)
-                    message_placeholder.markdown(full_response + "▌")
-                    
-                    if chunk.get("done"):
-                        break
-        
-        # Po skončení vypíšeme finální text bez kurzoru
-        message_placeholder.markdown(full_response)
-        return full_response
+        response = requests.get(f"{OLLAMA_URL}/api/tags", timeout=5)
+        if response.status_code == 200:
+            models = response.json().get("models", [])
+            model_names = [m.get("name", "") for m in models]
+            has_llava = any("llava" in name.lower() for name in model_names)
+            return True, has_llava
+        return False, False
+    except Exception:
+        return False, False
 
+
+def reset_session():
+    """Reset all session state variables."""
+    keys_to_clear = ["extraction_results", "processed_images", "messages"]
+    for key in keys_to_clear:
+        if key in st.session_state:
+            del st.session_state[key]
+
+
+def convert_pdf_to_images(pdf_bytes, dpi=150):
+    """Convert PDF bytes to list of PIL Images."""
+    try:
+        images = convert_from_bytes(pdf_bytes, dpi=dpi)
+        return images
     except Exception as e:
-        error_msg = f"❌ Chyba komunikace: {str(e)}"
-        st.error(error_msg)
-        return error_msg
+        st.error(f"PDF conversion error: {str(e)}")
+        return []
 
-# --- HLAVNÍ NAVIGACE ---
-tabs = st.tabs([
-    "📊 Dashboard", 
-    "📑 Requirements", 
-    "🔗 Traceability", 
-    "🔍 Code Review", 
-    "💬 Chat s Ollamou"
-])
 
-# 1. TAB: DASHBOARD
-with tabs[0]:
-    st.title("Automotive Assistance Tool (AAT) v0.3.4")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.header("Systémový přehled")
-        st.write("Vítejte v AAT. AI asistent je nyní připojen v režimu streamování.")
-        st.success("✅ Provoz: Docker (Host Network)")
-    with col2:
-        st.header("Statistiky")
-        st.metric(label="Dostupnost AI", value="Online (Streaming)")
+def image_to_base64(image):
+    """Convert PIL Image to base64 string."""
+    buffered = io.BytesIO()
+    image.save(buffered, format="PNG")
+    return base64.b64encode(buffered.getvalue()).decode("utf-8")
 
-# 2. - 4. TAB: (Zatím prázdné)
-with tabs[1]: st.header("Requirements (DNG)")
-with tabs[2]: st.header("Traceability Matrix")
-with tabs[3]: st.header("Code Review")
 
-# 5. TAB: CHAT (AI ASISTENT)
-with tabs[4]:
-    st.header("💬 AI Asistent (Ollama)")
-    
-    # Inicializace historie zpráv
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+def extract_requirements_from_image(image_base64, customer_id, custom_instructions=""):
+    """Send image to Ollama llava model for requirements extraction."""
 
-    # Zobrazení historie zpráv
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+    # STRICT PROMPT - Forbids hallucination and outside knowledge
+    system_prompt = f"""You are a strict document text extractor. Your ONLY task is to extract text that is VISIBLY present in the provided image.
 
-    # Vstup od uživatele
-    if prompt := st.chat_input("Zeptej se na CAN bus, ISO 26262 nebo cokoliv..."):
-        # Uložíme dotaz do historie
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
+CRITICAL RULES:
+1. ONLY extract text that you can SEE in the image. Do NOT invent, assume, or hallucinate any content.
+2. If you cannot read text clearly, mark it as [UNCLEAR].
+3. If no requirements are visible, respond with "NO REQUIREMENTS FOUND IN IMAGE".
+4. Do NOT use any outside knowledge. Do NOT add explanations or interpretations.
+5. Extract EXACTLY what is written - do not paraphrase or summarize.
 
-        # Generování odpovědi
-        with st.chat_message("assistant"):
-            # Zavoláme naši streamovací funkci
-            full_ans = get_ollama_response(prompt)
-            
-        # Uložíme hotovou odpověď do historie
-        st.session_state.messages.append({"role": "assistant", "content": full_ans})
+Customer ID: {customer_id}
+
+Output format - Use this EXACT markdown table structure:
+| Req ID | Requirement Text | Status |
+|--------|------------------|--------|
+| [ID from image or AUTO-001] | [Exact text from image] | Extracted |
+
+{f"Additional instructions: {custom_instructions}" if custom_instructions else ""}
+
+REMEMBER: If text is not visible in the image, do NOT make it up. Only report what you can actually see."""
+
+    payload = {
+        "model": MODEL_NAME,
+        "prompt": system_prompt,
+        "images": [image_base64],
+        "stream": False,
+        "options": {
+            "temperature": 0.1,
+            "num_ctx": 4096,
+            "num_thread": 8
+        }
+    }
+
+    try:
+        response = requests.post(
+            f"{OLLAMA_URL}/api/generate",
+            json=payload,
+            timeout=120
+        )
+        response.raise_for_status()
+        result = response.json()
+        return result.get("response", "No response received")
+    except requests.exceptions.Timeout:
+        return "ERROR: Request timed out. Please try again."
+    except Exception as e:
+        return f"ERROR: {str(e)}"
+
+
+# --- SIDEBAR ---
+st.sidebar.title("AI Requirements Extractor")
+st.sidebar.markdown(f"**Version:** `{APP_VERSION}`")
+st.sidebar.markdown("---")
+
+# Ollama Status Check
+ollama_online, llava_available = check_ollama_status()
+
+if ollama_online:
+    st.sidebar.success("Ollama: Online")
+    if llava_available:
+        st.sidebar.success(f"Model: {MODEL_NAME} Ready")
+    else:
+        st.sidebar.warning(f"Model: {MODEL_NAME} Not Found")
+else:
+    st.sidebar.error("Ollama: Offline")
+
+st.sidebar.markdown("---")
+
+# Reset Session Button
+if st.sidebar.button("Reset Session", type="primary", use_container_width=True):
+    reset_session()
+    st.rerun()
+
+st.sidebar.markdown("---")
+st.sidebar.markdown("**Settings:**")
+st.sidebar.markdown(f"- Temperature: `0.1`")
+st.sidebar.markdown(f"- Context: `4096`")
+st.sidebar.markdown(f"- Threads: `8`")
+st.sidebar.markdown(f"- PDF DPI: `150`")
+
+
+# --- MAIN CONTENT ---
+st.title("AI Requirements Extractor")
+st.markdown("Upload a PDF document to extract requirements using AI vision analysis.")
+
+# Initialize session state
+if "extraction_results" not in st.session_state:
+    st.session_state.extraction_results = []
+
+# Customer ID Input
+col1, col2 = st.columns([1, 3])
+with col1:
+    customer_id = st.text_input(
+        "Customer ID",
+        value="CUST-001",
+        help="Generic identifier for tracking extractions"
+    )
+
+# File Upload
+uploaded_file = st.file_uploader(
+    "Upload PDF Document",
+    type=["pdf"],
+    help="Upload a PDF file containing requirements to extract"
+)
+
+# Custom Instructions (Chat-like text area)
+st.markdown("### Instructions for AI")
+custom_instructions = st.text_area(
+    "Additional extraction instructions (optional)",
+    placeholder="Example: Focus on safety requirements only, or extract section headers as well...",
+    height=100,
+    help="Provide specific instructions to guide the extraction process"
+)
+
+# Process Button
+if uploaded_file is not None:
+    st.markdown("---")
+
+    if st.button("Extract Requirements", type="primary", use_container_width=True):
+        if not ollama_online:
+            st.error("Cannot process: Ollama service is offline.")
+        elif not llava_available:
+            st.error(f"Cannot process: {MODEL_NAME} model is not available.")
+        else:
+            with st.spinner("Converting PDF to images (DPI: 150)..."):
+                pdf_bytes = uploaded_file.read()
+                images = convert_pdf_to_images(pdf_bytes, dpi=150)
+
+            if images:
+                st.info(f"Found {len(images)} page(s) in the document.")
+
+                results = []
+                progress_bar = st.progress(0)
+
+                for idx, image in enumerate(images):
+                    progress = (idx + 1) / len(images)
+                    progress_bar.progress(progress, text=f"Processing page {idx + 1} of {len(images)}...")
+
+                    # Convert image to base64
+                    image_base64 = image_to_base64(image)
+
+                    # Show page preview
+                    with st.expander(f"Page {idx + 1} Preview", expanded=False):
+                        st.image(image, caption=f"Page {idx + 1}", use_container_width=True)
+
+                    # Extract requirements
+                    with st.spinner(f"Extracting requirements from page {idx + 1}..."):
+                        result = extract_requirements_from_image(
+                            image_base64,
+                            customer_id,
+                            custom_instructions
+                        )
+                        results.append({
+                            "page": idx + 1,
+                            "content": result
+                        })
+
+                progress_bar.empty()
+
+                # Store results in session state
+                st.session_state.extraction_results = results
+                st.success("Extraction complete!")
+
+# Display Results
+if st.session_state.extraction_results:
+    st.markdown("---")
+    st.markdown("## Extraction Results")
+    st.markdown(f"**Customer ID:** `{customer_id}`")
+
+    for result in st.session_state.extraction_results:
+        st.markdown(f"### Page {result['page']}")
+
+        # Display in a clean markdown container
+        st.markdown(result["content"])
+
+        st.markdown("---")
+
+    # Export option
+    if st.button("Copy Results to Clipboard", use_container_width=True):
+        all_results = "\n\n".join([
+            f"## Page {r['page']}\n{r['content']}"
+            for r in st.session_state.extraction_results
+        ])
+        st.code(all_results, language="markdown")
+        st.info("Results displayed above - copy manually using Ctrl+C / Cmd+C")
+
+
+# --- FOOTER ---
+st.markdown("---")
+st.markdown(
+    f"<div style='text-align: center; color: gray;'>"
+    f"AI Requirements Extractor v{APP_VERSION} | Model: {MODEL_NAME} | "
+    f"Low Temperature Mode (0.1) for Stable Output"
+    f"</div>",
+    unsafe_allow_html=True
+)

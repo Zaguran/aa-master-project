@@ -2,20 +2,21 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Instalace systémových věcí
+# Install system dependencies including poppler-utils for PDF processing
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     git \
+    poppler-utils \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Kopírujeme soubor z adresáře web/ do aktuálního adresáře v kontejneru
+# Copy requirements file from web/ directory
 COPY web/requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Kopírujeme vše ostatní z web/
+# Copy application code from web/
 COPY web/ .
 
 EXPOSE 8501
