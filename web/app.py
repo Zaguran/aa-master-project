@@ -8,7 +8,7 @@ from pdf2image import convert_from_bytes
 st.set_page_config(page_title="AA Project Control Tower", layout="wide", page_icon="🚀")
 
 # --- KONFIGURACE ---
-VERSION = "0.8"
+VERSION = "0.8.1"
 OLLAMA_IP = "168.119.122.36"
 OLLAMA_URL_BASE = f"http://{OLLAMA_IP}:11434"
 OLLAMA_URL_GENERATE = f"{OLLAMA_URL_BASE}/api/generate"
