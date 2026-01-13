@@ -5,61 +5,87 @@ import io
 import time
 from pdf2image import convert_from_bytes
 
-st.set_page_config(page_title="AA Control Tower", layout="wide")
+st.set_page_config(page_title="AA Control Tower", layout="wide", page_icon="🚀")
 
 # --- KONFIGURACE ---
+VERSION = "0.9.8"
 OLLAMA_URL = "http://168.119.122.36:11434/api/generate"
 
-if 'result' not in st.session_state: st.session_state.result = ""
-if 'timer' not in st.session_state: st.session_state.timer = 0
+# Inicializace session state
+if 'chat_history' not in st.session_state: st.session_state.chat_history = []
+if 'ai_result' not in st.session_state: st.session_state.ai_result = ""
 
-st.title("🚀 Automotive Assistant: AI Extractor")
+# --- BOČNÍ MENU (SIDEBAR) ---
+with st.sidebar:
+    st.title(f"Control Tower v{VERSION}")
+    st.write("---")
+    st.success("● Ollama: Connected")
+    st.info("Model: LLaVA (Vision)\nMode: Expert Extraction")
+    
+    st.write("---")
+    # Tlačítko pro reset kontextu - tvůj požadavek
+    if st.button("🗑️ RESET KONTEXTU / CLEAR", use_container_width=True):
+        st.session_state.ai_result = ""
+        st.session_state.chat_history = []
+        st.rerun()
 
-# --- VSTUPY ---
-col1, col2 = st.columns([1, 1])
+# --- HLAVNÍ ROZHRANÍ ---
+st.title("🛡️ AA Project Control Tower")
 
-with col1:
-    zakaznik = st.selectbox("Zákazník:", ["Škoda Auto", "BMW Group", "CARIAD", "Continental"])
-    file = st.file_uploader("Vložte PDF specifikaci", type=['pdf'])
+# Nahrávání souboru
+uploaded_file = st.file_uploader("Nahrajte PDF nebo obrázek specifikace", type=['pdf', 'png', 'jpg'])
 
-with col2:
-    prompt = f"Analyze this document for {zakaznik}. Extract all requirements into a Markdown table with columns: ID, Title, Description. Keep it strictly in English."
-    st.write("Nastavení: LLaVA | Temperature 0.7 | CPU 8-cores")
-    run = st.button("SPUSTIT ANALÝZU ⚡", use_container_width=True)
+# Chatovací okno s přednastaveným promptem
+# Pokud stiskneš šipku dolů nebo začneš psát, můžeš použít toto:
+default_prompt = "Extract all requirements from the document. Output a Markdown table with columns: ID | Title | Description. Keep it strictly in English as in the source. Do not provide any introduction, only the table."
 
-st.divider()
+user_query = st.text_area("Chat s AI / Instrukce:", value=default_prompt, height=150)
 
-# --- LOGIKA ---
-if run and file:
-    start = time.time()
-    with st.spinner(f"Provádím analýzu pro {zakaznik}..."):
-        # 1. Převod PDF na obrázek (DPI 150 pro rychlost kolem 90s)
-        images = convert_from_bytes(file.read(), dpi=150)
-        img_byte_arr = io.BytesIO()
-        images[0].save(img_byte_arr, format='JPEG')
+col_run, col_timer = st.columns([1, 1])
+with col_run:
+    run_btn = st.button("ODESLAT DOTAZ / ANALÝZU ⚡", use_container_width=True)
+
+# --- LOGIKA EXTRAKCE ---
+if run_btn and uploaded_file:
+    start_time = time.time()
+    with st.status("🚀 AI Agent analyzuje dokument...", expanded=True) as status:
         
-        # 2. Odeslání do Ollama
+        # Digitalizace PDF na obrázek (dpi 150 pro rychlost kolem 90s)
+        status.write("📸 Digitalizace stránek...")
+        if uploaded_file.type == "application/pdf":
+            images = convert_from_bytes(uploaded_file.read(), dpi=150)
+            buf = io.BytesIO()
+            images[0].save(buf, format="JPEG")
+            img_data = buf.getvalue()
+        else:
+            img_data = uploaded_file.getvalue()
+
+        # Dotaz na Ollama
+        status.write("🧠 Extrakce požadavků (LLaVA)...")
         payload = {
             "model": "llava",
-            "prompt": prompt,
+            "prompt": user_query,
             "stream": False,
-            "images": [base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')],
-            "options": {"temperature": 0.7} # Nastavení pro nejlepší pochopení tabulky
+            "images": [base64.b64encode(img_data).decode('utf-8')],
+            "options": {"temperature": 0.3} # Snížená teplota pro přesnost SYS-REQ
         }
         
         try:
             r = requests.post(OLLAMA_URL, json=payload, timeout=300)
-            st.session_state.result = r.json().get("response", "Žádná data nebyla vrácena.")
-            st.session_state.timer = round(time.time() - start, 2)
+            if r.status_code == 200:
+                st.session_state.ai_result = r.json().get("response", "")
+                st.session_state.process_time = round(time.time() - start_time, 2)
+                status.update(label=f"Hotovo za {st.session_state.process_time}s!", state="complete")
+            else:
+                st.error("Chyba serveru Ollama.")
         except Exception as e:
-            st.error(f"Chyba spojení se serverem: {e}")
+            st.error(f"Spojení selhalo: {e}")
 
-# --- VÝSTUP ---
-if st.session_state.result:
-    st.info(f"⏱ Dokument zdigitalizován za {st.session_state.timer} sekund")
-    st.markdown(f"### Výsledek pro: {zakaznik}")
-    st.markdown(st.session_state.result)
+# --- ZOBRAZENÍ VÝSLEDKU ---
+if st.session_state.ai_result:
+    st.markdown("---")
+    st.subheader("📊 Výsledek analýzy")
+    st.metric("Čas zpracování", f"{st.session_state.process_time} s")
     
-    if st.button("Vymazat výsledek"):
-        st.session_state.result = ""
-        st.rerun()
+    with st.container(border=True):
+        st.markdown(st.session_state.ai_result)
