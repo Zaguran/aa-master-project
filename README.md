@@ -13,6 +13,11 @@ Projekt pro správu kvality a monitorování automotive projektů.
 ### Technické nastavení
 Pro správnou funkci musí mít cílový server s Ollamou povolený poslech na `0.0.0.0` a nastavené `OLLAMA_ORIGINS` pro IP adresu webového serveru.
 
+- [x] **v0.7.0** (2026-01-13) - **Add file to Ollama chat**
+   - [x] add PDF, PNG pro digitalizaci
+   - [x] ollama pull llama3 pro texty (na linuxu)
+   - [x] ollama pull llava  pro obrázky (na linuxu)   
+- [x] **v0.6.0** (2026-01-12) - **Ollama Conecter**
 - [x] **v0.5.0** (2026-01-11) - **Add DB schema**
   - [x] DB conected, zobrazen počet tabulek i obsah první s nenulovmi daty
 - [x] **v0.4.0** (2026-01-09) - **Multi-Node Resource Monitoring**

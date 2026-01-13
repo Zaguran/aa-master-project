@@ -1,18 +1,22 @@
 import streamlit as st
 import pandas as pd
 import requests
+import base64
 
 st.set_page_config(page_title="AA Project Control Tower", layout="wide", page_icon="🚀")
 
 # --- KONFIGURACE ---
-VERSION = "0.6"
+VERSION = "0.7"
 OLLAMA_IP = "168.119.122.36"
 OLLAMA_URL_BASE = f"http://{OLLAMA_IP}:11434"
 
 OLLAMA_URL_GENERATE = f"{OLLAMA_URL_BASE}/api/generate"
 OLLAMA_URL_TAGS = f"{OLLAMA_URL_BASE}/api/tags"
 OLLAMA_URL_PULL = f"{OLLAMA_URL_BASE}/api/pull"
-OLLAMA_MODEL = "llama3"
+
+# Modely
+MODEL_TEXT = "llama3"
+MODEL_VISION = "llava"
 
 def check_ollama():
     try:
@@ -25,58 +29,84 @@ def check_ollama():
         return False, []
 
 def main():
+    is_online, installed_models = check_ollama()
+    
     with st.sidebar:
         st.title(f"Verze: {VERSION}")
         st.markdown("---")
         st.subheader("🤖 Ollama Service")
-        is_online, installed_models = check_ollama()
         
         if is_online:
             st.success("● Online")
-            if any(OLLAMA_MODEL in m for m in installed_models):
-                st.info(f"**Model:** {OLLAMA_MODEL} ✅")
-            else:
-                st.warning(f"**Model:** {OLLAMA_MODEL} ❌")
-                if st.button("📥 Load Model"):
-                    requests.post(OLLAMA_URL_PULL, json={"name": OLLAMA_MODEL, "stream": False})
+            # Požadavek z 11.01.2026: Zobrazení verze modulu a módu
+            st.write(f"**Modul:** {MODEL_TEXT} / {MODEL_VISION}")
+            st.write(f"**Mód:** OCR & Generativní")
+            
+            # Kontrola přítomnosti modelů
+            if not any(MODEL_VISION in m for m in installed_models):
+                st.warning(f"Chybí vision model ({MODEL_VISION})")
+                if st.button("📥 Stáhnout Vision Modul"):
+                    requests.post(OLLAMA_URL_PULL, json={"name": MODEL_VISION, "stream": False})
                     st.rerun()
         else:
             st.error("● Offline")
-        st.markdown("**Mód:** Generativní")
 
     st.title("🚀 AA Project Control Tower")
-    tabs = st.tabs(["💬 Chat", "📊 Dashboard", "📅 Table View", "⚙️ Logs"])
+    tabs = st.tabs(["💬 Chat & Vision", "📊 Dashboard", "📅 Table View", "⚙️ Logs"])
 
     with tabs[0]:
-        st.header("Chat s AI")
-        user_input = st.text_input("Zadej otázku:", key="chat_in")
+        st.header("AI Asistent (Text + Obrázky)")
+        
+        # Nahrávání souborů
+        uploaded_file = st.file_uploader("Nahraj obrázek (nebo PDF - experimentální)", type=['png', 'jpg', 'jpeg', 'pdf'])
+        
+        user_input = st.text_input("Zadej instrukci (např. 'Převeď tabulku na text'):", key="chat_in")
+        
         if st.button("Odeslat"):
             if user_input and is_online:
-                with st.spinner("..."):
+                payload = {
+                    "model": MODEL_TEXT,
+                    "prompt": user_input,
+                    "stream": False
+                }
+
+                # Logika pro obrázky
+                if uploaded_file is not None:
+                    if uploaded_file.type == "application/pdf":
+                        st.warning("Poznámka: Přímé zpracování PDF vyžaduje konverzi na obrázky. Zkouším extrahovat text přes vision model...")
+                    
+                    # Přepnutí na vision model
+                    payload["model"] = MODEL_VISION
+                    bytes_data = uploaded_file.getvalue()
+                    base64_image = base64.b64encode(bytes_data).decode('utf-8')
+                    payload["images"] = [base64_image]
+
+                with st.spinner(f"Analyzuji pomocí {payload['model']}..."):
                     try:
-                        # Odstraněn problematický timeout a složité options pro build
-                        r = requests.post(OLLAMA_URL_GENERATE, json={
-                            "model": OLLAMA_MODEL,
-                            "prompt": user_input,
-                            "stream": False
-                        })
+                        r = requests.post(OLLAMA_URL_GENERATE, json=payload)
+                        st.markdown("### Výsledek analýzy:")
                         st.write(r.json().get("response", "Prázdná odpověď"))
                     except Exception as e:
                         st.error(f"Chyba: {e}")
 
-    # Dashboard, Table View a Logs zůstávají beze změny (přebírají se z database.py)
     with tabs[1]:
         st.header("Database Statistics")
-        from database import get_aa_stats
-        s = get_aa_stats()
-        if s: st.table(pd.DataFrame(s))
+        try:
+            from database import get_aa_stats
+            s = get_aa_stats()
+            if s: st.table(pd.DataFrame(s))
+        except:
+            st.info("Statistiky momentálně nejsou dostupné.")
     
     with tabs[2]:
         st.header("Table Data Explorer")
-        from database import get_table_data
-        t = st.selectbox("Tabulka", ["projects", "nodes", "links", "customer"])
-        d, total = get_table_data(t)
-        if isinstance(d, list): st.dataframe(pd.DataFrame(d))
+        try:
+            from database import get_table_data
+            t = st.selectbox("Tabulka", ["projects", "nodes", "links", "customer"])
+            d, total = get_table_data(t)
+            if isinstance(d, list): st.dataframe(pd.DataFrame(d))
+        except:
+            st.info("Průzkumník dat není dostupný.")
 
 if __name__ == "__main__":
     main()
