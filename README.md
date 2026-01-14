@@ -2,9 +2,12 @@
 
 An AI-powered tool for extracting requirements from PDF documents using vision-based analysis.
 
-## Current Version: 1.0.1
+## Current Version: 1.0.2
 
 ## Change Log
+- [x] **v1.0.2** (2026-01-14) - **Web Version Bump**
+  - [x] Testing CLAUDE.md workflow
+  - [x] No functional changes to application
 - [x] **v1.0.1** (2026-01-13) - **Stable Demo Version**
   - [x] AI Requirements Extractor with llava vision model
   - [x] Generic Customer ID system for privacy compliance
@@ -72,6 +75,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
+| **v1.0.2** | 2026-01-14 | **Web Version Bump**. Testing CLAUDE.md workflow, no functional changes. |
 | **v1.0.1** | 2026-01-13 | **Stable Demo**. AI Requirements Extractor with generic Customer IDs, low temperature mode, strict extraction prompts. |
 | **v0.5.0** | 2026-01-13 | **Ollama Module + Performance Stats**. UI improvements and efficiency tracking. |
 | **v0.4.0** | 2026-01-09 | **Resource Monitoring**. Multi-node monitoring integration. |

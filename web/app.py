@@ -7,7 +7,7 @@ from pdf2image import convert_from_bytes
 from PIL import Image
 
 # --- APP CONFIGURATION ---
-APP_VERSION = "1.0.1"
+APP_VERSION = "1.0.2"
 OLLAMA_URL = "http://127.0.0.1:11434"
 MODEL_NAME = "llava"
 
