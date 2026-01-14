@@ -97,7 +97,7 @@ REMEMBER: If text is not visible in the image, do NOT make it up. Only report wh
         response = requests.post(
             f"{OLLAMA_URL}/api/generate",
             json=payload,
-            timeout=120
+            timeout=300
         )
         response.raise_for_status()
         result = response.json()
