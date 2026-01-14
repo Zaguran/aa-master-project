@@ -1,0 +1,71 @@
+erDiagram
+    %% --- ORGANIZAČNÍ STRUKTURA ---
+    CUSTOMER ||--o{ PROJECTS : "zadává / vlastní"
+    %% Vazba projektu na platformu (Zákaznický projekt -> Platforma firmy)
+    PROJECTS ||--o{ PROJECTS : "inherits_from (Customer Proj -> Platform)"
+    
+    CUSTOMER {
+        string customer_id PK "BMW, VW, VOLVO, INTERNAL"
+        string full_name "Název společnosti"
+        string contact "Lead Engineer"
+    }
+
+    PROJECTS {
+        string project_id PK "Platforma_A, BMW_G60, atd."
+        string type "PLATFORM / CUSTOMER_PROJECT"
+        string status "ACTIVE / RFQ / FINISHED"
+        string customer_id FK "Vazba na majitele"
+        string parent_platform_id FK "Odkaz na Master Platformu"
+        string baseline_version "R1.0, B-Sample"
+    }
+
+    %% --- JÁDRO SYSTÉMU (NODES) ---
+    PROJECTS ||--o{ NODES : "obsahuje"
+    
+    NODES {
+        string node_uuid PK "Interní UUID"
+        string project_id FK "Vazba na projekt/platformu"
+        string type "CUST_REQ / SYS_REQ / ARCH_ELEM / SW_REQ / TEST_SPEC / CODE"
+        string scope "PLATFORM / PROJECT"
+        string inheritance "NEW / INHERITED / MODIFIED / DELETED"
+        string asil "QM / A / B / C / D"
+        string test_level "SW_TEST / SW_INT / SYS_INT / SYS_TEST / VEHICLE"
+        string node_status "Draft / Proposed / Agreed / Rejected"
+        text content "Základní text/popis"
+        jsonb attributes "DYNAMICKÉ ATRIBUTY (JSONB)"
+        string version "Baseline/Tag"
+    }
+
+    %% --- TRACEABILITY (Dle tvého obrázku) ---
+    NODES ||--o{ LINKS : "source"
+    NODES ||--o{ LINKS : "target"
+
+    LINKS {
+        int link_id PK
+        string source_uuid FK "Zdroj (např. CUST_REQ)"
+        string target_uuid FK "Cíl (např. SYS_SPEC)"
+        string link_type "refined_to / verified_by / implements"
+        float ai_match_score "Sémantická shoda (0-1)"
+    }
+
+    %% --- ANALÝZA A VÝSLEDKY ---
+    NODES ||--o{ TEST_RESULTS : "historie výsledků"
+    NODES ||--o{ AI_ANALYSIS : "audit sémantiky"
+
+    TEST_RESULTS {
+        int result_id PK
+        string node_uuid FK "Odkaz na TEST_SPEC v Nodes"
+        string release_tag "R1.0, R2.0"
+        string verdict "PASSED / FAILED / INCONCLUSIVE"
+        timestamp executed_at
+        string report_url "Link na report"
+    }
+
+    AI_ANALYSIS {
+        int analysis_id PK
+        string node_uuid FK "Vazba na uzel v Nodes"
+        int match_percent "Kvalitativní shoda"
+        string safety_compliance "ASIL OK/NOK"
+        text suggestions "Návrhy na opravu / důvod změny"
+        timestamp last_run
+    }

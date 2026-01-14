@@ -1,0 +1,27 @@
+graph TD
+    %% Fáze 1: Inicializace
+    START((START)) --> INIT[Založení Projektu v Dashboardu]
+    INIT --> LINK_PLAT[Navázání na Master Platformu]
+    
+    %% Fáze 2: První import a mapování
+    LINK_PLAT --> IMP_CUST[Import Customer Req - RFQ]
+    IMP_CUST --> AI_MAP[AI Mapování: Platforma vs Customer]
+    AI_MAP --> DEF_INH[Definice Inheritance: 70/30 - New/Deleted/Inherited]
+
+    %% Fáze 3: Iterativní cyklus (Kritické místo)
+    DEF_INH --> DASH[Dashboard: Sledování rozpracovanosti]
+    DASH --> |Chybí vazby/analýza| WORK[Dopracování: Architektura + Testy]
+    WORK --> DASH
+
+    %% Fáze 4: Změnové řízení
+    DASH --> |Nová Baseline / CR| UPDATE[Import změn]
+    UPDATE --> AI_IMPACT[AI Impact Analysis: Co se rozpadlo?]
+    AI_IMPACT --> WORK
+
+    %% Fáze 5: Finále
+    DASH --> |100% Pokrytí & Pass| GEN_MAT[Generování Compliance Matrix]
+    GEN_MAT --> DELIVERY((Odevzdání Zákazníkovi))
+
+    %% Stylizace
+    style DASH fill:#f96,stroke:#333,stroke-width:4px
+    style UPDATE fill:#f66,stroke:#333
