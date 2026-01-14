@@ -1,0 +1,4 @@
+infra/*.json 
+*.csv 
+__pycache__/ 
+.env 
