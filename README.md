@@ -2,9 +2,35 @@
 
 AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.3.2
+## Current Version: 1.4.0
+
+**Status:** Active development - debugging and refining authentication system
 
 ## Change Log
+- [x] **v1.4.0** (2026-01-16) - **Auth State & DB Sync Fixes**
+  - [x] Added detailed session creation error logging in auth.py
+  - [x] Implemented st.rerun() after successful login for immediate UI update
+  - [x] Enhanced sidebar status display: shows full_name and primary role
+  - [x] Improved session synchronization across all tabs
+  - [x] Created db_read.py inspection script for debugging DB state
+  - [x] Active debugging of authentication flow and session management
+- [x] **v1.3.9** (2026-01-16) - **Advanced Metadata & Auth Status**
+  - [x] Dynamic build date using datetime.now()
+  - [x] Session Info section in sidebar with auth status, email, and roles
+  - [x] Last login result tracking (success/failure)
+  - [x] Tab sync fix with auth.get_current_user() calls
+  - [x] Clean logout with success message and state clearing
+- [x] **v1.3.8** (2026-01-16) - **Simplified Static Navigation & Security**
+  - [x] Removed dynamic navigation logic for simplicity
+  - [x] Uniform protection with 'Goto Login Page' button on all pages
+  - [x] Version info in sidebar: v1.3.8 | Ollama Mod: v0.5.
+  - [x] Static navigation with proper icons for all pages
+- [x] **v1.3.7** (2026-01-16) - **UI/UX Refinement & Secure Routing**
+  - [x] Strict sidebar locking for unauthenticated users
+  - [x] Dynamic role-based navigation for authenticated users
+  - [x] Logout button in sidebar with redirect to Login
+  - [x] Version info display in sidebar
+  - [x] Global protection on all pages with redirect to Login
 - [x] **v1.3.2** (2026-01-16) - **Hotfix: Docker Container Name Conflict**
   - [x] Added container cleanup step in deploy_web.yaml workflow
   - [x] Prevents deployment failures due to existing container names
