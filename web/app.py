@@ -25,7 +25,21 @@ st.set_page_config(
 
 session.init_session_state()
 
-build_date = "2026-01-11"
+# Dynamic build date
+build_date = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+# Check Ollama API availability for Mode status
+ollama_mode = "Offline"
+try:
+    ollama_base = os.getenv('OLLAMA_API_BASE', os.getenv('OLLAMA_BASE_URL', ''))
+    if ollama_base:
+        import requests
+        response = requests.get(f"{ollama_base}/api/tags", timeout=2)
+        if response.status_code == 200:
+            ollama_mode = "Online"
+except Exception as e:
+    print(f"[AAT Web] Ollama API check: {e}")
+    ollama_mode = "Offline"
 
 # Error resilience: Wrap DB-dependent operations to prevent 502 errors
 db_available = True
@@ -38,24 +52,13 @@ except Exception as e:
     print(f"[AAT Web] Container will continue running, showing error to user...")
     user = None
 
-# Get Ollama status from DB (reads from work_aa.agent_status via LINUX_1_IP)
-ollama_status = "v0.5 | Mode: unknown"
-try:
-    agents = list_agent_status()
-    for agent in agents:
-        if agent['agent_name'] == 'monitor_ollama_server':
-            details = agent.get('details', {})
-            if isinstance(details, dict):
-                version = details.get('module_version', 'v0.5')
-                mode = details.get('mode', 'unknown')
-                ollama_status = f"{version} | Mode: {mode}"
-            break
-except Exception as e:
-    print(f"[AAT Web] Warning: Could not read Ollama status from DB: {e}")
-
+# Sidebar Build Information for v0.5
 st.sidebar.markdown("---")
-st.sidebar.markdown(f"**v{APP_VERSION} | Ollama Mod: {ollama_status}**")
-st.sidebar.markdown(f"*[cite: {build_date}]*")
+st.sidebar.markdown("### 🏗️ Build Information")
+st.sidebar.markdown(f"**Build:** v{APP_VERSION}")
+st.sidebar.markdown(f"**Build Date:** {build_date}")
+st.sidebar.markdown(f"**Ollama Module:** v0.5")
+st.sidebar.markdown(f"**Mode:** {ollama_mode}")
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 📊 Session Info")
