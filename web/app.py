@@ -1,51 +1,27 @@
 import streamlit as st
 from components import layout, auth, session
 
-APP_VERSION = "1.3.7"
+APP_VERSION = "1.3.8"
 
 st.set_page_config(
-    page_title=f"AA Tool v{APP_VERSION}",
-    page_icon="🚗",
+    page_title=f"App",
+    page_icon="🏠",
     layout="wide"
 )
 
 session.init_session_state()
 
+st.sidebar.markdown("---")
+st.sidebar.markdown("**v1.3.8 | Ollama Mod: v0.5.**")
+st.sidebar.markdown("*[cite: 2026-01-11]*")
+
 if not auth.is_authenticated():
-    st.sidebar.page_link("pages/00_Login.py", label="🔐 Login", icon="🔐")
-    st.sidebar.markdown("---")
-    st.sidebar.markdown(f"**v{APP_VERSION}** - Production PoC")
     st.warning("Please login to access the application.")
-    if st.button("Go to Login Page", type="primary"):
+    if st.button("Goto Login Page", type="primary"):
         st.switch_page("pages/00_Login.py")
     st.stop()
 
 user = auth.get_current_user()
-user_roles = user.get('roles', [])
-is_admin = 'admin' in user_roles
-
-st.sidebar.page_link("pages/01_Dashboard.py", label="📊 Dashboard", icon="📊")
-st.sidebar.page_link("pages/02_Status.py", label="🔄 Status", icon="🔄")
-st.sidebar.page_link("pages/05_Matching.py", label="🔗 Matching", icon="🔗")
-st.sidebar.page_link("pages/06_Trace.py", label="🔍 Trace", icon="🔍")
-
-if is_admin:
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("**Admin Only**")
-    st.sidebar.page_link("pages/03_DB_Status.py", label="🗄️ DB Status", icon="🗄️")
-    st.sidebar.page_link("pages/04_TableView.py", label="📋 TableView", icon="📋")
-    st.sidebar.page_link("pages/07_Impact.py", label="💥 Impact", icon="💥")
-    st.sidebar.page_link("pages/08_Reports.py", label="📄 Reports", icon="📄")
-    st.sidebar.page_link("pages/09_Chat.py", label="💬 Chat", icon="💬")
-    st.sidebar.page_link("pages/99_Admin.py", label="⚙️ Admin Panel", icon="⚙️")
-
-st.sidebar.markdown("---")
-if st.sidebar.button("🚪 Logout", use_container_width=True, type="secondary"):
-    auth.logout()
-    st.switch_page("pages/00_Login.py")
-
-st.sidebar.markdown("---")
-st.sidebar.markdown(f"**v{APP_VERSION}** - Production PoC")
 
 
 def load_css():
@@ -59,7 +35,7 @@ def load_css():
 
 load_css()
 
-layout.render_header(f"AA Tool v{APP_VERSION}")
+layout.render_header(f"App v{APP_VERSION}")
 layout.render_user_info()
 
 st.markdown("---")
