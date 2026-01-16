@@ -4,7 +4,7 @@ from psycopg2 import Error
 import logging
 import json
 
-# Version: 1.4.5.3 - Added .env file generation from GitHub Secrets in deployment workflow
+# Version: 1.4.5.5 - Fixed ModuleNotFoundError for agents module with correct import path
 
 # Nastavení logování
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s - %(message)s')

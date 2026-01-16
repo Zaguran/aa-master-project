@@ -1,15 +1,15 @@
 import sys
 import os
 
-# Fix Python path for Docker/Linux compatibility
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+# Fix Python path for Docker/Linux compatibility - force correct path for agents module
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import streamlit as st
 from datetime import datetime
 from components import layout, auth, session
 from agents.db_bridge.database import list_agent_status
 
-APP_VERSION = "1.4.5.3"
+APP_VERSION = "1.4.5.5"
 
 # Startup logging for Docker debugging
 db_host = os.getenv('DB_HOST', 'LINUX_1_IP')
