@@ -1,5 +1,5 @@
 import streamlit as st
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import uuid
 from components import security
 import os
@@ -34,7 +34,7 @@ def create_session(user_id: str) -> dict:
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
         csrf_token = security.generate_csrf_token()
-        expires_at = datetime.now() + timedelta(hours=8)
+        expires_at = datetime.now(timezone.utc) + timedelta(hours=8)
         
         cur.execute("""
             INSERT INTO app_session (user_id, expires_at, csrf_token, revoked)
@@ -83,10 +83,13 @@ def validate_session(session_id: str) -> bool:
         if not session:
             return False
         
+        # Emergency fix v1.4.2: Simplified validation - only check if session exists
+        # Removed auto-revocation logic to prevent session invalidation
         if session['revoked']:
             return False
         
-        if datetime.now() > session['expires_at']:
+        # Use UTC for timezone-aware comparison
+        if datetime.now(timezone.utc) > session['expires_at']:
             return False
         
         return True

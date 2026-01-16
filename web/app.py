@@ -2,10 +2,10 @@ import streamlit as st
 from datetime import datetime
 from components import layout, auth, session
 
-APP_VERSION = "1.4.1"
+APP_VERSION = "1.4.2"
 
 st.set_page_config(
-    page_title=f"App",
+    page_title=f"🏠 App Home",
     page_icon="🏠",
     layout="wide"
 )

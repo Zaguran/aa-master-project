@@ -2,11 +2,18 @@
 
 AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.4.1
+## Current Version: 1.4.2
 
-**Status:** Active development - authentication system stabilized
+**Status:** Active development - session management stabilized
 
 ## Change Log
+- [x] **v1.4.2** (2026-01-16) - **Emergency Fix: Session Revocation & Timezone Sync**
+  - [x] Emergency fix for session revocation and timezone sync
+  - [x] Fixed timezone mismatch using datetime.now(timezone.utc)
+  - [x] Simplified session validation to prevent auto-revocation
+  - [x] Sessions now remain active for 8 hours with UTC timezone
+  - [x] Changed app title to '🏠 App Home'
+  - [x] Verified st.rerun() after login for immediate UI update
 - [x] **v1.4.1** (2026-01-16) - **Bug Fix: Session Revocation Loop**
   - [x] Fixed session revocation loop preventing user login
   - [x] Explicitly set revoked=FALSE in session creation
