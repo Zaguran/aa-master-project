@@ -2,11 +2,19 @@
 
 AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.4.5.6
+## Current Version: 1.4.5.8
 
 **Status:** Active development - session management stabilized
 
 ## Change Log
+- [x] **v1.4.5.8** (2026-01-17) - **CRITICAL: Missing 'agents' Directory in Container**
+  - [x] CRITICAL: Verified COPY agents/ /app/agents/ in Dockerfile
+  - [x] Added emphasis comments to prevent agents directory from being missed
+  - [x] Verified build context is set to root directory (.)
+  - [x] Confirmed agents/ copied before web/ in Dockerfile
+  - [x] Updated sidebar: v1.4.5.8 | Ollama Mod: v0.5
+  - [x] Container structure: /app/agents/ and /app/app.py must coexist
+  - [x] Added verification: ls /app should show agents directory
 - [x] **v1.4.5.6** (2026-01-17) - **Final Fix for 'agents' Import**
   - [x] CRITICAL: Added dual sys.path.append for Docker compatibility
   - [x] Added sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -238,6 +246,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
+| **v1.4.5.8** | 2026-01-17 | **CRITICAL: Missing 'agents' Directory in Container**. Verified and emphasized COPY agents/ instruction in Dockerfile, confirmed build context, added critical comments to prevent directory from being missed. |
 | **v1.4.5.6** | 2026-01-17 | **Final Fix for 'agents' Import**. Added dual sys.path.append, created __init__.py files in agents folders, comprehensive fix for ModuleNotFoundError in Docker. |
 | **v1.4.5.5** | 2026-01-16 | **Fix ModuleNotFoundError for 'agents'**. Fixed critical import path issue preventing agents module from loading, updated sys.path resolution, final web startup fix. |
 | **v1.4.5.3** | 2026-01-16 | **Environment Injection & Final Web Start**. Fixed deployment workflow to generate .env from GitHub Secrets, ensured DB connection to LINUX_1_IP, added error resilience to prevent 502 errors. |

@@ -20,7 +20,8 @@ COPY web/requirements.txt .
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy agents directory for imports
+# CRITICAL: Copy agents directory for imports (MUST exist in container)
+# Without this, web will fail with ModuleNotFoundError
 COPY agents/ /app/agents/
 
 # Copy application code from web/
