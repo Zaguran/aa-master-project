@@ -1,7 +1,7 @@
 import streamlit as st
 from components import layout, auth, session
 
-APP_VERSION = "1.3.3"
+APP_VERSION = "1.3.5"
 
 st.set_page_config(
     page_title=f"AAT Automotive Assistance Tool v{APP_VERSION}",
@@ -12,6 +12,7 @@ st.set_page_config(
 session.init_session_state()
 
 if not auth.is_authenticated():
+    st.sidebar.page_link("pages/00_Login.py", label="🔐 Login", icon="🔐")
     st.warning("Please login to access the application.")
     if st.button("Go to Login Page", type="primary"):
         st.switch_page("pages/00_Login.py")

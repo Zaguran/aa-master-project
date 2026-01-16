@@ -38,7 +38,7 @@ with st.form("login_form"):
             with st.spinner("Authenticating..."):
                 if auth.login(email, password):
                     st.success("Login successful! Redirecting...")
-                    st.rerun()
+                    st.switch_page("pages/01_Dashboard.py")
                 else:
                     st.error("Invalid email or password. Please try again.")
 
