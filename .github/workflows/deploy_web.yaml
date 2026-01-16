@@ -28,10 +28,30 @@ jobs:
           ssh-keyscan -H ${{ secrets.LINUX_2_IP }} >> ~/.ssh/known_hosts
       
       - name: Deploy Web Application
+        env:
+          LINUX_1_IP: ${{ secrets.LINUX_1_IP }}
+          LINUX_2_IP: ${{ secrets.LINUX_2_IP }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
-          ssh -i ~/.ssh/id_ed25519 root@${{ secrets.LINUX_2_IP }} << 'EOF'
+          ssh -i ~/.ssh/id_ed25519 root@${{ secrets.LINUX_2_IP }} << EOF
             cd /root/aa-master-project
             git pull origin main
+            
+            # Generate .env file from GitHub Secrets
+            echo "# Database Configuration (connects to Linux 1)" > .env
+            echo "DB_HOST=${LINUX_1_IP}" >> .env
+            echo "DB_PORT=5432" >> .env
+            echo "DB_NAME=trading" >> .env
+            echo "DB_USER=${DB_USER}" >> .env
+            echo "DB_PASS=${DB_PASSWORD}" >> .env
+            echo "" >> .env
+            echo "# Infrastructure" >> .env
+            echo "LINUX_1_IP=${LINUX_1_IP}" >> .env
+            echo "LINUX_2_IP=${LINUX_2_IP}" >> .env
+            
+            echo "Generated .env file with DB_HOST=${LINUX_1_IP}"
+            
             docker compose down
             docker rm -f aat-web-container 2>/dev/null || true
             docker compose up -d --build

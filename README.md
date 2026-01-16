@@ -2,11 +2,19 @@
 
 AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.4.5.2
+## Current Version: 1.4.5.3
 
 **Status:** Active development - session management stabilized
 
 ## Change Log
+- [x] **v1.4.5.3** (2026-01-16) - **Environment Injection & Final Web Start**
+  - [x] Fixed deployment workflow to generate .env file from GitHub Secrets
+  - [x] Added DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS injection
+  - [x] Ensured DB_HOST points to LINUX_1_IP (128.140.108.240)
+  - [x] Updated sidebar display: v1.4.5.3 | Ollama Mod v0.5 [cite: 2026-01-11]
+  - [x] Verified PYTHONPATH="/app" in Dockerfile (correct)
+  - [x] Added error resilience to prevent 502 on DB connection failure
+  - [x] Web container stays running even when DB is unavailable
 - [x] **v1.4.5.2** (2026-01-16) - **Web Runtime & Docker Environment Fixes**
   - [x] Added ENV PYTHONPATH="/app" to web/Dockerfile for proper imports
   - [x] Added COPY agents/ to Dockerfile to make agent modules available
@@ -214,6 +222,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
+| **v1.4.5.3** | 2026-01-16 | **Environment Injection & Final Web Start**. Fixed deployment workflow to generate .env from GitHub Secrets, ensured DB connection to LINUX_1_IP, added error resilience to prevent 502 errors. |
 | **v1.4.5.2** | 2026-01-16 | **Web Runtime & Docker Environment Fixes**. Added PYTHONPATH to Dockerfile, startup logging, verified Ollama status display from DB, fixed import issues in Docker container. |
 | **v1.4.5.1** | 2026-01-16 | **Deployment Workflow Fixes**. Fixed secret names to match GitHub Secrets (LINUX_1_IP, LINUX_2_IP, SSH_KEY_L1, SSH_KEY_L2), added dual ssh-keyscan, deprecated old workflows. |
 | **v1.4.5** | 2026-01-16 | **Emergency Path Fix & Infrastructure Alignment**. Fixed critical Python import paths for Docker/Linux, split infrastructure across two servers, removed GCP dependencies, added robust error handling. |
