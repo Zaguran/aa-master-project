@@ -34,6 +34,8 @@ jobs:
             git pull origin main
             # 1. Zastavíme a smažeme staré kontejnery i sítě
             docker compose down
-            # 2. Spustíme novou verzi s buildem
+            # 2. Vyčistíme případné konfliktní kontejnery
+            docker rm -f aat-web-container 2>/dev/null || true
+            # 3. Spustíme novou verzi s buildem
             docker compose up -d --build
           EOF

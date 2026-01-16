@@ -1,7 +1,7 @@
 import streamlit as st
 from components import layout, auth, session
 
-APP_VERSION = "1.3.1"
+APP_VERSION = "1.3.2"
 
 st.set_page_config(
     page_title=f"AAT Automotive Assistance Tool v{APP_VERSION}",

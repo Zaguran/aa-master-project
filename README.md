@@ -2,9 +2,13 @@
 
 AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.3.1
+## Current Version: 1.3.2
 
 ## Change Log
+- [x] **v1.3.2** (2026-01-16) - **Hotfix: Docker Container Name Conflict**
+  - [x] Added container cleanup step in deploy_web.yaml workflow
+  - [x] Prevents deployment failures due to existing container names
+  - [x] Added `docker rm -f aat-web-container` before docker compose up
 - [x] **v1.3.1** (2026-01-16) - **Hotfix: PostgreSQL Dependency**
   - [x] Added psycopg2-binary to requirements.txt
   - [x] Added libpq-dev to Dockerfile for PostgreSQL support
@@ -124,6 +128,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
+| **v1.3.2** | 2026-01-16 | **Hotfix: Docker Container Conflict**. Fixed deployment failures by adding container cleanup step to prevent name conflicts. |
 | **v1.3.1** | 2026-01-16 | **Hotfix: PostgreSQL Dependency**. Fixed Docker deployment crash by adding psycopg2-binary and libpq-dev dependencies. |
 | **v1.3.0** | 2026-01-16 | **Authentication & RBAC**. Full authentication system with login/logout, role-based access control (Admin/Visitor), session management, and admin panel. |
 | **v1.2.0** | 2026-01-16 | **Automated Deployment Testing**. Added tag trigger to CI/CD workflow for automated deployments on version releases. |
