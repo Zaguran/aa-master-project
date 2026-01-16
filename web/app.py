@@ -12,7 +12,7 @@ OLLAMA_URL = "http://127.0.0.1:11434"
 MODEL_NAME = "llava"
 
 st.set_page_config(
-    page_title=f"AI Requirements Extractor v{APP_VERSION}",
+    page_title=f"AAT Automotive Assitance Tool v{APP_VERSION}",
     page_icon="📄",
     layout="wide"
 )
