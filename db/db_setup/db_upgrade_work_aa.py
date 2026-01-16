@@ -37,7 +37,8 @@ def get_conn():
         database=os.getenv("DB_NAME"),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASS"),
-        options=f"-c search_path={SCHEMA}"
+        # Změňte tento řádek:
+        options=f"-c search_path={SCHEMA},public"
     )
 
 def upgrade():
@@ -45,10 +46,6 @@ def upgrade():
     conn.autocommit = True
     cur = conn.cursor()
    
-    # PŘIDEJTE TENTO ŘÁDEK:
-    print("Enabling pgvector extension...")
-    cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
-
     print("=== UPGRADE: Creating new PoC tables if missing ===")
 
     # --- Embedding Model Registry ---
