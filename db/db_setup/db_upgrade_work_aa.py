@@ -37,7 +37,6 @@ def get_conn():
         database=os.getenv("DB_NAME"),
         user=os.getenv("DB_USER"),
         password=os.getenv("DB_PASS"),
-        # Změňte tento řádek:
         options=f"-c search_path={SCHEMA},public"
     )
 
@@ -45,6 +44,7 @@ def upgrade():
     conn = get_conn()
     conn.autocommit = True
     cur = conn.cursor()
+   
    
     print("=== UPGRADE: Creating new PoC tables if missing ===")
 
