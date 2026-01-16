@@ -2,11 +2,19 @@
 
 AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.4.2
+## Current Version: 1.4.3
 
 **Status:** Active development - session management stabilized
 
 ## Change Log
+- [x] **v1.4.3** (2026-01-16) - **Database Dashboard & Table Browser**
+  - [x] Implemented DB Status page (03_DB_Status.py) with read-only dashboard
+  - [x] Shows table statistics from work_aa schema using get_aa_stats()
+  - [x] Added placeholder buttons for future features (DB Extensions, Storage Size)
+  - [x] Implemented Table View page (04_TableView.py) with pagination
+  - [x] Browse all work_aa tables with 50 rows per page
+  - [x] Pagination controls with Previous/Next buttons
+  - [x] Admin-only access for both pages
 - [x] **v1.4.2** (2026-01-16) - **Emergency Fix: Session Revocation & Timezone Sync**
   - [x] Emergency fix for session revocation and timezone sync
   - [x] Fixed timezone mismatch using datetime.now(timezone.utc)
@@ -167,6 +175,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
+| **v1.4.3** | 2026-01-16 | **Database Dashboard & Table Browser**. Added DB Status and Table View modules for read-only database browsing with pagination. |
 | **v1.3.2** | 2026-01-16 | **Hotfix: Docker Container Conflict**. Fixed deployment failures by adding container cleanup step to prevent name conflicts. |
 | **v1.3.1** | 2026-01-16 | **Hotfix: PostgreSQL Dependency**. Fixed Docker deployment crash by adding psycopg2-binary and libpq-dev dependencies. |
 | **v1.3.0** | 2026-01-16 | **Authentication & RBAC**. Full authentication system with login/logout, role-based access control (Admin/Visitor), session management, and admin panel. |

@@ -1,5 +1,7 @@
 import streamlit as st
-from components import auth, session
+from components import auth, session, layout
+import database
+import pandas as pd
 
 st.set_page_config(page_title="DB Status", page_icon="🗄️", layout="wide")
 
@@ -14,5 +16,31 @@ if not auth.is_authenticated():
 
 auth.require_role(["admin"])
 
-st.title("DB Status")
-st.info("Page not implemented yet.")
+layout.render_header("Database Status")
+
+st.title("Database Status")
+st.info("Overview of tables in schema 'work_aa'.")
+
+col1, col2, col3 = st.columns([1, 1, 4])
+
+with col1:
+    if st.button("🔄 Refresh", use_container_width=True):
+        st.rerun()
+
+with col2:
+    if st.button("📦 DB Extensions", use_container_width=True, disabled=True):
+        st.info("Feature coming soon")
+
+with col3:
+    if st.button("💾 Storage Size", use_container_width=True, disabled=True):
+        st.info("Feature coming soon")
+
+st.markdown("---")
+
+stats = database.get_aa_stats()
+
+if stats:
+    df = pd.DataFrame(stats)
+    st.dataframe(df, use_container_width=True, hide_index=True)
+else:
+    st.warning("No data available or database connection error.")
