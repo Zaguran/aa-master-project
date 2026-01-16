@@ -2,9 +2,13 @@
 
 AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.1.0
+## Current Version: 1.2.0
 
 ## Change Log
+- [x] **v1.2.0** (2026-01-16) - **Automated Deployment Testing**
+  - [x] Added tag trigger to deploy_web.yaml workflow (v* pattern)
+  - [x] Testing automated deployment on tag creation
+  - [x] CI/CD improvements for version releases
 - [x] **v1.1.0** (2026-01-16) - **Web Skeleton Refactor**
   - [x] Complete removal of old PDF extraction UI logic
   - [x] New multi-tab Streamlit structure with 9 pages (Dashboard, Status, DB Status, TableView, Matching, Trace, Impact, Reports, Chat)
@@ -107,6 +111,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
+| **v1.2.0** | 2026-01-16 | **Automated Deployment Testing**. Added tag trigger to CI/CD workflow for automated deployments on version releases. |
 | **v1.1.0** | 2026-01-16 | **Web Skeleton Refactor**. Complete removal of PDF extraction code, new 9-page structure, Chat Type A, Ollama Module v1.3.0 integration, database on work_aa schema. |
 | **v1.0.2** | 2026-01-14 | **Web Version Bump**. Testing CLAUDE.md workflow, no functional changes. |
 | **v1.0.1** | 2026-01-13 | **Stable Demo**. AI Requirements Extractor with generic Customer IDs, low temperature mode, strict extraction prompts. |

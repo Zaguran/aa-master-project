@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*'                  # Spustí se při vytvoření tagu (např. v1.1.0)
     paths:
       - 'web/**'              # Spustí se jen při změně v aplikaci
       - 'docker-compose.yml'  # Nebo při změně dockeru
