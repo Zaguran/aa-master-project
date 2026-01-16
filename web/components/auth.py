@@ -63,8 +63,16 @@ def login(email: str, password: str) -> bool:
             return False
         
         # Create session
-        session_data = session.create_session(str(user['user_id']))
-        if not session_data:
+        try:
+            session_data = session.create_session(str(user['user_id']))
+            if not session_data:
+                st.error("Session creation failed: No session data returned from database")
+                st.session_state.last_login_error = True
+                st.session_state.last_login_success = False
+                return False
+        except Exception as session_error:
+            st.error(f"Session creation failed: {session_error}")
+            print(f"Session creation error: {session_error}")
             st.session_state.last_login_error = True
             st.session_state.last_login_success = False
             return False
