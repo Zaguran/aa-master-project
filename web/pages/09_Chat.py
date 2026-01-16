@@ -1,7 +1,10 @@
 import streamlit as st
-from components import utils
+from components import auth, session, utils
 
 st.set_page_config(page_title="Chat", page_icon="💬", layout="wide")
+
+session.init_session_state()
+auth.require_role(["admin"])
 
 st.title("Chat (Type A)")
 

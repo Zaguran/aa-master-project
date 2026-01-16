@@ -1,8 +1,9 @@
 import streamlit as st
-from components import auth
+from components import auth, session
 
 st.set_page_config(page_title="Admin Panel", page_icon="⚙️", layout="wide")
 
+session.init_session_state()
 auth.require_role(["admin"])
 
 st.title("⚙️ Admin Panel")

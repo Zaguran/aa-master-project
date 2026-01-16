@@ -23,4 +23,4 @@ def render_user_info():
         
         if st.sidebar.button("🚪 Logout", use_container_width=True, type="secondary"):
             auth.logout()
-            st.rerun()
+            st.switch_page("pages/00_Login.py")

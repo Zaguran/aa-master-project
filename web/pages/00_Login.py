@@ -43,4 +43,4 @@ with st.form("login_form"):
                     st.error("Invalid email or password. Please try again.")
 
 st.markdown("---")
-st.markdown("**Default credentials:** admin@aat.local / admin123")
+st.markdown("**Default credentials:** admin@aat.local / VeryStrongAdminPwd")

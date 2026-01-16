@@ -84,7 +84,7 @@ def create_auth_tables():
         
         # Create default admin user
         admin_email = "admin@aat.local"
-        admin_password = "admin123"
+        admin_password = "VeryStrongAdminPwd"
         admin_hash = hash_password(admin_password)
         
         cur.execute("""
