@@ -44,6 +44,10 @@ def upgrade():
     conn = get_conn()
     conn.autocommit = True
     cur = conn.cursor()
+   
+    # PŘIDEJTE TENTO ŘÁDEK:
+    print("Enabling pgvector extension...")
+    cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
 
     print("=== UPGRADE: Creating new PoC tables if missing ===")
 
