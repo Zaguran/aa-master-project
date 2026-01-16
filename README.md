@@ -2,11 +2,19 @@
 
 AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.4.5.1
+## Current Version: 1.4.5.2
 
 **Status:** Active development - session management stabilized
 
 ## Change Log
+- [x] **v1.4.5.2** (2026-01-16) - **Web Runtime & Docker Environment Fixes**
+  - [x] Added ENV PYTHONPATH="/app" to web/Dockerfile for proper imports
+  - [x] Added COPY agents/ to Dockerfile to make agent modules available
+  - [x] Verified Streamlit entrypoint with --server.port=8501 --server.address=0.0.0.0
+  - [x] Added startup logging to web/app.py showing DB connection target
+  - [x] Enhanced Ollama Mod v0.5 display to read from work_aa.agent_status
+  - [x] Kept sys.path hack in app.py as fallback for local development
+  - [x] Added error logging for DB connection issues
 - [x] **v1.4.5.1** (2026-01-16) - **Deployment Workflow Fixes**
   - [x] CRITICAL: Fixed secret names in all deployment workflows
   - [x] Updated to use LINUX_1_IP and LINUX_2_IP (not HOST)
@@ -206,6 +214,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
+| **v1.4.5.2** | 2026-01-16 | **Web Runtime & Docker Environment Fixes**. Added PYTHONPATH to Dockerfile, startup logging, verified Ollama status display from DB, fixed import issues in Docker container. |
 | **v1.4.5.1** | 2026-01-16 | **Deployment Workflow Fixes**. Fixed secret names to match GitHub Secrets (LINUX_1_IP, LINUX_2_IP, SSH_KEY_L1, SSH_KEY_L2), added dual ssh-keyscan, deprecated old workflows. |
 | **v1.4.5** | 2026-01-16 | **Emergency Path Fix & Infrastructure Alignment**. Fixed critical Python import paths for Docker/Linux, split infrastructure across two servers, removed GCP dependencies, added robust error handling. |
 | **v1.4.4** | 2026-01-16 | **Final Agent Integration & Infrastructure**. Implemented agent heartbeat system, monitoring agents for DB and Ollama, Status dashboard, and docker-compose for agent services. |

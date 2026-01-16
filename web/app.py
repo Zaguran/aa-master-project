@@ -9,7 +9,13 @@ from datetime import datetime
 from components import layout, auth, session
 from agents.db_bridge.database import list_agent_status
 
-APP_VERSION = "1.4.5.1"
+APP_VERSION = "1.4.5.2"
+
+# Startup logging for Docker debugging
+db_host = os.getenv('DB_HOST', 'LINUX_1_IP')
+print(f"[AAT Web v{APP_VERSION}] Starting up...")
+print(f"[AAT Web v{APP_VERSION}] Connecting to DB at {db_host}...")
+print(f"[AAT Web v{APP_VERSION}] PYTHONPATH: {os.getenv('PYTHONPATH', 'not set')}")
 
 st.set_page_config(
     page_title=f"🏠 App Home",
@@ -23,7 +29,7 @@ build_date = "2026-01-11"
 
 user = auth.get_current_user()
 
-# Get Ollama status from DB
+# Get Ollama status from DB (reads from work_aa.agent_status via LINUX_1_IP)
 ollama_status = "v0.5 | Mode: unknown"
 try:
     agents = list_agent_status()
@@ -35,11 +41,11 @@ try:
                 mode = details.get('mode', 'unknown')
                 ollama_status = f"{version} | Mode: {mode}"
             break
-except:
-    pass
+except Exception as e:
+    print(f"[AAT Web] Warning: Could not read Ollama status from DB: {e}")
 
 st.sidebar.markdown("---")
-st.sidebar.markdown(f"**v{APP_VERSION} | Ollama Mod: v0.5**")
+st.sidebar.markdown(f"**v{APP_VERSION} | Ollama Mod: {ollama_status}**")
 st.sidebar.markdown(f"*[cite: {build_date}]*")
 
 st.sidebar.markdown("---")
