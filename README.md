@@ -1,10 +1,18 @@
-# AI Requirements Extractor
+# AAT - Automotive Assistance Tool
 
-An AI-powered tool for extracting requirements from PDF documents using vision-based analysis.
+AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.0.2
+## Current Version: 1.1.0
 
 ## Change Log
+- [x] **v1.1.0** (2026-01-16) - **Web Skeleton Refactor**
+  - [x] Complete removal of old PDF extraction UI logic
+  - [x] New multi-tab Streamlit structure with 9 pages (Dashboard, Status, DB Status, TableView, Matching, Trace, Impact, Reports, Chat)
+  - [x] Chat Type A implementation: simple input/output interface with no history or DB logging
+  - [x] Integrated Ollama Module v1.3.0 status monitoring (2026-01-11)
+  - [x] Database now running on schema `work_aa` in DB `trading`
+  - [x] Clean component architecture: `components/layout.py` and `components/utils.py`
+  - [x] Minimal CSS styling in `static/css/app.css`
 - [x] **v1.0.2** (2026-01-14) - **Web Version Bump**
   - [x] Testing CLAUDE.md workflow
   - [x] No functional changes to application
@@ -28,26 +36,50 @@ An AI-powered tool for extracting requirements from PDF documents using vision-b
 
 ## Features
 
-### AI Requirements Extraction
-- Upload PDF documents for automated requirements extraction
-- Uses **llava** vision model to analyze document images
-- Outputs structured Markdown tables with requirement IDs and text
-- Strict prompts ensure AI only extracts visible text (no hallucinations)
+### Web Interface Structure
+The application now features a clean multi-tab Streamlit interface:
 
-### Privacy & Generic Customer IDs
-The system uses generic Customer IDs (e.g., `CUST-001`) instead of customer-specific identifiers. This ensures:
-- **Privacy compliance**: No customer names stored in extraction logs
-- **Data portability**: Results can be shared without exposing client identities
-- **Demo-safe**: Safe for presentations and demos
+```bash
+web/
+ ├─ app.py                    # Main entry point with layout loader
+ ├─ pages/
+ │   ├─ 01_Dashboard.py       # System overview and key metrics
+ │   ├─ 02_Status.py          # Agent and system status monitoring
+ │   ├─ 03_DB_Status.py       # Database health and statistics
+ │   ├─ 04_TableView.py       # Browse database tables
+ │   ├─ 05_Matching.py        # Requirements matching interface
+ │   ├─ 06_Trace.py           # Traceability analysis
+ │   ├─ 07_Impact.py          # Git impact analysis
+ │   ├─ 08_Reports.py         # Generate and view reports
+ │   └─ 09_Chat.py            # AI chat interface (Type A)
+ ├─ components/
+ │   ├─ layout.py             # Header rendering and layout utilities
+ │   └─ utils.py              # Chat and utility functions
+ ├─ static/
+ │   ├─ css/
+ │   │   └─ app.css           # Minimal styling
+ │   └─ img/
+ └─ requirements.txt
+```
 
-### Technical Configuration
-| Parameter | Value | Purpose |
-|-----------|-------|---------|
-| Temperature | 0.1 | Low creativity for stable output |
-| Context Window | 4096 | Token context size |
-| Threads | 8 | Parallel processing threads |
-| PDF DPI | 150 | Image conversion quality |
-| Model | llava | Vision-capable LLM |
+### Chat Type A
+- Simple question/answer interface
+- Single input box for user questions
+- Single output box for responses
+- No conversation history
+- No database logging
+- Placeholder implementation ready for future integration
+
+### Database Configuration
+- **Database**: `trading`
+- **Schema**: `work_aa`
+- **Extensions**: pgvector enabled for embeddings
+- All database access uses environment variables (DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS)
+
+### Ollama Module Integration
+- Integrated Ollama Module v1.3.0 (2026-01-11)
+- Status monitoring for AI services
+- Ready for embedding and matching operations
 
 ## System Architecture
 
@@ -75,6 +107,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
+| **v1.1.0** | 2026-01-16 | **Web Skeleton Refactor**. Complete removal of PDF extraction code, new 9-page structure, Chat Type A, Ollama Module v1.3.0 integration, database on work_aa schema. |
 | **v1.0.2** | 2026-01-14 | **Web Version Bump**. Testing CLAUDE.md workflow, no functional changes. |
 | **v1.0.1** | 2026-01-13 | **Stable Demo**. AI Requirements Extractor with generic Customer IDs, low temperature mode, strict extraction prompts. |
 | **v0.5.0** | 2026-01-13 | **Ollama Module + Performance Stats**. UI improvements and efficiency tracking. |
