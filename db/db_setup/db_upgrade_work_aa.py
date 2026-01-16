@@ -72,7 +72,7 @@ def upgrade():
         lang TEXT,
         text_hash TEXT NOT NULL,
         content TEXT NOT NULL,
-        embedding vector(768),
+        embedding public.vector(768),
         created_at TIMESTAMPTZ DEFAULT now(),
         updated_at TIMESTAMPTZ
     );
