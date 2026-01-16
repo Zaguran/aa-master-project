@@ -3,3 +3,4 @@ pandas
 requests
 pdf2image
 pillow
+psycopg2-binary

@@ -2,12 +2,13 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies including poppler-utils for PDF processing
+# Install system dependencies including poppler-utils for PDF processing and libpq-dev for PostgreSQL
 RUN apt-get update && apt-get install -y \
     build-essential \
     curl \
     git \
     poppler-utils \
+    libpq-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

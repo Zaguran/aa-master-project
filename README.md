@@ -2,9 +2,13 @@
 
 AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.3.0
+## Current Version: 1.3.1
 
 ## Change Log
+- [x] **v1.3.1** (2026-01-16) - **Hotfix: PostgreSQL Dependency**
+  - [x] Added psycopg2-binary to requirements.txt
+  - [x] Added libpq-dev to Dockerfile for PostgreSQL support
+  - [x] Fixed Docker deployment crash due to missing database driver
 - [x] **v1.3.0** (2026-01-16) - **Authentication & RBAC Implementation**
   - [x] Full authentication system with login/logout
   - [x] Role-Based Access Control (Admin / Visitor)
@@ -120,6 +124,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
+| **v1.3.1** | 2026-01-16 | **Hotfix: PostgreSQL Dependency**. Fixed Docker deployment crash by adding psycopg2-binary and libpq-dev dependencies. |
 | **v1.3.0** | 2026-01-16 | **Authentication & RBAC**. Full authentication system with login/logout, role-based access control (Admin/Visitor), session management, and admin panel. |
 | **v1.2.0** | 2026-01-16 | **Automated Deployment Testing**. Added tag trigger to CI/CD workflow for automated deployments on version releases. |
 | **v1.1.0** | 2026-01-16 | **Web Skeleton Refactor**. Complete removal of PDF extraction code, new 9-page structure, Chat Type A, Ollama Module v1.3.0 integration, database on work_aa schema. |
