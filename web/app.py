@@ -1,7 +1,8 @@
 import streamlit as st
+from datetime import datetime
 from components import layout, auth, session
 
-APP_VERSION = "1.3.8"
+APP_VERSION = "1.3.9"
 
 st.set_page_config(
     page_title=f"App",
@@ -11,17 +12,32 @@ st.set_page_config(
 
 session.init_session_state()
 
+build_date = datetime.now().strftime("%Y-%m-%d")
+
 st.sidebar.markdown("---")
-st.sidebar.markdown("**v1.3.8 | Ollama Mod: v0.5.**")
-st.sidebar.markdown("*[cite: 2026-01-11]*")
+st.sidebar.markdown(f"**v{APP_VERSION} | Ollama Mod: v0.5.**")
+st.sidebar.markdown(f"*[cite: {build_date}]*")
+
+st.sidebar.markdown("---")
+st.sidebar.markdown("### 📊 Session Info")
+
+user = auth.get_current_user()
 
 if not auth.is_authenticated():
+    st.sidebar.markdown("**Status:** Not Authenticated ❌")
+    if 'last_login_error' in st.session_state and st.session_state.last_login_error:
+        st.sidebar.markdown(f"**Last Login:** Failed ❌")
+    
     st.warning("Please login to access the application.")
     if st.button("Goto Login Page", type="primary"):
         st.switch_page("pages/00_Login.py")
     st.stop()
-
-user = auth.get_current_user()
+else:
+    st.sidebar.markdown("**Status:** Logged In ✅")
+    st.sidebar.markdown(f"**Email:** {user['email']}")
+    st.sidebar.markdown(f"**Roles:** {', '.join(user.get('roles', []))}")
+    if 'last_login_success' in st.session_state and st.session_state.last_login_success:
+        st.sidebar.markdown("**Last Login:** Success ✅")
 
 
 def load_css():
@@ -36,7 +52,10 @@ def load_css():
 load_css()
 
 layout.render_header(f"App v{APP_VERSION}")
-layout.render_user_info()
+
+if st.session_state.get('logout_message'):
+    st.success(st.session_state.logout_message)
+    del st.session_state.logout_message
 
 st.markdown("---")
 st.success(f"Welcome, {user['full_name']}!")

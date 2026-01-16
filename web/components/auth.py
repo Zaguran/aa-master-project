@@ -65,6 +65,8 @@ def login(email: str, password: str) -> bool:
         # Create session
         session_data = session.create_session(str(user['user_id']))
         if not session_data:
+            st.session_state.last_login_error = True
+            st.session_state.last_login_success = False
             return False
         
         # Store in session state
@@ -76,12 +78,16 @@ def login(email: str, password: str) -> bool:
             'full_name': user['full_name'],
             'roles': [r for r in user['roles'] if r is not None]
         }
+        st.session_state.last_login_success = True
+        st.session_state.last_login_error = False
         
         return True
         
     except Exception as e:
         st.error(f'Debug DB Error: {e}')
         print(f"Login error: {e}")
+        st.session_state.last_login_error = True
+        st.session_state.last_login_success = False
         return False
 
 
@@ -93,6 +99,9 @@ def logout():
     st.session_state.authenticated = False
     st.session_state.user = None
     st.session_state.session_id = None
+    st.session_state.last_login_success = False
+    st.session_state.last_login_error = False
+    st.session_state.logout_message = "Successfully logged out"
 
 
 def get_current_user() -> dict:

@@ -16,11 +16,7 @@ def render_user_info():
     
     if user:
         st.sidebar.markdown("---")
-        st.sidebar.markdown("### 👤 User Info")
-        st.sidebar.markdown(f"**Email:** {user['email']}")
-        st.sidebar.markdown(f"**Name:** {user.get('full_name', 'N/A')}")
-        st.sidebar.markdown(f"**Roles:** {', '.join(user.get('roles', []))}")
         
         if st.sidebar.button("🚪 Logout", use_container_width=True, type="secondary"):
             auth.logout()
-            st.switch_page("pages/00_Login.py")
+            st.switch_page("app.py")

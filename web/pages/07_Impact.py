@@ -4,6 +4,7 @@ from components import auth, session
 st.set_page_config(page_title="Impact", page_icon="💥", layout="wide")
 
 session.init_session_state()
+user = auth.get_current_user()
 
 if not auth.is_authenticated():
     st.warning("Please login to access the application.")
