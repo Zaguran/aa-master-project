@@ -27,7 +27,16 @@ session.init_session_state()
 
 build_date = "2026-01-11"
 
-user = auth.get_current_user()
+# Error resilience: Wrap DB-dependent operations to prevent 502 errors
+db_available = True
+user = None
+try:
+    user = auth.get_current_user()
+except Exception as e:
+    db_available = False
+    print(f"[AAT Web] ERROR: Database connection failed: {e}")
+    print(f"[AAT Web] Container will continue running, showing error to user...")
+    user = None
 
 # Get Ollama status from DB (reads from work_aa.agent_status via LINUX_1_IP)
 ollama_status = "v0.5 | Mode: unknown"
@@ -51,7 +60,12 @@ st.sidebar.markdown(f"*[cite: {build_date}]*")
 st.sidebar.markdown("---")
 st.sidebar.markdown("### 📊 Session Info")
 
-if not auth.is_authenticated():
+# Show DB status warning if unavailable
+if not db_available:
+    st.sidebar.error("⚠️ Database on Linux 1 is temporarily unavailable")
+    st.sidebar.info("Please wait while connection is restored...")
+
+if not db_available or not auth.is_authenticated():
     st.sidebar.markdown("**Status:** Not Authenticated ❌")
     if 'last_login_error' in st.session_state and st.session_state.last_login_error:
         st.sidebar.markdown(f"**Last Login:** Failed ❌")
@@ -62,10 +76,18 @@ if not auth.is_authenticated():
         if not sess.validate_session(st.session_state.session_id):
             st.sidebar.markdown("**Status:** Session Revoked ⚠️")
     
-    st.warning("Please login to access the application.")
-    if st.button("Goto Login Page", type="primary"):
-        st.switch_page("pages/00_Login.py")
-    st.stop()
+    if not db_available:
+        st.error("🔌 Database Connection Error")
+        st.warning("**Databáze na Linuxu 1 je dočasně nedostupná**")
+        st.info("The application is running, but cannot connect to the database. Please check:")
+        st.code(f"DB_HOST: {os.getenv('DB_HOST', 'not set')}\nDB_PORT: {os.getenv('DB_PORT', 'not set')}\nDB_NAME: {os.getenv('DB_NAME', 'not set')}")
+        st.markdown("Contact your administrator if this issue persists.")
+        st.stop()
+    else:
+        st.warning("Please login to access the application.")
+        if st.button("Goto Login Page", type="primary"):
+            st.switch_page("pages/00_Login.py")
+        st.stop()
 else:
     user_roles = user.get('roles', [])
     primary_role = user_roles[0] if user_roles else 'user'
