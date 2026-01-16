@@ -80,6 +80,7 @@ def login(email: str, password: str) -> bool:
         return True
         
     except Exception as e:
+        st.error(f'Debug DB Error: {e}')
         print(f"Login error: {e}")
         return False
 
