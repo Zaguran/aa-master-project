@@ -1,0 +1,15 @@
+ Volume in drive C is Acer
+ Volume Serial Number is 5E4C-37D4
+
+ Directory of C:\Data\soubory_rodina\Dali\Projects\aa-master-project\agents
+
+15.01.2026  15:42    <DIR>          .
+14.01.2026  22:08    <DIR>          ..
+09.01.2026  08:55                 0 .gitkeep
+15.01.2026  15:42                 0 agents.txt
+11.01.2026  23:21    <DIR>          db_bridge
+11.01.2026  23:18             1ÿ140 list.txt
+09.01.2026  18:18    <DIR>          ollama_bridge
+09.01.2026  18:06    <DIR>          ollama_monitor
+               3 File(s)          1ÿ140 bytes
+               5 Dir(s)  51ÿ342ÿ802ÿ944 bytes free

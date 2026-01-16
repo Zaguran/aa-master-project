@@ -1,188 +1,243 @@
-# PROJECT: aa-poc (Proof of Concept - Requirements Digitalization)
+You are the coding assistant for the project "aa-poc" (AI-driven Requirements Engineering PoC).
+You must strictly follow the project rules defined below.
 
-## Project Overview
-**Purpose**: PoC for digitalization of customer requirements and automatic matching with system requirements. Demo for management decision-making.
+======================================================================
+PROJECT CONTEXT
+======================================================================
+This project is a Proof‑of‑Concept for automated requirements engineering:
+- Digitalization of customer requirements
+- Automated matching against platform/system requirements
+- Embeddings (Ollama)
+- Matching, traceability, V-model simulation
+- Git impact analysis
+- Web UI
+- Monitoring and agents
+- TimescaleDB / PostgreSQL backend
 
-**System Components:**
-- **Customer Requirements** → Digitalization → System Requirements matching
-- **V-Model simulation**: simplified subset with SRC (git)
-- **DNG simulation** (DOORS Next Gen): Requirements detail from TimescaleDB
-- **Rhapsody simulation**: Similar to DNG (possibly with static images)
-- **Requirements ↔ Source Code traceability**: Bidirectional change detection
+Your outputs must always follow the PROJECT RULES below.
 
-**Multi-VM Architecture:**
-- **Linux VM #1**: TimescaleDB database, HW monitoring, digitalization agents (PDF processing)
-- **Linux VM #2**: Ollama AI, Web interface (Docker container), HW monitoring
-  - Web URL: http://168.119.122.36
-  - Web for: task assignment, agent monitoring, visualization
+======================================================================
+GLOBAL RULES (MUST FOLLOW)
+======================================================================
 
-**Tech Stack:**
-- Database: TimescaleDB (PostgreSQL) - hosted on Linux VM #1
-- Backend: Python agents (digitalization, matching, monitoring)
-- Frontend: Web interface (Dockerized on Linux VM #2)
-- AI: Ollama (Linux VM #2)
-- Version Control: Git + GitHub
+1) MODIFY ONLY FILES EXPLICITLY SPECIFIED IN THE TASK
+   - Never change unrelated files.
+   - Never refactor anything unless asked.
+   - Never “fix” other code.
+   - If unsure → STOP and ask.
 
-**Environment Setup:**
-- Database credentials: configured on Linux VMs
-- Web runs in Docker container on Linux VM #2
-- PoC status: Demo system, can be shut down after management review
+2) SQL / DATABASE ACCESS
+   - You must operate **exclusively** on schema `work_aa`.
+   - Never touch other schemas such as `schema_mt`, `schema_trading`, or anything else.
+   - If a migration would affect another schema:
+     -> respond with:
+        FAIL: Cannot access schema – belongs to different project.
 
-## Database Context (CRITICAL)
-- **Primary schema**: `work_aa` (full access - can modify)
-- **Shared schemas**: `schema_trading`, `schema_mt` exist in same DB but are INVISIBLE to this project
-  - DO NOT query, modify, or reference these schemas
-  - They belong to different projects
-- Schema definition: `agents/db_basis/manage_db_aa.py`
-- Current version: see version comment at top of manage_db_aa.py
-- **WARNING**: Only `work_aa` can be modified. All other schemas are OFF-LIMITS.
+3) ENVIRONMENT VARIABLES ONLY
+   - All DB access must use:
+       DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASS
+   - Absolutely no hard-coded hostnames, IP addresses, ports, or passwords.
+   - No internal server names.
+   - No local filesystem paths except relative project paths.
 
-## Tables Structure (work_aa schema)
-- **customer**: Customer information
-- **projects**: Project hierarchy (platforms, variants)
-- **nodes**: Requirements nodes (type, scope, inheritance, ASIL, test_level, content)
-- **links**: Traceability links between nodes (AI matching scores)
-- **ai_analysis**: AI analysis results for nodes
+4) VERSIONING RULES
+   - Every change increments project version by +0.01.
+   - Version is located in top comment of manage_db_aa.py.
+   - After generating a code update, always show updated version.
+   - Provide unified `git diff` output only for modified files.
 
-## Versioning Rules (STRICT)
-- **Every change** increments version by 0.01 (unless explicitly told otherwise)
-- Version location: Top comment in `manage_db_aa.py`
-  - Format: `Version: X.Y.Z - Description of change`
-- **After every change**:
-  1. Update version in manage_db_aa.py
-  2. Update README.md with changelog entry
-  3. Create git tag: `git tag vX.Y.Z`
-  4. Push with tags: `git push && git push --tags`
+5) GIT WORKFLOW RULES
+   - After change:
+       * update version in manage_db_aa.py (+0.01)
+       * update README.md changelog
+       * commit message format:
+           feat: description (vX.Y.Z)
+           fix: description (vX.Y.Z)
+           refactor: description (vX.Y.Z)
+           docs: description (vX.Y.Z)
+       * tag: vX.Y.Z
+   - If any git step would fail: STOP.
 
-## Task Execution Rules (STRICT)
-- Modify ONLY files explicitly mentioned in the task
-- If the task cannot be completed fully, DO NOT:
-  - commit
-  - deploy
-  - modify additional files
-  - continue working
-- If interrupted or context is missing: STOP and report status
-- NEVER make assumptions - always ask if unclear
+6) OUTPUT FORMAT RULES
+   - Your output must be a unified diff, nothing else.
+   - Use correct file paths.
+   - Do NOT reformat code outside changed lines.
+   - Do NOT modify whitespace unless asked.
+   - Do NOT introduce new dependencies unless asked.
 
-## Git Workflow (CRITICAL)
-### Standard Process:
-```bash
-# 1. Make changes
-# 2. Update version in manage_db_aa.py (+0.01)
-# 3. Update README.md changelog
-# 4. Verify changes
-git diff
+7) SAFETY RULES
+   - If a request is ambiguous, ask clarifying questions.
+   - If a request contradicts project rules, ask for confirmation.
+   - Never make assumptions outside defined project structure.
 
-# 5. Stage and commit
-git add .
-git commit -m "type: description (vX.Y.Z)"
+8) DOCKER RULES
+   - Never modify Dockerfile without explicit approval.
+   - If a new dependency requires system-level package:
+       -> STOP and ask for confirmation.
+   - If a Python dependency is required:
+       -> add to requirements.txt (only on request).
 
-# 6. Create version tag
-git tag vX.Y.Z
+9) PYTHON CODE STYLE
+   - Follow PEP8.
+   - Use explicit imports.
+   - Log important steps.
+   - When writing scripts: include if __name__ == "__main__".
 
-# 7. Pull and push
-git pull --rebase
-git push
-git push --tags
+10) FILE STRUCTURE (IMPORTANT)
+   Existing folders include:
+       agents/
+       agents/db_bridge/
+       agents/db_basis/
+       agents/ollama_monitor/
+       web/
+       web/app.py
+       web/requirements.txt
+       .github/workflows/
+       Dockerfile
 
-# If ANY step fails, STOP and report
-```
+   You must place new files ONLY where requested.
+   If a new file is needed, ask first.
 
-### Commit Message Format:
-- `feat: description (vX.Y.Z)` - new feature
-- `fix: description (vX.Y.Z)` - bug fix
-- `refactor: description (vX.Y.Z)` - code improvement
-- `docs: description (vX.Y.Z)` - documentation only
+======================================================================
+AGENT AND SYSTEM EXPECTATIONS
+======================================================================
 
-### If Git Push Fails:
-1. STOP immediately
-2. Do NOT attempt fixes
-3. Report the error
-4. Wait for instructions
+The system uses multiple agents: 
+pdf_extractor, pdf_chunker, strict_extractor, embedding_agent, matching_agent,
+trace_agent, report_agent, git_impact_agent, bridge_api, monitor_db_server, monitor_ollama_server
 
-## Output Rules
-- Prefer unified diff output for changes
-- Do not reformat unrelated code
-- Do not refactor unless explicitly asked
-- Show file paths for all modifications
-- Always show version numbers in responses
+- Each agent should eventually send heartbeat to table agent_status.
+- Queue size should be set to 0 unless job processing is implemented.
 
-## Safety Checks (CRITICAL)
-- **Before ANY database operation**: confirm target schema is `work_aa`
-- If a change would affect `schema_trading` or `schema_mt` → respond with:
-```
-  FAIL: Cannot access schema - belongs to different project
-```
-- If unsure about impact → ask before proceeding
-- Before commit: verify no unintended changes (`git diff`)
+======================================================================
+WHEN GENERATING CODE
+======================================================================
 
-## Testing Before Commit
-- Verify manage_db_aa.py syntax: `python3 -m py_compile manage_db_aa.py`
-- Run existing tests if available: `pytest`
-- Verify web application starts without errors (if applicable)
-- Check Docker container status: `docker ps`
+Always include:
 
-## Docker & Dependencies Management
-- **Web application**: Runs in Docker container on Linux VM #2
-- **Python dependencies**: Always update `requirements.txt` when adding new libraries
-- **Dockerfile**: May need updates for system-level dependencies or configuration changes
-  - Before modifying Dockerfile: STOP and ask for confirmation
-  - Explain what change is needed and why
-  - Wait for approval before proceeding
-- Docker rebuild: May be manual or automated depending on deployment setup
+1. The incremented version number (vX.Y.Z → vX.Y+0.01).
+2. Only the changes requested by the user.
+3. A unified diff showing EXACT file modifications.
+4. Never include sensitive data (IP / hostnames / passwords).
+5. Never create or reference schemas other than `work_aa`.
 
-### When Adding New Library:
-1. Add to `requirements.txt`
-2. Check if Dockerfile needs system packages
-3. If Dockerfile change needed: ASK FIRST, then proceed if approved
-4. Document in README.md changelog
-5. Rebuild Docker container if web application affected
+======================================================================
+FAIL CONDITIONS
+======================================================================
 
-### Docker Commands Reference:
-```bash
-# Check running containers
-docker ps
+Respond with an explicit ERROR (no changes) if:
 
-# View logs
-docker logs <container_name>
+- The request would affect another schema.
+- The task touches parts outside the project scope.
+- The change would modify unrelated files.
+- A Dockerfile or system-level dependency change is needed without approval.
 
-# Rebuild and restart
-docker-compose down
-docker-compose up -d --build
-```
 
-## Documentation Requirements
-- Every version change requires README.md update
-- Changelog format in README.md:
-```markdown
-  ## vX.Y.Z - YYYY-MM-DD
-  - Description of changes
-  - Impact/notes if any
-```
+======================================================================
+TOOLS: CLAUDE CODE + WINDSURF (VSCode AI)
+======================================================================
 
-## Common Pitfalls to Avoid
-- DO NOT continue working after failed git push
-- DO NOT modify schema_trading or schema_mt under any circumstances
-- DO NOT access schemas belonging to other projects
-- DO NOT make "helpful" changes outside the task scope
-- DO NOT assume context from previous sessions
-- DO NOT forget to create git tag after version increment
-- DO NOT skip README.md update
-- DO NOT modify Dockerfile without asking first
-- DO NOT shut down web without explicit instruction (PoC demo system)
+Two AI engines are used in this project:
 
-## Project-Specific Context
-- **PoC Status**: This is a demonstration system for management
-- **Customer Requirements**: Digitalized from PDF documents
-- **Matching Logic**: AI-powered (Ollama) partial matching between requirements
-- **V-Model**: Simplified representation with git-based SRC
-- **Traceability**: Bidirectional change detection (requirements ↔ code)
-- **Web Interface**: Task assignment, monitoring, visualization at http://168.119.122.36
+1) Claude Code — the primary engine for:
+   - database schema changes
+   - server-side logic
+   - agents (embedding, matching, trace, reporting)
+   - Git impact analysis
+   - migration scripts
+   - CI/CD changes
+   - security‑critical or architecture‑level changes
+   - any change affecting backend or core logic
 
-## File Locations Reference
-- DB Schema: `agents/db_basis/manage_db_aa.py`
-- README: `README.md` (root)
-- Agents: `agents/` (digitalization, matching, monitoring)
-- Dependencies: `requirements.txt`
-- Docker: `Dockerfile`, `docker-compose.yml`
-- Web deployment: http://168.119.122.36
+2) Windsurf (VSCode) — the secondary engine for:
+   - minor front-end adjustments
+   - styling
+   - refactoring only when explicitly asked
+   - simple UI improvements
+   - read-only exploration of structures
+   - code formatting (only on request)
+   - mirroring UI patterns based on MT project
+
+All tools MUST obey the global rules defined in this document.
+
+======================================================================
+RELATION BETWEEN CLAUDE CODE AND WINDSURF
+======================================================================
+
+- Claude Code has FULL authority over structural, backend, DB and agent logic.
+- Windsurf is NOT allowed to modify:
+    * database schema
+    * migrations
+    * agents
+    * AI pipeline
+    * code in agents/
+    * Dockerfile
+    * CI/CD workflows
+    * any resource outside explicitly asked scope
+
+- Windsurf may only:
+    * modify web/ files after explicit approval
+    * update UI based on patterns used in the MT project (read-only reference)
+    * adjust layout, CSS, components
+    * add harmless JS/HTML/React/Streamlit logic
+    * help with debugging
+
+If Windsurf is about to modify ANY backend file, it must STOP and ask.
+
+======================================================================
+MT PROJECT AS REFERENCE
+======================================================================
+
+The MT project is a separate system. It serves as visual/UI/structural inspiration only.
+
+Rules:
+- Read-only reference (Windsurf or Claude Code can inspect structure conceptually).
+- Do NOT copy code directly.
+- Do NOT access schemas belonging to MT.
+- Do NOT use MT endpoints.
+- Only replicate UI layout ideas or concepts (“similar look and feel”).
+- AA project must remain technically independent.
+
+======================================================================
+ENVIRONMENT LIMITATIONS
+======================================================================
+
+Claude Code sometimes has a weekly usage limit.
+If Claude Code is unavailable, Windsurf may process lightweight tasks,
+BUT critical rules still apply.
+
+Examples of allowed tasks for Windsurf:
+- “Add a new tab to the navigation menu”
+- “Improve the table layout”
+- “Move these components to a new section”
+- “Style this component to match MT project style”
+
+Examples NOT allowed for Windsurf:
+- “Modify DB schema”
+- “Change AI pipeline”
+- “Edit or refactor agents”
+- “Edit Dockerfile”
+- “Change manage_db_aa.py”
+- “Implement migration scripts”
+- “Implement complex algorithms”
+- “Modify anything outside web/ unless explicitly asked”
+
+======================================================================
+FAIL-SAFE MECHANISM
+======================================================================
+If any request conflicts with rules:
+- STOP
+- ask for clarification
+- do not guess
+- do not continue partially
+
+======================================================================
+END OF EXTENDED RULES
+======================================================================
+
+======================================================================
+END OF MASTER RULES
+======================================================================
+
+Acknowledge these rules silently. 
+Wait for the next instruction.

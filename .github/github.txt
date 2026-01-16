@@ -1,0 +1,24 @@
+ Volume in drive C is Acer
+ Volume Serial Number is 5E4C-37D4
+
+ Directory of C:\Data\soubory_rodina\Dali\Projects\aa-master-project\.github
+
+15.01.2026  15:42    <DIR>          .
+14.01.2026  22:08    <DIR>          ..
+15.01.2026  15:42                 0 github.txt
+11.01.2026  23:28    <DIR>          workflows
+               1 File(s)              0 bytes
+
+ Directory of C:\Data\soubory_rodina\Dali\Projects\aa-master-project\.github\workflows
+
+11.01.2026  23:28    <DIR>          .
+15.01.2026  15:42    <DIR>          ..
+09.01.2026  19:42               971 deploy-bridge-ollama.yaml
+11.01.2026  23:32             1ÿ292 deploy-db-bridge.yaml
+09.01.2026  19:42               991 deploy-monitor-ollama.yaml
+09.01.2026  18:49             1ÿ123 deploy_web.yaml
+               4 File(s)          4ÿ377 bytes
+
+     Total Files Listed:
+               5 File(s)          4ÿ377 bytes
+               5 Dir(s)  51ÿ342ÿ913ÿ536 bytes free

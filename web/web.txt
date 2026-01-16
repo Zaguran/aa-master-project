@@ -1,0 +1,14 @@
+ Volume in drive C is Acer
+ Volume Serial Number is 5E4C-37D4
+
+ Directory of C:\Data\soubory_rodina\Dali\Projects\aa-master-project\web
+
+15.01.2026  15:43    <DIR>          .
+14.01.2026  22:08    <DIR>          ..
+14.01.2026  22:08             8ÿ755 app.py
+12.01.2026  00:09             1ÿ920 database.py
+14.01.2026  19:39               568 Dockerfile
+14.01.2026  19:39                48 requirements.txt
+15.01.2026  15:43                 0 web.txt
+               5 File(s)         11ÿ291 bytes
+               2 Dir(s)  51ÿ343ÿ425ÿ536 bytes free

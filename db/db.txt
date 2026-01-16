@@ -1,0 +1,11 @@
+ Volume in drive C is Acer
+ Volume Serial Number is 5E4C-37D4
+
+ Directory of C:\Data\soubory_rodina\Dali\Projects\aa-master-project\db
+
+15.01.2026  15:43    <DIR>          .
+14.01.2026  22:08    <DIR>          ..
+15.01.2026  15:43                 0 db.txt
+11.01.2026  23:01    <DIR>          db_setup
+               1 File(s)              0 bytes
+               3 Dir(s)  51ÿ342ÿ774ÿ272 bytes free

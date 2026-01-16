@@ -1,0 +1,45 @@
+# WINDSURF RULES: PROJECT aa-poc 
+
+## Role & Limitations (STRICT)
+- You are a secondary engine for UI/Frontend adjustments (Streamlit).
+- **DO NOT MODIFY**: DB schema, agents/, Dockerfile, or any core logic.
+- **ALLOWED**: Modifications in `web/` folder, styling, and UI logic.
+- Follow "mt" project style (dark/professional) but keep "aa" project Light Mode as base.
+
+## v0.5 Task: System Status & Versioning Implementation
+- **Goal**: Implement a dual-status indicator in the global web header (layout.py) to show system readiness.
+- **Visual Style**: Use two separate "pills" or badges in the top right corner, following the MT project's professional dark/blue aesthetic.
+
+### 1. App Version Indicator
+- **Display**: `App: v0.5.0`
+- **Logic**: Read from a hardcoded constant `APP_VERSION` in `web/components/layout.py`.
+- **Significance**: Marks the transition to the New Architecture (Skeleton B.1).
+
+### 2. Ollama Module Status
+- **Display Format**: `Ollama Module v1.3.0 | Mode: active`
+- **Data Source (READ ONLY)**:
+    - Version: Fetch from `OLLAMA_MOD_VERSION` environment variable or default to `v1.3.0`.
+    - Mode: Fetch from `OLLAMA_MODE` (e.g., 'active', 'standby', 'offline').
+- **Implementation**:
+    - If the backend endpoint for status is not yet ready, use a placeholder status with a "warning" color if the connection fails.
+    - [cite_start]Reference the "status pill" design from the MT project[cite: 1, 3].
+
+### 3. Header Integration (layout.py)
+- Ensure the header is responsive and does not break on iPhone/mobile views.
+- [cite_start]The versions must be visible on every page (01_Dashboard through 09_Chat)[cite: 3, 7].
+
+
+## Database & Environment
+- Scope: Schema `work_aa` ONLY.
+- DB Credentials: Use DB_HOST, DB_PORT, etc. from local .env (DO NOT hardcode).
+- Always stop if a change would affect `schema_mt` or `schema_trading`.
+
+## Git Workflow
+- Versioning: Every change +0.01 in `manage_db_aa.py` (top comment).
+- Commit format: `feat: description (vX.Y.Z)`.
+- Tagging: Create git tag after version increment.
+
+## UI Patterns (from mt reference)
+- Mirror the look and feel of the MT dashboard: status indicators, table views, and health monitors.
+- Ensure responsiveness for iPhone (mobile view).
+
