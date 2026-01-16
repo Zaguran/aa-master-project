@@ -4,7 +4,7 @@ from psycopg2 import Error
 import logging
 import json
 
-# Version: 1.3.0 - Added authentication tables (app_user, app_role, app_user_role, app_session)
+# Version: 1.4.4 - Added agent_status and system_health tables with heartbeat support
 
 # Nastavení logování
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s - %(message)s')
@@ -41,7 +41,7 @@ def check_table_content(cur, schema_name, table_name):
 def init_aa_structure():
     conn = None
     schema_name = "work_aa"
-    tables = ["customer", "projects", "nodes", "links", "ai_analysis"]
+    tables = ["customer", "projects", "nodes", "links", "ai_analysis", "agent_status", "system_health"]
     
     try:
         conn = get_connection()
@@ -144,6 +144,29 @@ def init_aa_structure():
                 revoked BOOLEAN DEFAULT FALSE
             );
         """)
+        
+        # --- AGENT STATUS TABLE (v1.4.4) ---
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS agent_status (
+                agent_name TEXT PRIMARY KEY,
+                status TEXT DEFAULT 'READY',
+                last_heartbeat TIMESTAMPTZ,
+                queue_size INT DEFAULT 0,
+                details JSONB DEFAULT '{}'
+            );
+        """)
+        
+        # --- SYSTEM HEALTH TABLE (v1.4.4) ---
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS system_health (
+                metric_id SERIAL PRIMARY KEY,
+                node_name TEXT NOT NULL,
+                cpu_usage FLOAT,
+                ram_usage FLOAT,
+                disk_usage FLOAT,
+                timestamp TIMESTAMPTZ DEFAULT now()
+            );
+        """)
 
         # --- POMOCNÉ INDEXY ---
         cur.execute("CREATE INDEX IF NOT EXISTS idx_nodes_project ON nodes(project_id);")
@@ -155,6 +178,26 @@ def init_aa_structure():
         # --- AUTH DEFAULT DATA ---
         cur.execute("INSERT INTO app_role(name) VALUES ('admin') ON CONFLICT (name) DO NOTHING;")
         cur.execute("INSERT INTO app_role(name) VALUES ('visitor') ON CONFLICT (name) DO NOTHING;")
+        
+        # --- AGENT STATUS SEED DATA (v1.4.4) ---
+        agents = [
+            'pdf_extractor',
+            'pdf_chunker',
+            'strict_extractor',
+            'embedding_agent',
+            'matching_agent',
+            'trace_agent',
+            'report_agent',
+            'git_impact_agent',
+            'bridge_api',
+            'monitor_db_server',
+            'monitor_ollama_server'
+        ]
+        for agent in agents:
+            cur.execute(
+                "INSERT INTO agent_status (agent_name, status, queue_size) VALUES (%s, 'READY', 0) ON CONFLICT (agent_name) DO NOTHING;",
+                (agent,)
+            )
 
         # --- SELF-CHECK OBSAHU ---
         logger.info("=== KONTROLA OBSAHU TABULEK ===")

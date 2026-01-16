@@ -1,5 +1,6 @@
 import streamlit as st
-from components import auth, session
+from components import auth, session, layout, agents
+import pandas as pd
 
 st.set_page_config(page_title="Status", page_icon="🔄", layout="wide")
 
@@ -14,5 +15,24 @@ if not auth.is_authenticated():
 
 auth.require_role(["admin", "visitor"])
 
-st.title("Status")
-st.info("Page not implemented yet.")
+layout.render_header("System & Agents Status")
+
+st.title("System & Agents Status")
+
+st.markdown("---")
+
+st.subheader("🤖 Agent Heartbeat")
+
+agent_data = agents.get_agent_overview()
+
+if agent_data:
+    df = pd.DataFrame(agent_data)
+    df.columns = ["Agent", "Status", "Last Heartbeat", "Queue Size", "Details"]
+    st.dataframe(df, use_container_width=True, hide_index=True)
+else:
+    st.warning("No agent data available.")
+
+st.markdown("---")
+
+st.subheader("💻 System Health (Coming soon)")
+st.info("CPU/RAM/Disk metrics from system_health table will appear here.")

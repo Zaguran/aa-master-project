@@ -2,11 +2,22 @@
 
 AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.4.3
+## Current Version: 1.4.4
 
 **Status:** Active development - session management stabilized
 
 ## Change Log
+- [x] **v1.4.4** (2026-01-16) - **Final Agent Integration & Infrastructure**
+  - [x] Added agent_status and system_health tables to schema work_aa
+  - [x] Implemented agent heartbeat backend in agents/db_bridge/database.py
+  - [x] Created web/components/agents.py helper for Status page
+  - [x] Implemented Status dashboard (02_Status.py) with agent monitoring
+  - [x] Created monitor_db_server.py agent with DB health checks
+  - [x] Created monitor_ollama_server.py agent with Ollama Module v0.5 tracking
+  - [x] Added docker-compose.agents.yml for monitor services
+  - [x] Updated app.py sidebar to read Ollama status from DB
+  - [x] All agents seed data initialized in manage_db_aa.py
+  - [x] Version bumped to 1.4.4 in manage_db_aa.py
 - [x] **v1.4.3** (2026-01-16) - **Database Dashboard & Table Browser**
   - [x] Implemented DB Status page (03_DB_Status.py) with read-only dashboard
   - [x] Shows table statistics from work_aa schema using get_aa_stats()
@@ -175,6 +186,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
+| **v1.4.4** | 2026-01-16 | **Final Agent Integration & Infrastructure**. Implemented agent heartbeat system, monitoring agents for DB and Ollama, Status dashboard, and docker-compose for agent services. |
 | **v1.4.3** | 2026-01-16 | **Database Dashboard & Table Browser**. Added DB Status and Table View modules for read-only database browsing with pagination. |
 | **v1.3.2** | 2026-01-16 | **Hotfix: Docker Container Conflict**. Fixed deployment failures by adding container cleanup step to prevent name conflicts. |
 | **v1.3.1** | 2026-01-16 | **Hotfix: PostgreSQL Dependency**. Fixed Docker deployment crash by adding psycopg2-binary and libpq-dev dependencies. |

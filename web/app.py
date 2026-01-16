@@ -1,8 +1,13 @@
 import streamlit as st
 from datetime import datetime
 from components import layout, auth, session
+import sys
+import os
 
-APP_VERSION = "1.4.2"
+sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+from agents.db_bridge.database import list_agent_status
+
+APP_VERSION = "1.4.4"
 
 st.set_page_config(
     page_title=f"🏠 App Home",
@@ -16,8 +21,23 @@ build_date = datetime.now().strftime("%Y-%m-%d")
 
 user = auth.get_current_user()
 
+# Get Ollama status from DB
+ollama_status = "v0.5 | Mode: unknown"
+try:
+    agents = list_agent_status()
+    for agent in agents:
+        if agent['agent_name'] == 'monitor_ollama_server':
+            details = agent.get('details', {})
+            if isinstance(details, dict):
+                version = details.get('module_version', 'v0.5')
+                mode = details.get('mode', 'unknown')
+                ollama_status = f"{version} | Mode: {mode}"
+            break
+except:
+    pass
+
 st.sidebar.markdown("---")
-st.sidebar.markdown(f"**v{APP_VERSION} | Ollama Mod: v0.5.**")
+st.sidebar.markdown(f"**v{APP_VERSION} | Ollama Mod: {ollama_status}**")
 st.sidebar.markdown(f"*[cite: {build_date}]*")
 
 st.sidebar.markdown("---")
