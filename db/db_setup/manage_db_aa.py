@@ -4,7 +4,7 @@ from psycopg2 import Error
 import logging
 import json
 
-# Version: 1.4.5.5 - Fixed ModuleNotFoundError for agents module with correct import path
+# Version: 1.4.5.6 - Final fix for agents import with dual sys.path and __init__.py files
 
 # Nastavení logování
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s - %(message)s')
