@@ -2,9 +2,18 @@
 
 AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.2.0
+## Current Version: 1.3.0
 
 ## Change Log
+- [x] **v1.3.0** (2026-01-16) - **Authentication & RBAC Implementation**
+  - [x] Full authentication system with login/logout
+  - [x] Role-Based Access Control (Admin / Visitor)
+  - [x] Database tables: app_user, app_role, app_user_role, app_session
+  - [x] SHA256 password hashing with session management
+  - [x] Login page (00_Login.py) and Admin panel (99_Admin.py)
+  - [x] Authentication components: auth.py, session.py, security.py
+  - [x] Default admin user: admin@aat.local / admin123
+  - [x] Database scripts: db_create_user.py, db_read_users.py
 - [x] **v1.2.0** (2026-01-16) - **Automated Deployment Testing**
   - [x] Added tag trigger to deploy_web.yaml workflow (v* pattern)
   - [x] Testing automated deployment on tag creation
@@ -111,6 +120,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
+| **v1.3.0** | 2026-01-16 | **Authentication & RBAC**. Full authentication system with login/logout, role-based access control (Admin/Visitor), session management, and admin panel. |
 | **v1.2.0** | 2026-01-16 | **Automated Deployment Testing**. Added tag trigger to CI/CD workflow for automated deployments on version releases. |
 | **v1.1.0** | 2026-01-16 | **Web Skeleton Refactor**. Complete removal of PDF extraction code, new 9-page structure, Chat Type A, Ollama Module v1.3.0 integration, database on work_aa schema. |
 | **v1.0.2** | 2026-01-14 | **Web Version Bump**. Testing CLAUDE.md workflow, no functional changes. |

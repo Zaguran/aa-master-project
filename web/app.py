@@ -1,13 +1,21 @@
 import streamlit as st
-from components import layout
+from components import layout, auth, session
 
-APP_VERSION = "1.2.0"
+APP_VERSION = "1.3.0"
 
 st.set_page_config(
     page_title=f"AAT Automotive Assistance Tool v{APP_VERSION}",
     page_icon="🚗",
     layout="wide"
 )
+
+session.init_session_state()
+
+if not auth.is_authenticated():
+    st.warning("Please login to access the application.")
+    if st.button("Go to Login Page", type="primary"):
+        st.switch_page("pages/00_Login.py")
+    st.stop()
 
 
 def load_css():
@@ -22,20 +30,31 @@ def load_css():
 load_css()
 
 layout.render_header(f"AAT Automotive Assistance Tool v{APP_VERSION}")
+layout.render_user_info()
+
+user = auth.get_current_user()
 
 st.markdown("---")
-st.info("Welcome to the AAT system. Use the navigation menu on the left to access different modules.")
+st.success(f"Welcome, {user['full_name']}!")
+st.info("Use the navigation menu on the left to access different modules.")
 st.markdown("---")
 
 st.markdown("### Available Modules")
-st.markdown("""
-- **Dashboard** - System overview and key metrics
-- **Status** - Agent and system status monitoring
-- **DB Status** - Database health and statistics
-- **TableView** - Browse database tables
-- **Matching** - Requirements matching interface
-- **Trace** - Traceability analysis
-- **Impact** - Git impact analysis
-- **Reports** - Generate and view reports
-- **Chat** - AI chat interface (Type A)
-""")
+
+modules = [
+    ("Dashboard", "System overview and key metrics"),
+    ("Status", "Agent and system status monitoring"),
+    ("DB Status", "Database health and statistics"),
+    ("TableView", "Browse database tables"),
+    ("Matching", "Requirements matching interface"),
+    ("Trace", "Traceability analysis"),
+    ("Impact", "Git impact analysis"),
+    ("Reports", "Generate and view reports"),
+    ("Chat", "AI chat interface (Type A)")
+]
+
+if auth.has_role("admin"):
+    modules.append(("Admin Panel", "System administration (Admin only)"))
+
+for name, desc in modules:
+    st.markdown(f"- **{name}** - {desc}")

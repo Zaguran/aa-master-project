@@ -4,6 +4,8 @@ from psycopg2 import Error
 import logging
 import json
 
+# Version: 1.3.0 - Added authentication tables (app_user, app_role, app_user_role, app_session)
+
 # Nastavení logování
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -105,12 +107,54 @@ def init_aa_structure():
             );
         """)
 
+        # --- AUTHENTICATION TABLES (v1.3.0) ---
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS app_user (
+                user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                email TEXT UNIQUE NOT NULL,
+                full_name TEXT,
+                password_hash TEXT NOT NULL,
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMPTZ DEFAULT now()
+            );
+        """)
+        
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS app_role (
+                role_id SERIAL PRIMARY KEY,
+                name TEXT UNIQUE NOT NULL
+            );
+        """)
+        
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS app_user_role (
+                user_id UUID REFERENCES app_user(user_id) ON DELETE CASCADE,
+                role_id INT REFERENCES app_role(role_id) ON DELETE CASCADE,
+                PRIMARY KEY (user_id, role_id)
+            );
+        """)
+        
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS app_session (
+                session_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                user_id UUID REFERENCES app_user(user_id) ON DELETE CASCADE,
+                expires_at TIMESTAMPTZ NOT NULL,
+                csrf_token TEXT NOT NULL,
+                created_at TIMESTAMPTZ DEFAULT now(),
+                revoked BOOLEAN DEFAULT FALSE
+            );
+        """)
+
         # --- POMOCNÉ INDEXY ---
         cur.execute("CREATE INDEX IF NOT EXISTS idx_nodes_project ON nodes(project_id);")
         cur.execute("CREATE INDEX IF NOT EXISTS idx_links_source ON links(source_uuid);")
 
         # --- DEFAULT DATA ---
         cur.execute("INSERT INTO projects (project_id, type, status, baseline_version) VALUES ('Platforma_A', 'PLATFORM', 'ACTIVE', 'v1.0.0') ON CONFLICT DO NOTHING;")
+        
+        # --- AUTH DEFAULT DATA ---
+        cur.execute("INSERT INTO app_role(name) VALUES ('admin') ON CONFLICT (name) DO NOTHING;")
+        cur.execute("INSERT INTO app_role(name) VALUES ('visitor') ON CONFLICT (name) DO NOTHING;")
 
         # --- SELF-CHECK OBSAHU ---
         logger.info("=== KONTROLA OBSAHU TABULEK ===")
