@@ -125,9 +125,11 @@ def get_current_user() -> dict:
     if not st.session_state.get('session_id'):
         return None
     
-    # Validate session is still valid
+    # Validate session is still valid (but don't auto-logout on first call after login)
     if not session.validate_session(st.session_state.session_id):
-        logout()
+        # Only logout if this isn't a fresh login
+        if not st.session_state.get('last_login_success'):
+            logout()
         return None
     
     return st.session_state.get('user')

@@ -37,8 +37,8 @@ def create_session(user_id: str) -> dict:
         expires_at = datetime.now() + timedelta(hours=8)
         
         cur.execute("""
-            INSERT INTO app_session (user_id, expires_at, csrf_token)
-            VALUES (%s, %s, %s)
+            INSERT INTO app_session (user_id, expires_at, csrf_token, revoked)
+            VALUES (%s, %s, %s, FALSE)
             RETURNING session_id, csrf_token;
         """, (user_id, expires_at, csrf_token))
         

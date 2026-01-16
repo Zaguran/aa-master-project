@@ -2,11 +2,17 @@
 
 AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.4.0
+## Current Version: 1.4.1
 
-**Status:** Active development - debugging and refining authentication system
+**Status:** Active development - authentication system stabilized
 
 ## Change Log
+- [x] **v1.4.1** (2026-01-16) - **Bug Fix: Session Revocation Loop**
+  - [x] Fixed session revocation loop preventing user login
+  - [x] Explicitly set revoked=FALSE in session creation
+  - [x] Prevented get_current_user from invalidating newly created sessions
+  - [x] Added UI feedback for revoked sessions in sidebar
+  - [x] Session validation now respects fresh login state
 - [x] **v1.4.0** (2026-01-16) - **Auth State & DB Sync Fixes**
   - [x] Added detailed session creation error logging in auth.py
   - [x] Implemented st.rerun() after successful login for immediate UI update

@@ -2,7 +2,7 @@ import streamlit as st
 from datetime import datetime
 from components import layout, auth, session
 
-APP_VERSION = "1.4.0"
+APP_VERSION = "1.4.1"
 
 st.set_page_config(
     page_title=f"App",
@@ -27,6 +27,12 @@ if not auth.is_authenticated():
     st.sidebar.markdown("**Status:** Not Authenticated ❌")
     if 'last_login_error' in st.session_state and st.session_state.last_login_error:
         st.sidebar.markdown(f"**Last Login:** Failed ❌")
+    
+    # Check if session was revoked
+    if st.session_state.get('session_id'):
+        from components import session as sess
+        if not sess.validate_session(st.session_state.session_id):
+            st.sidebar.markdown("**Status:** Session Revoked ⚠️")
     
     st.warning("Please login to access the application.")
     if st.button("Goto Login Page", type="primary"):
