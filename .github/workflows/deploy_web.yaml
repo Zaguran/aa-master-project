@@ -24,6 +24,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_KEY_L2 }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.LINUX_1_IP }} >> ~/.ssh/known_hosts
           ssh-keyscan -H ${{ secrets.LINUX_2_IP }} >> ~/.ssh/known_hosts
       
       - name: Deploy Web Application

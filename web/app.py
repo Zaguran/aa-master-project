@@ -9,7 +9,7 @@ from datetime import datetime
 from components import layout, auth, session
 from agents.db_bridge.database import list_agent_status
 
-APP_VERSION = "1.4.5"
+APP_VERSION = "1.4.5.1"
 
 st.set_page_config(
     page_title=f"🏠 App Home",

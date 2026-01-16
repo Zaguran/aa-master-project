@@ -4,7 +4,7 @@ from psycopg2 import Error
 import logging
 import json
 
-# Version: 1.4.5 - Emergency path fix for Docker/Linux compatibility and dual-server infrastructure
+# Version: 1.4.5.1 - Fixed deployment workflows with correct secret names (LINUX_1_IP, LINUX_2_IP, SSH_KEY_L1, SSH_KEY_L2)
 
 # Nastavení logování
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s - %(message)s')

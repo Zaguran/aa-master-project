@@ -2,11 +2,19 @@
 
 AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.4.5
+## Current Version: 1.4.5.1
 
 **Status:** Active development - session management stabilized
 
 ## Change Log
+- [x] **v1.4.5.1** (2026-01-16) - **Deployment Workflow Fixes**
+  - [x] CRITICAL: Fixed secret names in all deployment workflows
+  - [x] Updated to use LINUX_1_IP and LINUX_2_IP (not HOST)
+  - [x] Updated to use SSH_KEY_L1 and SSH_KEY_L2 (not SSH_KEY)
+  - [x] Added dual ssh-keyscan for both servers in all workflows
+  - [x] Deprecated old workflows (deploy-bridge-ollama, deploy-db-bridge, deploy-monitor-ollama)
+  - [x] Removed all remaining GCP references
+  - [x] Verified Python path fix in web/app.py (already correct)
 - [x] **v1.4.5** (2026-01-16) - **Emergency Path Fix & Infrastructure Alignment**
   - [x] CRITICAL: Fixed Python import paths for Docker/Linux compatibility
   - [x] Added os.path.abspath() in web/app.py and web/components/agents.py
@@ -198,6 +206,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
+| **v1.4.5.1** | 2026-01-16 | **Deployment Workflow Fixes**. Fixed secret names to match GitHub Secrets (LINUX_1_IP, LINUX_2_IP, SSH_KEY_L1, SSH_KEY_L2), added dual ssh-keyscan, deprecated old workflows. |
 | **v1.4.5** | 2026-01-16 | **Emergency Path Fix & Infrastructure Alignment**. Fixed critical Python import paths for Docker/Linux, split infrastructure across two servers, removed GCP dependencies, added robust error handling. |
 | **v1.4.4** | 2026-01-16 | **Final Agent Integration & Infrastructure**. Implemented agent heartbeat system, monitoring agents for DB and Ollama, Status dashboard, and docker-compose for agent services. |
 | **v1.4.3** | 2026-01-16 | **Database Dashboard & Table Browser**. Added DB Status and Table View modules for read-only database browsing with pagination. |
