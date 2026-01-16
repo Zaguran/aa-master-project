@@ -1,13 +1,15 @@
-import streamlit as st
-from datetime import datetime
-from components import layout, auth, session
 import sys
 import os
 
-sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+# Fix Python path for Docker/Linux compatibility
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+import streamlit as st
+from datetime import datetime
+from components import layout, auth, session
 from agents.db_bridge.database import list_agent_status
 
-APP_VERSION = "1.4.4"
+APP_VERSION = "1.4.5"
 
 st.set_page_config(
     page_title=f"🏠 App Home",
@@ -17,7 +19,7 @@ st.set_page_config(
 
 session.init_session_state()
 
-build_date = datetime.now().strftime("%Y-%m-%d")
+build_date = "2026-01-11"
 
 user = auth.get_current_user()
 
@@ -37,7 +39,7 @@ except:
     pass
 
 st.sidebar.markdown("---")
-st.sidebar.markdown(f"**v{APP_VERSION} | Ollama Mod: {ollama_status}**")
+st.sidebar.markdown(f"**v{APP_VERSION} | Ollama Mod: v0.5**")
 st.sidebar.markdown(f"*[cite: {build_date}]*")
 
 st.sidebar.markdown("---")

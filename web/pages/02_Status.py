@@ -23,14 +23,20 @@ st.markdown("---")
 
 st.subheader("🤖 Agent Heartbeat")
 
-agent_data = agents.get_agent_overview()
-
-if agent_data:
-    df = pd.DataFrame(agent_data)
-    df.columns = ["Agent", "Status", "Last Heartbeat", "Queue Size", "Details"]
-    st.dataframe(df, use_container_width=True, hide_index=True)
-else:
-    st.warning("No agent data available.")
+try:
+    agent_data = agents.get_agent_overview()
+    
+    if agent_data:
+        df = pd.DataFrame(agent_data)
+        df.columns = ["Agent", "Status", "Last Heartbeat", "Queue Size", "Details"]
+        st.dataframe(df, use_container_width=True, hide_index=True)
+    else:
+        st.warning("No agent data available. Agents may not be running yet.")
+except Exception as e:
+    st.error("⚠️ Unable to retrieve agent status. Database or agents may be offline.")
+    st.info("This is normal if agents are starting up or running on a different server.")
+    with st.expander("Error Details"):
+        st.code(str(e))
 
 st.markdown("---")
 

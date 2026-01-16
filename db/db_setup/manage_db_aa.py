@@ -4,7 +4,7 @@ from psycopg2 import Error
 import logging
 import json
 
-# Version: 1.4.4 - Added agent_status and system_health tables with heartbeat support
+# Version: 1.4.5 - Emergency path fix for Docker/Linux compatibility and dual-server infrastructure
 
 # Nastavení logování
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s - %(message)s')

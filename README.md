@@ -2,11 +2,23 @@
 
 AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.4.4
+## Current Version: 1.4.5
 
 **Status:** Active development - session management stabilized
 
 ## Change Log
+- [x] **v1.4.5** (2026-01-16) - **Emergency Path Fix & Infrastructure Alignment**
+  - [x] CRITICAL: Fixed Python import paths for Docker/Linux compatibility
+  - [x] Added os.path.abspath() in web/app.py and web/components/agents.py
+  - [x] Added comprehensive error handling in 02_Status.py to prevent crashes
+  - [x] Split infrastructure: Linux 1 (DB + monitor-db), Linux 2 (Web + monitor-ollama)
+  - [x] Created deploy-linux1-monitor-db.yaml workflow with SSH_KEY_L1
+  - [x] Created deploy-linux2-web-ollama.yaml workflow with SSH_KEY_L2
+  - [x] Updated deploy_web.yaml to use LINUX_2_IP (removed GCP references)
+  - [x] Created docker-compose.linux1.yml (monitor-db connects to localhost:5432)
+  - [x] Created docker-compose.linux2.yml (monitor-ollama connects to LINUX_1_IP:5432)
+  - [x] Updated app.py sidebar: v1.4.5 | Ollama Mod v0.5 [cite: 2026-01-11]
+  - [x] All agents enforce search_path=work_aa for schema isolation
 - [x] **v1.4.4** (2026-01-16) - **Final Agent Integration & Infrastructure**
   - [x] Added agent_status and system_health tables to schema work_aa
   - [x] Implemented agent heartbeat backend in agents/db_bridge/database.py
@@ -186,6 +198,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
+| **v1.4.5** | 2026-01-16 | **Emergency Path Fix & Infrastructure Alignment**. Fixed critical Python import paths for Docker/Linux, split infrastructure across two servers, removed GCP dependencies, added robust error handling. |
 | **v1.4.4** | 2026-01-16 | **Final Agent Integration & Infrastructure**. Implemented agent heartbeat system, monitoring agents for DB and Ollama, Status dashboard, and docker-compose for agent services. |
 | **v1.4.3** | 2026-01-16 | **Database Dashboard & Table Browser**. Added DB Status and Table View modules for read-only database browsing with pagination. |
 | **v1.3.2** | 2026-01-16 | **Hotfix: Docker Container Conflict**. Fixed deployment failures by adding container cleanup step to prevent name conflicts. |
