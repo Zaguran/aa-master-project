@@ -1,10 +1,10 @@
 import streamlit as st
 from components import layout, auth, session
 
-APP_VERSION = "1.3.6"
+APP_VERSION = "1.3.7"
 
 st.set_page_config(
-    page_title=f"AAT Automotive Assistance Tool v{APP_VERSION}",
+    page_title=f"AA Tool v{APP_VERSION}",
     page_icon="🚗",
     layout="wide"
 )
@@ -13,6 +13,8 @@ session.init_session_state()
 
 if not auth.is_authenticated():
     st.sidebar.page_link("pages/00_Login.py", label="🔐 Login", icon="🔐")
+    st.sidebar.markdown("---")
+    st.sidebar.markdown(f"**v{APP_VERSION}** - Production PoC")
     st.warning("Please login to access the application.")
     if st.button("Go to Login Page", type="primary"):
         st.switch_page("pages/00_Login.py")
@@ -38,6 +40,12 @@ if is_admin:
     st.sidebar.page_link("pages/99_Admin.py", label="⚙️ Admin Panel", icon="⚙️")
 
 st.sidebar.markdown("---")
+if st.sidebar.button("🚪 Logout", use_container_width=True, type="secondary"):
+    auth.logout()
+    st.switch_page("pages/00_Login.py")
+
+st.sidebar.markdown("---")
+st.sidebar.markdown(f"**v{APP_VERSION}** - Production PoC")
 
 
 def load_css():
@@ -51,7 +59,7 @@ def load_css():
 
 load_css()
 
-layout.render_header(f"AAT Automotive Assistance Tool v{APP_VERSION}")
+layout.render_header(f"AA Tool v{APP_VERSION}")
 layout.render_user_info()
 
 st.markdown("---")
