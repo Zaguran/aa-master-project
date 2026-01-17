@@ -4,7 +4,7 @@ from psycopg2 import Error
 import logging
 import json
 
-# Version: 1.6.0 - All agents active with CPU/RAM monitoring
+# Version: 1.61 - Backend Import Pipeline (Platform + Customer Requirements)
 
 # Nastavení logování
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s - %(message)s')
