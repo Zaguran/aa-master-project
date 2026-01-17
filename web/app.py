@@ -141,3 +141,6 @@ if auth.has_role("admin"):
 
 for name, desc in modules:
     st.markdown(f"- **{name}** - {desc}")
+    
+    
+# Vynuceny build
