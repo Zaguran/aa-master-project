@@ -1,9 +1,10 @@
 """
 Web Import Wrapper Module
-Version: 1.63
+Version: 1.65
 
 Provides safe wrapper functions for UI to import platform and customer requirements.
 All DB writes are delegated to import_platform and import_customer modules.
+Supports multiple data types: requirements, architecture, code, tests, links.
 """
 
 import os
@@ -53,16 +54,30 @@ load_customer_csv = _customer_module.load_customer_csv
 load_customer_jsonl = _customer_module.load_customer_jsonl
 
 
-def import_platform_file(uploaded_file_bytes: bytes, filetype: str) -> dict:
+def import_platform_file(
+    uploaded_file_bytes: bytes,
+    filetype: str,
+    platform_id: str = None,
+    data_type: str = "platform_requirements"
+) -> dict:
     """
-    Import platform requirements from uploaded file.
+    Import platform data from uploaded file.
 
     Args:
         uploaded_file_bytes: Raw bytes of the uploaded file
         filetype: 'csv' or 'jsonl'
+        platform_id: Platform identifier (e.g., 'Platform_A')
+        data_type: Type of data being imported:
+            - 'platform_requirements' (default)
+            - 'system_requirements'
+            - 'architecture_elements'
+            - 'code_elements'
+            - 'test_cases'
+            - 'test_results'
+            - 'links'
 
     Returns:
-        dict with 'inserted', 'failed' counts and 'status' message
+        dict with 'inserted', 'failed' counts, 'status' message, and metadata
     """
     suffix = f".{filetype}"
 
@@ -71,14 +86,32 @@ def import_platform_file(uploaded_file_bytes: bytes, filetype: str) -> dict:
         tmp_path = tmp.name
 
     try:
-        if filetype == 'csv':
-            result = load_platform_csv(tmp_path)
-        elif filetype == 'jsonl':
-            result = load_platform_jsonl(tmp_path)
+        # Currently only platform_requirements is fully implemented
+        # Other data types will be implemented in future tasks
+        if data_type == "platform_requirements":
+            if filetype == 'csv':
+                result = load_platform_csv(tmp_path)
+            elif filetype == 'jsonl':
+                result = load_platform_jsonl(tmp_path)
+            else:
+                return {"inserted": 0, "failed": 0, "status": f"Unsupported filetype: {filetype}"}
+        elif data_type in ["system_requirements", "architecture_elements", "code_elements",
+                           "test_cases", "test_results", "links"]:
+            # Placeholder for future implementation
+            # TODO: Implement specific loaders for each data type
+            return {
+                "inserted": 0,
+                "failed": 0,
+                "status": f"Data type '{data_type}' import not yet implemented. Coming soon!",
+                "platform_id": platform_id,
+                "data_type": data_type
+            }
         else:
-            return {"inserted": 0, "failed": 0, "status": f"Unsupported filetype: {filetype}"}
+            return {"inserted": 0, "failed": 0, "status": f"Unknown data type: {data_type}"}
 
         result["status"] = "success"
+        result["platform_id"] = platform_id
+        result["data_type"] = data_type
         return result
     except Exception as e:
         return {"inserted": 0, "failed": 0, "status": f"Error: {str(e)}"}
