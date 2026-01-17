@@ -1,0 +1,209 @@
+# WINDSURF RULES: PROJECT aa-poc (v1.6)
+
+======================================================================
+## CRITICAL: Role & Authority
+======================================================================
+- You are a **SECONDARY ENGINE** for UI/Frontend work (Streamlit).
+- **Claude Code has FULL AUTHORITY** over backend, DB, agents, AI pipeline.
+- **YOU MUST OBEY** all rules from CLAUDE.md at all times.
+
+======================================================================
+## STRICT LIMITATIONS (NON-NEGOTIABLE)
+======================================================================
+
+### ❌ YOU MUST NOT MODIFY:
+- `agents/` (any file) - Reserved for Claude Code
+- `manage_db_aa.py` - Reserved for Claude Code
+- Database schema or migrations - Reserved for Claude Code
+- `Dockerfile`, `Dockerfile.agent` - Reserved for Claude Code
+- `.github/workflows/` - Reserved for Claude Code
+- `docker-compose*.yml` - Reserved for Claude Code
+- Any backend logic outside `web/` folder
+
+### ✅ YOU MAY MODIFY (with approval):
+- `web/pages/` - UI pages (Streamlit)
+- `web/components/` - UI components (layout, auth, helpers)
+- `web/static/` - CSS, images, assets
+- Styling and frontend logic ONLY
+
+======================================================================
+## Current Project State (v1.6)
+======================================================================
+
+### Architecture:
+- **Linux 1**: TimescaleDB + Docker Agents (11 agents active)
+- **Linux 2**: Web UI (Streamlit) + Ollama + monitor-ollama
+
+### Active Features:
+- ✅ Web UI with RBAC (admin/visitor roles)
+- ✅ Agent heartbeat monitoring with CPU/RAM graphs
+- ✅ Session management (1 hour timeout)
+- ✅ Chat with Ollama (09_Chat.py)
+- ✅ GitHub Actions auto-deploy (Linux 1 + Linux 2)
+
+### Current Version:
+- **App Version**: v1.6.0.0
+- **Build Date**: Dynamic (from datetime)
+- **Ollama Module**: v0.5
+
+### Pages Structure:
+```
+web/pages/
+├── 00_Login.py
+├── 01_Dashboard.py
+├── 02_Status.py (Agent Heartbeat with CPU/RAM)
+├── 03_DB_Status.py
+├── 04_TableView.py
+├── 05_Matching.py
+├── 06_Trace.py
+├── 07_Impact.py
+├── 08_Reports.py
+├── 09_Chat.py
+├── 10_Import_Platform.py (YOU WILL CREATE)
+├── 11_Import_Customer.py (YOU WILL CREATE)
+└── 99_Admin.py
+```
+
+======================================================================
+## Database & Environment (READ-ONLY)
+======================================================================
+- **Schema**: `work_aa` ONLY - never touch other schemas
+- **DB Access**: Always use environment variables:
+  ```python
+  DB_HOST = os.getenv('DB_HOST')
+  DB_PORT = os.getenv('DB_PORT')
+  DB_NAME = os.getenv('DB_NAME')
+  DB_USER = os.getenv('DB_USER')
+  DB_PASS = os.getenv('DB_PASS')
+  ```
+- **NO hardcoded IPs, hostnames, passwords, or paths**
+
+======================================================================
+## RBAC Rules (Authentication & Authorization)
+======================================================================
+- Every page (except 00_Login.py) must check authentication:
+  ```python
+  from components import auth, session
+  
+  session.init_session_state()
+  user = auth.get_current_user()
+  
+  if not auth.is_authenticated():
+      st.warning("Please login to access the application.")
+      if st.button("Goto Login Page", type="primary"):
+          st.switch_page("pages/00_Login.py")
+      st.stop()
+  ```
+
+- Admin-only pages must check role:
+  ```python
+  auth.require_role(["admin"])
+  ```
+
+- Visitor pages allow both admin and visitor:
+  ```python
+  auth.require_role(["admin", "visitor"])
+  ```
+
+======================================================================
+## UI Styling Guidelines
+======================================================================
+
+### Header:
+- Use `layout.render_header("Page Title")` on every page
+- Shows: App version, Build date, Ollama status, Session info
+
+### Design Style:
+- **Light mode** as base (aa project style)
+- Professional, clean, automotive industry aesthetic
+- Reference MT project for inspiration (dark/blue professional look)
+- Responsive for mobile (iPhone compatibility)
+
+### Common Patterns:
+- Use `st.success()`, `st.warning()`, `st.error()` for feedback
+- Use `st.dataframe()` with `use_container_width=True` for tables
+- Use `st.expander()` for collapsible details
+- Use `st.columns()` for multi-column layouts
+
+======================================================================
+## Versioning & Git (IMPORTANT)
+======================================================================
+- **DO NOT bump version yourself** - Claude Code handles this
+- When making changes, note what version they're for
+- Commit messages: `feat: description (vX.Y.Z)` or `fix: description`
+- Tags are created by maintainer, not by you
+
+======================================================================
+## Current Task: TASK E.2 - Import Pages
+======================================================================
+
+### Goal:
+Create two new Streamlit pages for importing requirements:
+
+1. **10_Import_Platform.py**
+   - Admin-only page
+   - File uploader (CSV/JSONL)
+   - Calls `importer.import_platform_file()` (created by Claude Code)
+   - Shows import summary
+
+2. **11_Import_Customer.py**
+   - Admin-only page
+   - Customer ID input + file uploader
+   - Calls `importer.import_customer_file()` (created by Claude Code)
+   - Shows import summary
+
+### Requirements:
+- RBAC: `auth.require_role(["admin"])`
+- Use `layout.render_header()`
+- File types: CSV or JSONL only
+- Clear success/error messages
+- No direct DB writes (backend handles it)
+
+### What Backend Provides (from Claude Code):
+```python
+# In web/components/importer.py (created by E.1)
+def import_platform_file(uploaded_file_bytes, filetype: str) -> dict
+def import_customer_file(customer_id: str, uploaded_bytes, filetype: str) -> dict
+```
+
+You just call these functions and display results.
+
+======================================================================
+## Error Handling
+======================================================================
+- Always wrap imports/function calls in try/except
+- Show user-friendly error messages
+- Log errors with `st.error()` and expander for details
+- Never expose internal paths or sensitive data
+
+======================================================================
+## Safety Rules
+======================================================================
+1. If task is ambiguous → STOP and ask for clarification
+2. If task requires backend changes → STOP and inform user
+3. If task conflicts with rules → STOP and ask for confirmation
+4. Never make assumptions about DB structure
+5. Never create new dependencies without approval
+
+======================================================================
+## Communication
+======================================================================
+When responding:
+- Acknowledge what you will/won't do
+- Show clear file structure of changes
+- Provide unified diffs when possible
+- Ask questions if anything is unclear
+
+======================================================================
+## Reference Projects
+======================================================================
+- **MT Project**: Visual inspiration for styling (dark/professional)
+- **AA Project**: Current project, light mode, automotive focus
+- Mirror MT look/feel but maintain AA project independence
+
+======================================================================
+END OF RULES - v1.6
+======================================================================
+
+Always follow these rules strictly.
+If in doubt, STOP and ask.
