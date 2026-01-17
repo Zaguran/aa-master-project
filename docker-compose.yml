@@ -8,8 +8,6 @@ services:
       context: .
       dockerfile: web/Dockerfile
     container_name: aat-web-container
-    # SÍŤOVÝ REŽIM HOST: Kontejner přestane mít vlastní izolovanou síť 
-    # a začne používat přímo síť serveru (jako by v Dockeru nebyl).
     network_mode: "host" 
     restart: always
     environment:
