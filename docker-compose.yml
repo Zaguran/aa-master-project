@@ -11,12 +11,12 @@ services:
     network_mode: "host" 
     restart: always
     environment:
-       - PYTHONUNBUFFERED=1
-      - DB_HOST=${DB_HOST:-128.140.108.240}
-      - DB_PORT=${DB_PORT:-5432}
-      - DB_NAME=${DB_NAME:-trading}
-      - DB_USER
-      - DB_PASS
-      - LINUX_1_IP
-      - LINUX_2_IP
-      - OLLAMA_API_BASE
+      - PYTHONUNBUFFERED=1
+      - DB_HOST=DB_HOST:-128.140.108.240
+      - DB_PORT=5432
+      - DB_NAME=trading
+      - DB_USER=trading_user
+      - DB_PASS=Investor1966!
+      - LINUX_1_IP=128.140.108.240
+      - LINUX_2_IP=128.140.108.240
+      - OLLAMA_API_BASE=http://128.140.108.240:11434
