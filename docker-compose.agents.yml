@@ -1,40 +1,37 @@
 version: '3.8'
 
+# ====================================================================
+# LINUX 1 Configuration: All Agents (except monitor-ollama)
+# ====================================================================
+# - Monitor DB: monitors TimescaleDB on localhost:5432
+# - Future agents: embedding, matching, trace, git-impact, etc.
+# - All connect to local TimescaleDB
+# ====================================================================
+
 services:
+  # Monitor DB Agent
   monitor-db:
     build:
       context: .
       dockerfile: Dockerfile.agent
     container_name: aat-monitor-db
     command: python agents/monitor_db_server.py
+    restart: unless-stopped
     environment:
-      - DB_HOST=${DB_HOST:-128.140.108.240}
+      # Database connection to localhost (DB is on same server)
+      - DB_HOST=${DB_HOST:-localhost}
       - DB_PORT=${DB_PORT:-5432}
       - DB_NAME=${DB_NAME:-trading}
       - DB_USER=${DB_USER}
       - DB_PASS=${DB_PASS}
-    restart: unless-stopped
-    networks:
-      - aat-network
+    network_mode: "host"
 
-  monitor-ollama:
-    build:
-      context: .
-      dockerfile: Dockerfile.agent
-    container_name: aat-monitor-ollama
-    command: python agents/monitor_ollama_server.py
-    environment:
-      - DB_HOST=${DB_HOST:-128.140.108.240}
-      - DB_PORT=${DB_PORT:-5432}
-      - DB_NAME=${DB_NAME:-trading}
-      - DB_USER=${DB_USER}
-      - DB_PASS=${DB_PASS}
-      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://168.119.122.36:11434}
-      - OLLAMA_MOD_VERSION=v0.5
-    restart: unless-stopped
-    networks:
-      - aat-network
-
-networks:
-  aat-network:
-    driver: bridge
+  # Future agents can be added here:
+  # embedding-agent:
+  #   ...
+  # matching-agent:
+  #   ...
+  # trace-agent:
+  #   ...
+  # git-impact-agent:
+  #   ...

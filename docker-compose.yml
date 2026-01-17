@@ -1,22 +1,56 @@
 version: '3.8'
 
+# ====================================================================
+# LINUX 2 Configuration: Web Application + Monitor Ollama Agent
+# ====================================================================
+# - Web: Streamlit app (port 8501)
+# - Monitor Ollama: monitors Ollama server on same machine (localhost:11434)
+# - Both connect to TimescaleDB on Linux 1
+# ====================================================================
+
 services:
+  # Web Application (Streamlit)
   aat-web:
-    env_file:
-      - /opt/aat-config/.env  # TADY: Cesta, kde to bude na Linuxu schované
+    image: aat-web-image:latest
     build:
       context: .
       dockerfile: web/Dockerfile
     container_name: aat-web-container
-    network_mode: "host" 
+    network_mode: "host"
     restart: always
     environment:
       - PYTHONUNBUFFERED=1
-      - DB_HOST=DB_HOST:-128.140.108.240
-      - DB_PORT=5432
-      - DB_NAME=trading
-      - DB_USER=trading_user
-      - DB_PASS=Investor1966!
-      - LINUX_1_IP=128.140.108.240
-      - LINUX_2_IP=128.140.108.240
-      - OLLAMA_API_BASE=http://128.140.108.240:11434
+      # Database connection to Linux 1
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME:-trading}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      # Ollama API on same server (localhost because of network_mode: host)
+      - OLLAMA_API_BASE=${OLLAMA_API_BASE:-http://localhost:11434}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Monitor Ollama Agent
+  monitor-ollama:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    container_name: aat-monitor-ollama
+    command: python agents/monitor_ollama_server.py
+    restart: unless-stopped
+    environment:
+      # Database connection to Linux 1
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME:-trading}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      # Ollama on same server
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://localhost:11434}
+      - OLLAMA_MOD_VERSION=v0.5
+    network_mode: "host"
