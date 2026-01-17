@@ -1,8 +1,6 @@
 import sys
 import os
-# Přidání kořenového adresáře do PYTHONPATH pro Docker
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-sys.path.append("/app")
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import streamlit as st
 from datetime import datetime
