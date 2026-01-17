@@ -1,6 +1,7 @@
 FROM python:3.11-slim
 
 WORKDIR /app
+ENV PYTHONPATH="/app"
 
 # Set Python path for proper imports
 ENV PYTHONPATH="/app"
