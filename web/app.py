@@ -7,7 +7,7 @@ from datetime import datetime
 from components import layout, auth, session
 from agents.db_bridge.database import list_agent_status
 
-APP_VERSION = "1.4.5.8"
+APP_VERSION = "1.5"
 
 # Startup logging for Docker debugging
 db_host = os.getenv('DB_HOST', 'LINUX_1_IP')
@@ -142,9 +142,5 @@ if auth.has_role("admin"):
 for name, desc in modules:
     st.markdown(f"- **{name}** - {desc}")
     
-    
-# Vynuceny build
-# Vynuceny build
-# Vynuceny build
 
 

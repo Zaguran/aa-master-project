@@ -34,7 +34,7 @@ def create_session(user_id: str) -> dict:
         cur = conn.cursor(cursor_factory=RealDictCursor)
         
         csrf_token = security.generate_csrf_token()
-        expires_at = datetime.now(timezone.utc) + timedelta(hours=8)
+        expires_at = datetime.now(timezone.utc) + timedelta(hours=1)
         
         cur.execute("""
             INSERT INTO app_session (user_id, expires_at, csrf_token, revoked)

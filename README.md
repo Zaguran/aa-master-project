@@ -4,9 +4,147 @@ AI-driven Requirements Engineering Proof-of-Concept for automated requirements d
 
 ## Current Version: 1.4.5.8
 
-**Status:** Active development - session management stabilized
+**Status:** ✅ **Deploy Process Functional** - Active Development
+
+---
+
+## 🚀 Quick Start - Deployment
+
+### Architecture Overview
+
+```
+LINUX 1 (128.140.108.240)          LINUX 2 (168.119.122.36)
+├─ TimescaleDB (5432)              ├─ Ollama LLM (11434)
+├─ Docker Agents:                  ├─ Docker Containers:
+│  └─ aat-monitor-db               │  ├─ aat-web-container (8501)
+│                                  │  └─ aat-monitor-ollama
+└─ Path: /root/master-project      └─ Path: /root/master-project
+```
+
+### Automated Deploy via GitHub Actions
+
+**Triggers:**
+- Push to `main` branch
+- Changes in `web/**`, `agents/**`, or workflow files
+
+**Workflows:**
+- `.github/workflows/deploy-linux1.yaml` → Deploy agents to Linux 1
+- `.github/workflows/deploy-linux2.yaml` → Deploy web + monitor to Linux 2
+
+**Process:**
+1. Push code: `git push origin main`
+2. GitHub Actions automatically:
+   - SSH to servers
+   - Generate `.env` from secrets
+   - Git pull latest code
+   - Build Docker containers
+   - Start services
+3. Monitor in **Actions** tab (green ✅ = success)
+
+### GitHub Secrets Required
+
+```
+LINUX_1_IP=128.140.108.240
+LINUX_2_IP=168.119.122.36
+SSH_KEY_L1=<private_key_linux1>
+SSH_KEY_L2=<private_key_linux2>
+DB_NAME=trading
+DB_USER=trading_user
+DB_PASSWORD=<secure_password>
+DB_PORT=5432
+```
+
+### Manual Deploy (Emergency)
+
+**Linux 1:**
+```bash
+ssh root@128.140.108.240
+cd /root/master-project
+git pull origin main
+docker compose -f docker-compose.agents.yml up -d --build
+docker logs aat-monitor-db
+```
+
+**Linux 2:**
+```bash
+ssh root@168.119.122.36
+cd /root/master-project
+git pull origin main
+docker compose up -d --build
+docker logs aat-web-container
+```
+
+### Access Web UI
+
+- **URL:** http://168.119.122.36:8501
+- **Login:** Use credentials from database
+- **Status:** View agent heartbeats in "Status" page
+
+---
+
+## 📊 Current Implementation Status
+
+### ✅ Completed (v1.5.0):
+- [x] Multi-server Docker deployment (Linux 1 + Linux 2)
+- [x] GitHub Actions automated deploy workflows
+- [x] Web UI (Streamlit) with RBAC authentication
+- [x] Session management (1 hour timeout)
+- [x] Agent heartbeat monitoring system
+- [x] Monitor agents (DB + Ollama) operational
+- [x] Chat interface with Ollama LLM
+
+### 🚧 In Progress (v1.6.0 - Next):
+- [ ] Wake up all computation agents (embedding, matching, trace, etc.)
+- [ ] Add CPU/RAM mini graphs to Agent Heartbeat
+- [ ] Customer/Platform import pipeline
+- [ ] Semantic embeddings generation
+
+### 🎯 Roadmap:
+- [ ] Matching engine
+- [ ] Traceability visualization
+- [ ] Git impact analysis
+- [ ] Report generation
+- [ ] DNG/Rhapsody integration
+
+---
+
+## 🐛 Troubleshooting
+
+### Web returns 502:
+```bash
+ssh root@168.119.122.36
+docker logs aat-web-container --tail 50
+docker compose restart
+```
+
+### Agent not reporting:
+```bash
+ssh root@128.140.108.240
+docker ps --filter "name=aat-"
+docker logs aat-monitor-db
+```
+
+### Deploy fails:
+1. Check GitHub Actions logs
+2. Verify SSH keys in Secrets
+3. Ensure `/root/master-project` exists on both servers
+4. Verify Docker is running
+
+---
 
 ## Change Log
+
+- [x] **v1.5** (2026-01-17) - **Deploy Process Complete**
+  - [x] ✅ GitHub Actions workflows functional (Linux 1 + Linux 2)
+  - [x] ✅ Automated .env generation from secrets
+  - [x] ✅ Git reset + pull to avoid conflicts
+  - [x] ✅ Docker compose build + deploy working
+  - [x] ✅ Monitor agents operational and reporting heartbeat
+  - [x] Changed session timeout from 8 hours to 1 hour
+  - [x] Restored Chat page with Ollama integration
+  - [x] Updated README with deployment documentation
+  - [x] Next: Wake all agents + CPU/RAM graphs (v0.6.0)
+
 - [x] **v1.4.5.8** (2026-01-17) - **CRITICAL: Missing 'agents' Directory in Container**
   - [x] CRITICAL: Verified COPY agents/ /app/agents/ in Dockerfile
   - [x] Added emphasis comments to prevent agents directory from being missed
@@ -246,6 +384,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
+| **v1.5    ** | 2026-01-17 | **Deploy Process Complete**
 | **v1.4.5.8** | 2026-01-17 | **CRITICAL: Missing 'agents' Directory in Container**. Verified and emphasized COPY agents/ instruction in Dockerfile, confirmed build context, added critical comments to prevent directory from being missed. |
 | **v1.4.5.6** | 2026-01-17 | **Final Fix for 'agents' Import**. Added dual sys.path.append, created __init__.py files in agents folders, comprehensive fix for ModuleNotFoundError in Docker. |
 | **v1.4.5.5** | 2026-01-16 | **Fix ModuleNotFoundError for 'agents'**. Fixed critical import path issue preventing agents module from loading, updated sys.path resolution, final web startup fix. |
