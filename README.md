@@ -137,15 +137,25 @@ docker logs aat-monitor-db
 
 ## Change Log
 
-- [x] **v1.65** (2026-01-17) - **E.3.2: Enhanced Import Platform**
+- [x] **v1.65** (2026-01-17) - **E.3.2: Enhanced Import Platform + V-Model**
   - [x] Added platform dropdown (fetches from database)
-  - [x] Added data type selector (7 types supported)
-  - [x] Data types: Requirements, System, Architecture, Code, Tests, Results, Links
+  - [x] Added data type selector with V-Model structure (13 types)
   - [x] Enhanced importer.py to accept platform_id and data_type
   - [x] Dynamic platform list from Admin panel
   - [x] Warning if no platforms exist (redirect to Admin)
   - [x] Import pipeline complete: Admin -> Create Platform -> Import Data
-  - [x] Format reference for each data type
+  - [x] **V-Model Data Types (13 types):**
+    - **Requirements & Architecture (Left Side):**
+      - System Requirements, System Architecture
+      - Software Requirements, Software Architecture
+    - **Testing (Right Side):**
+      - System Test, System Integration Test
+      - Software Test, Software Integration Test
+    - **Test Results:**
+      - System Test Result, System Integration Test Result
+      - Software Test Result, Software Integration Test Result
+    - **Traceability:**
+      - Traceability Links (all links in one CSV)
   - [x] Next: H - Traceability Visualization
 
 - [x] **v1.64** (2026-01-17) - **E.3.1: Admin Panel Management**
@@ -457,7 +467,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
-| **v1.65   ** | 2026-01-17 | **E.3.2: Enhanced Import Platform** - Platform dropdown + 7 data type selectors
+| **v1.65   ** | 2026-01-17 | **E.3.2: Enhanced Import Platform + V-Model** - Platform dropdown + 13 V-Model data types
 | **v1.64   ** | 2026-01-17 | **E.3.1: Admin Panel Management** - User/Customer/Platform management with 4 tabs
 | **v1.62   ** | 2026-01-17 | **E.2: Import UI Pages** - Frontend for platform/customer requirements import
 | **v1.61   ** | 2026-01-17 | **E.1: Backend Import Pipeline** - E.1: steps done

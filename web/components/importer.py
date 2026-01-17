@@ -58,7 +58,7 @@ def import_platform_file(
     uploaded_file_bytes: bytes,
     filetype: str,
     platform_id: str = None,
-    data_type: str = "platform_requirements"
+    data_type: str = "system_requirements"
 ) -> dict:
     """
     Import platform data from uploaded file.
@@ -67,18 +67,43 @@ def import_platform_file(
         uploaded_file_bytes: Raw bytes of the uploaded file
         filetype: 'csv' or 'jsonl'
         platform_id: Platform identifier (e.g., 'Platform_A')
-        data_type: Type of data being imported:
-            - 'platform_requirements' (default)
+        data_type: Type of data being imported (V-Model aligned):
+            Requirements & Architecture (Left Side):
             - 'system_requirements'
-            - 'architecture_elements'
-            - 'code_elements'
-            - 'test_cases'
-            - 'test_results'
-            - 'links'
+            - 'system_architecture'
+            - 'software_requirements'
+            - 'software_architecture'
+            Testing (Right Side):
+            - 'system_test'
+            - 'system_integration_test'
+            - 'software_test'
+            - 'software_integration_test'
+            Test Results:
+            - 'system_test_result'
+            - 'system_integration_test_result'
+            - 'software_test_result'
+            - 'software_integration_test_result'
+            Traceability:
+            - 'traceability_links'
 
     Returns:
         dict with 'inserted', 'failed' counts, 'status' message, and metadata
     """
+    # V-Model data types
+    vmodel_types = [
+        # Requirements & Architecture
+        "system_requirements", "system_architecture",
+        "software_requirements", "software_architecture",
+        # Testing
+        "system_test", "system_integration_test",
+        "software_test", "software_integration_test",
+        # Test Results
+        "system_test_result", "system_integration_test_result",
+        "software_test_result", "software_integration_test_result",
+        # Traceability
+        "traceability_links"
+    ]
+
     suffix = f".{filetype}"
 
     with tempfile.NamedTemporaryFile(mode='wb', suffix=suffix, delete=False) as tmp:
@@ -86,23 +111,13 @@ def import_platform_file(
         tmp_path = tmp.name
 
     try:
-        # Currently only platform_requirements is fully implemented
-        # Other data types will be implemented in future tasks
-        if data_type == "platform_requirements":
-            if filetype == 'csv':
-                result = load_platform_csv(tmp_path)
-            elif filetype == 'jsonl':
-                result = load_platform_jsonl(tmp_path)
-            else:
-                return {"inserted": 0, "failed": 0, "status": f"Unsupported filetype: {filetype}"}
-        elif data_type in ["system_requirements", "architecture_elements", "code_elements",
-                           "test_cases", "test_results", "links"]:
-            # Placeholder for future implementation
-            # TODO: Implement specific loaders for each data type
+        # All V-Model data types - placeholder for future implementation
+        if data_type in vmodel_types:
+            # TODO: Implement specific loaders for each V-Model data type
             return {
                 "inserted": 0,
                 "failed": 0,
-                "status": f"Data type '{data_type}' import not yet implemented. Coming soon!",
+                "status": f"Data type '{data_type}' import is being prepared. Coming soon!",
                 "platform_id": platform_id,
                 "data_type": data_type
             }

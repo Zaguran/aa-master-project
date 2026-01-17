@@ -53,16 +53,29 @@ selected_platform = st.selectbox(
 platform_id = platform_options[selected_platform]
 
 # ============================================================================
-# DROPDOWN 2: SELECT DATA TYPE
+# DROPDOWN 2: SELECT DATA TYPE (aligned with V-Model)
 # ============================================================================
 data_types = {
-    "Platform Requirements": "platform_requirements",
+    # LEFT SIDE - Requirements & Architecture
     "System Requirements": "system_requirements",
-    "Architecture Elements": "architecture_elements",
-    "Code Elements": "code_elements",
-    "Test Cases": "test_cases",
-    "Test Results": "test_results",
-    "Traceability Links": "links"
+    "System Architecture": "system_architecture",
+    "Software Requirements": "software_requirements",
+    "Software Architecture": "software_architecture",
+
+    # RIGHT SIDE - Testing
+    "System Test": "system_test",
+    "System Integration Test": "system_integration_test",
+    "Software Test": "software_test",
+    "Software Integration Test": "software_integration_test",
+
+    # TEST RESULTS
+    "System Test Result": "system_test_result",
+    "System Integration Test Result": "system_integration_test_result",
+    "Software Test Result": "software_test_result",
+    "Software Integration Test Result": "software_integration_test_result",
+
+    # TRACEABILITY
+    "Traceability Links": "traceability_links"
 }
 
 selected_data_type_label = st.selectbox(
@@ -74,8 +87,7 @@ selected_data_type_label = st.selectbox(
 data_type = data_types[selected_data_type_label]
 
 # Show implementation status
-if data_type != "platform_requirements":
-    st.info(f"Note: '{selected_data_type_label}' import is planned for future implementation. Currently only 'Platform Requirements' is fully supported.")
+st.info(f"Note: Import functionality is being implemented. Currently preparing data structure for '{selected_data_type_label}'.")
 
 st.markdown("---")
 
@@ -135,14 +147,31 @@ st.info(f"""
 - Platform: **{selected_platform}** (`{platform_id}`)
 - Data Type: **{selected_data_type_label}**
 
+**V-Model Structure:**
+
+**Left Side (Requirements & Architecture):**
+- System Requirements -> System Architecture
+- Software Requirements -> Software Architecture
+
+**Right Side (Testing):**
+- System Test -> System Integration Test
+- Software Test -> Software Integration Test
+
+**Results:**
+- System Test Result, System Integration Test Result
+- Software Test Result, Software Integration Test Result
+
+**Traceability:**
+- Links between all layers (source_id, source_type, target_id, target_type, link_type)
+
 **Supported File Formats:** CSV, JSONL
 """)
 
 # Show format details based on selected data type
 with st.expander("CSV/JSONL Format Reference"):
-    if data_type == "platform_requirements":
-        st.markdown("""
-        **Platform Requirements Format:**
+    if data_type in ["system_requirements", "software_requirements"]:
+        st.markdown(f"""
+        **{selected_data_type_label} Format:**
         ```
         req_id, text, type, priority, asil, owner, version, baseline, status
         ```
@@ -150,50 +179,65 @@ with st.expander("CSV/JSONL Format Reference"):
         Example:
         ```csv
         req_id,text,type,priority,asil,owner,version,baseline,status
-        PLAT-001,The system shall support 100 concurrent users,functional,high,QM,Team A,1.0,B1,approved
-        PLAT-002,Response time shall be under 200ms,performance,medium,ASIL-B,Team B,1.0,B1,draft
+        SYS-001,The system shall support 100 concurrent users,functional,high,QM,Team A,1.0,B1,approved
+        SYS-002,Response time shall be under 200ms,performance,medium,ASIL-B,Team B,1.0,B1,draft
         ```
         """)
-    elif data_type == "system_requirements":
-        st.markdown("""
-        **System Requirements Format:** *(Coming Soon)*
+    elif data_type in ["system_architecture", "software_architecture"]:
+        st.markdown(f"""
+        **{selected_data_type_label} Format:**
         ```
-        req_id, text, parent_req, subsystem, verification_method, ...
+        arch_id, name, type, parent_id, description, diagram_ref
         ```
-        """)
-    elif data_type == "architecture_elements":
-        st.markdown("""
-        **Architecture Elements Format:** *(Coming Soon)*
-        ```
-        arch_id, name, type, diagram_path, description, ...
-        ```
-        """)
-    elif data_type == "code_elements":
-        st.markdown("""
-        **Code Elements Format:** *(Coming Soon)*
-        ```
-        code_id, file_path, function_name, lines_of_code, complexity, ...
+
+        Example:
+        ```csv
+        arch_id,name,type,parent_id,description,diagram_ref
+        ARCH-001,Main Controller,component,,Central processing unit,diagrams/main.png
+        ARCH-002,Sensor Module,component,ARCH-001,Input sensor handling,diagrams/sensor.png
         ```
         """)
-    elif data_type == "test_cases":
-        st.markdown("""
-        **Test Cases Format:** *(Coming Soon)*
+    elif data_type in ["system_test", "system_integration_test", "software_test", "software_integration_test"]:
+        st.markdown(f"""
+        **{selected_data_type_label} Format:**
         ```
-        test_id, name, type, description, expected_result, ...
+        test_id, name, type, description, preconditions, expected_result, linked_req
+        ```
+
+        Example:
+        ```csv
+        test_id,name,type,description,preconditions,expected_result,linked_req
+        TST-001,User Login Test,functional,Verify user can login,System running,Login successful,SYS-001
+        TST-002,Performance Test,performance,Verify response time,System under load,<200ms,SYS-002
         ```
         """)
-    elif data_type == "test_results":
-        st.markdown("""
-        **Test Results Format:** *(Coming Soon)*
+    elif data_type in ["system_test_result", "system_integration_test_result", "software_test_result", "software_integration_test_result"]:
+        st.markdown(f"""
+        **{selected_data_type_label} Format:**
         ```
-        result_id, test_id, status, execution_date, ...
+        result_id, test_id, status, execution_date, tester, notes
+        ```
+
+        Example:
+        ```csv
+        result_id,test_id,status,execution_date,tester,notes
+        RES-001,TST-001,PASSED,2026-01-17,John Doe,All checks passed
+        RES-002,TST-002,FAILED,2026-01-17,Jane Smith,Response time 250ms
         ```
         """)
-    elif data_type == "links":
+    elif data_type == "traceability_links":
         st.markdown("""
-        **Traceability Links Format:** *(Coming Soon)*
+        **Traceability Links Format:**
         ```
         source_id, source_type, target_id, target_type, link_type
+        ```
+
+        Example:
+        ```csv
+        source_id,source_type,target_id,target_type,link_type
+        SYS-001,system_requirements,ARCH-001,system_architecture,derives
+        ARCH-001,system_architecture,TST-001,system_test,verified_by
+        TST-001,system_test,RES-001,system_test_result,has_result
         ```
         """)
 
