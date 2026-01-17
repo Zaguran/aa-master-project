@@ -3,7 +3,7 @@ version: '3.8'
 services:
   aat-web:
     env_file:
-      - /opt/aat-config/.env  # Tady bude v bezpečí před Gitem
+      - /opt/aat-config/.env  # TADY: Cesta, kde to bude na Linuxu schované
     build:
       context: .
       dockerfile: web/Dockerfile
