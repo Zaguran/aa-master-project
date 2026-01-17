@@ -2,9 +2,9 @@
 
 AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.4.5.8
+## Current Version: 1.6.0
 
-**Status:** ✅ **Deploy Process Functional** - Active Development
+**Status:** ✅ **All Agents Active** - Active Development
 
 ---
 
@@ -84,18 +84,21 @@ docker logs aat-web-container
 
 ## 📊 Current Implementation Status
 
-### ✅ Completed (v1.5.0):
+### ✅ Completed (v1.6.0):
+- [x] All 11 computation agents running in daemon loop mode
+- [x] CPU/RAM resource monitoring in agent heartbeat
+- [x] Visual resource bars in Status dashboard
+- [x] Agent scaffolds ready for implementation
 - [x] Multi-server Docker deployment (Linux 1 + Linux 2)
 - [x] GitHub Actions automated deploy workflows
 - [x] Web UI (Streamlit) with RBAC authentication
 - [x] Session management (1 hour timeout)
 - [x] Agent heartbeat monitoring system
-- [x] Monitor agents (DB + Ollama) operational
 - [x] Chat interface with Ollama LLM
 
-### 🚧 In Progress (v1.6.0 - Next):
-- [ ] Wake up all computation agents (embedding, matching, trace, etc.)
-- [ ] Add CPU/RAM mini graphs to Agent Heartbeat
+### 🚧 In Progress (v1.7.0 - Next):
+- [ ] Implement embedding_agent logic (Ollama integration)
+- [ ] Implement matching_agent logic (vector similarity)
 - [ ] Customer/Platform import pipeline
 - [ ] Semantic embeddings generation
 
@@ -134,6 +137,17 @@ docker logs aat-monitor-db
 
 ## Change Log
 
+- [x] **v1.6.0** (2026-01-17) - **All Agents Active + Resource Monitoring**
+  - [x] ✅ Created scaffolds for all 9 computation agents
+  - [x] ✅ All agents running in daemon loop mode
+  - [x] ✅ All agents reporting heartbeat to agent_status table
+  - [x] ✅ Added CPU/RAM monitoring to agent heartbeat (psutil)
+  - [x] ✅ Visual resource bars in Status dashboard UI
+  - [x] ✅ Updated docker-compose.agents.yml with all 10 services
+  - [x] ✅ Added psutil and plotly to requirements
+  - [x] Agents created: embedding_agent, matching_agent, trace_agent, git_impact_agent, report_agent, pdf_chunker, pdf_extractor, strict_extractor, bridge_api
+  - [x] Next: Implement actual logic in agents (v1.7)
+
 - [x] **v1.5** (2026-01-17) - **Deploy Process Complete**
   - [x] ✅ GitHub Actions workflows functional (Linux 1 + Linux 2)
   - [x] ✅ Automated .env generation from secrets
@@ -143,7 +157,6 @@ docker logs aat-monitor-db
   - [x] Changed session timeout from 8 hours to 1 hour
   - [x] Restored Chat page with Ollama integration
   - [x] Updated README with deployment documentation
-  - [x] Next: Wake all agents + CPU/RAM graphs (v0.6.0)
 
 - [x] **v1.4.5.8** (2026-01-17) - **CRITICAL: Missing 'agents' Directory in Container**
   - [x] CRITICAL: Verified COPY agents/ /app/agents/ in Dockerfile
@@ -384,6 +397,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
+| **v1.6.0  ** | 2026-01-17 | **All Agents Active + Resource Monitoring** - 9 computation agent scaffolds, CPU/RAM monitoring, visual resource bars in UI
 | **v1.5    ** | 2026-01-17 | **Deploy Process Complete**
 | **v1.4.5.8** | 2026-01-17 | **CRITICAL: Missing 'agents' Directory in Container**. Verified and emphasized COPY agents/ instruction in Dockerfile, confirmed build context, added critical comments to prevent directory from being missed. |
 | **v1.4.5.6** | 2026-01-17 | **Final Fix for 'agents' Import**. Added dual sys.path.append, created __init__.py files in agents folders, comprehensive fix for ModuleNotFoundError in Docker. |

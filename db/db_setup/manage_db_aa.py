@@ -4,7 +4,7 @@ from psycopg2 import Error
 import logging
 import json
 
-# Version: 1.4.5.8 - Critical verification: agents directory MUST be copied to container
+# Version: 1.6.0 - All agents active with CPU/RAM monitoring
 
 # Nastavení logování
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s - %(message)s')

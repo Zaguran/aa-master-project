@@ -3,9 +3,10 @@ version: '3.8'
 # ====================================================================
 # LINUX 1 Configuration: All Agents (except monitor-ollama)
 # ====================================================================
+# v1.6 - All computation agents now active
 # - Monitor DB: monitors TimescaleDB on localhost:5432
-# - Future agents: embedding, matching, trace, git-impact, etc.
-# - All connect to local TimescaleDB
+# - All computation agents running in scaffold/daemon mode
+# - All agents connect to local TimescaleDB
 # ====================================================================
 
 services:
@@ -18,7 +19,6 @@ services:
     command: python agents/monitor_db_server.py
     restart: unless-stopped
     environment:
-      # Database connection to localhost (DB is on same server)
       - DB_HOST=${DB_HOST:-localhost}
       - DB_PORT=${DB_PORT:-5432}
       - DB_NAME=${DB_NAME:-trading}
@@ -26,12 +26,146 @@ services:
       - DB_PASS=${DB_PASS}
     network_mode: "host"
 
-  # Future agents can be added here:
-  # embedding-agent:
-  #   ...
-  # matching-agent:
-  #   ...
-  # trace-agent:
-  #   ...
-  # git-impact-agent:
-  #   ...
+  # Embedding Agent - Generates semantic embeddings using Ollama
+  embedding-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    container_name: aat-embedding-agent
+    command: python agents/embedding_agent.py
+    restart: unless-stopped
+    environment:
+      - DB_HOST=${DB_HOST:-localhost}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME:-trading}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+    network_mode: "host"
+
+  # Matching Agent - Vector similarity matching
+  matching-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    container_name: aat-matching-agent
+    command: python agents/matching_agent.py
+    restart: unless-stopped
+    environment:
+      - DB_HOST=${DB_HOST:-localhost}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME:-trading}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+    network_mode: "host"
+
+  # Trace Agent - Traceability link management
+  trace-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    container_name: aat-trace-agent
+    command: python agents/trace_agent.py
+    restart: unless-stopped
+    environment:
+      - DB_HOST=${DB_HOST:-localhost}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME:-trading}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+    network_mode: "host"
+
+  # Git Impact Agent - Repository change analysis
+  git-impact-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    container_name: aat-git-impact-agent
+    command: python agents/git_impact_agent.py
+    restart: unless-stopped
+    environment:
+      - DB_HOST=${DB_HOST:-localhost}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME:-trading}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+    network_mode: "host"
+
+  # Report Agent - Report generation
+  report-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    container_name: aat-report-agent
+    command: python agents/report_agent.py
+    restart: unless-stopped
+    environment:
+      - DB_HOST=${DB_HOST:-localhost}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME:-trading}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+    network_mode: "host"
+
+  # PDF Chunker - Splits PDF text into chunks
+  pdf-chunker:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    container_name: aat-pdf-chunker
+    command: python agents/pdf_chunker.py
+    restart: unless-stopped
+    environment:
+      - DB_HOST=${DB_HOST:-localhost}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME:-trading}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+    network_mode: "host"
+
+  # PDF Extractor - Extracts text from PDFs
+  pdf-extractor:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    container_name: aat-pdf-extractor
+    command: python agents/pdf_extractor.py
+    restart: unless-stopped
+    environment:
+      - DB_HOST=${DB_HOST:-localhost}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME:-trading}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+    network_mode: "host"
+
+  # Strict Extractor - Strict parsing rules extraction
+  strict-extractor:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    container_name: aat-strict-extractor
+    command: python agents/strict_extractor.py
+    restart: unless-stopped
+    environment:
+      - DB_HOST=${DB_HOST:-localhost}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME:-trading}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+    network_mode: "host"
+
+  # Bridge API - REST API for external integration
+  bridge-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.agent
+    container_name: aat-bridge-api
+    command: python agents/bridge_api.py
+    restart: unless-stopped
+    environment:
+      - DB_HOST=${DB_HOST:-localhost}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_NAME=${DB_NAME:-trading}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+    network_mode: "host"
