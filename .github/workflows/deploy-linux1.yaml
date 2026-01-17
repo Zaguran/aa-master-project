@@ -45,13 +45,10 @@ jobs:
       
       - name: Deploy Agents to Linux 1
         run: |
-          # Copy .env to server
-          scp -i ~/.ssh/id_ed25519 .env root@${{ secrets.LINUX_1_IP }}:/root/master-project/.env
-          
-          # Deploy agents
+          # First, prepare the server
           ssh -i ~/.ssh/id_ed25519 root@${{ secrets.LINUX_1_IP }} bash << 'EOF'
           set -e
-          cd /root/master-project
+          cd /root
           
           echo "=== [1/8] Cleanup old directory ==="
           if [ -d "/root/aa-master-project" ]; then
@@ -59,8 +56,10 @@ jobs:
             rm -rf /root/aa-master-project
             echo "Cleanup completed"
           else
-            echo "No cleanup needed - /root/aa-master-project doesn't exist"
+            echo "No cleanup needed"
           fi
+          
+          cd /root/master-project
           
           echo "=== [2/8] Resetting local changes ==="
           git reset --hard HEAD
@@ -68,21 +67,30 @@ jobs:
           
           echo "=== [3/8] Pulling latest code ==="
           git pull origin main
+          EOF
           
-          echo "=== [4/8] Checking .env file ==="
+          # Now copy .env AFTER git pull
+          echo "=== [4/8] Copying .env file to server ==="
+          scp -i ~/.ssh/id_ed25519 .env root@${{ secrets.LINUX_1_IP }}:/root/master-project/.env
+          
+          # Continue with deployment
+          ssh -i ~/.ssh/id_ed25519 root@${{ secrets.LINUX_1_IP }} bash << 'EOF'
+          set -e
+          cd /root/master-project
+          
+          echo "=== [5/8] Checking .env file ==="
           cat .env
           
-          echo "=== [5/8] Stopping old containers ==="
+          echo "=== [6/8] Stopping old containers ==="
           docker compose -f docker-compose.agents.yml down || true
           docker rm -f aat-monitor-db 2>/dev/null || true
           
-          echo "=== [6/8] Building and starting agents ==="
+          echo "=== [7/8] Building and starting agents ==="
           docker compose -f docker-compose.agents.yml up -d --build
           
-          echo "=== [7/8] Waiting 10 seconds ==="
+          echo "=== [8/8] Waiting and checking status ==="
           sleep 10
           
-          echo "=== [8/8] Checking status ==="
           docker ps --filter "name=aat-"
           echo ""
           echo "--- Monitor DB logs (last 30 lines) ---"
@@ -90,5 +98,4 @@ jobs:
           
           echo ""
           echo "=== Deployment completed ==="
-          echo "Agents deployed on Linux 1"
           EOF
