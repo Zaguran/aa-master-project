@@ -81,8 +81,28 @@ def init_aa_structure():
                 attributes JSONB,
                 version VARCHAR(50),
                 processing_status INT DEFAULT 0,
+                id_type TEXT NOT NULL DEFAULT 'requirement' CHECK (id_type IN ('requirement', 'information')),
                 created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
             );
+        """)
+        
+        # Migration: Add id_type to existing nodes table (if not exists)
+        cur.execute("""
+            DO $$ 
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM information_schema.columns 
+                    WHERE table_schema='work_aa' AND table_name='nodes' AND column_name='id_type'
+                ) THEN
+                    ALTER TABLE work_aa.nodes 
+                    ADD COLUMN id_type TEXT NOT NULL DEFAULT 'requirement' 
+                    CHECK (id_type IN ('requirement', 'information'));
+                    
+                    CREATE INDEX IF NOT EXISTS idx_nodes_id_type ON work_aa.nodes(id_type);
+                    
+                    RAISE NOTICE 'Added id_type column to nodes table';
+                END IF;
+            END $$;
         """)
 
         cur.execute("""
