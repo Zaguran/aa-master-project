@@ -408,7 +408,8 @@ docker run -p 8501:8501 ai-requirements-extractor
 ## Release History
 
 | Tag | Date | Description |
-|-----|------|-------------|
+|-----|------|-------------|   
+| **v1.6.1  ** | 2026-01-17 | **E.1: Backend Import Pipeline** - E.1: steps done
 | **v1.6.0  ** | 2026-01-17 | **All Agents Active + Resource Monitoring** - 9 computation agent scaffolds, CPU/RAM monitoring, visual resource bars in UI
 | **v1.5    ** | 2026-01-17 | **Deploy Process Complete**
 | **v1.4.5.8** | 2026-01-17 | **CRITICAL: Missing 'agents' Directory in Container**. Verified and emphasized COPY agents/ instruction in Dockerfile, confirmed build context, added critical comments to prevent directory from being missed. |
