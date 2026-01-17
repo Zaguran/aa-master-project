@@ -57,24 +57,28 @@ jobs:
           set -e
           cd /root/master-project
           
-          echo "=== [1/6] Pulling latest code ==="
+          echo "=== [1/7] Resetting local changes ==="
+          git reset --hard HEAD
+          git clean -fd
+          
+          echo "=== [2/7] Pulling latest code ==="
           git pull origin main
           
-          echo "=== [2/6] Checking .env file ==="
+          echo "=== [3/7] Checking .env file ==="
           cat .env
           
-          echo "=== [3/6] Stopping old containers ==="
+          echo "=== [4/7] Stopping old containers ==="
           docker compose down || true
           docker rm -f aat-web-container 2>/dev/null || true
           docker rm -f aat-monitor-ollama 2>/dev/null || true
           
-          echo "=== [4/6] Building and starting services ==="
+          echo "=== [5/7] Building and starting services ==="
           docker compose up -d --build
           
-          echo "=== [5/6] Waiting 15 seconds ==="
+          echo "=== [6/7] Waiting 15 seconds ==="
           sleep 15
           
-          echo "=== [6/6] Checking status ==="
+          echo "=== [7/7] Checking status ==="
           docker ps --filter "name=aat-"
           echo ""
           echo "--- Web container logs (last 30 lines) ---"
@@ -85,4 +89,5 @@ jobs:
           
           echo ""
           echo "=== Deployment completed ==="
+          echo "Web UI should be available at: http://${{ secrets.LINUX_2_IP }}:8501"
           EOF
