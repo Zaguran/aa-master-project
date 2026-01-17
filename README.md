@@ -137,6 +137,17 @@ docker logs aat-monitor-db
 
 ## Change Log
 
+- [x] **v1.64** (2026-01-17) - **E.3.1: Admin Panel Management**
+  - [x] Implemented User Management (view, create, manage roles, activate/deactivate)
+  - [x] Role definitions: Admin (full access) vs Visitor (read-only)
+  - [x] Implemented Customer Management (view, create, delete)
+  - [x] Implemented Platform Management (view, create, update, delete)
+  - [x] Extended database.py with 13 new helper functions
+  - [x] Admin panel with 4 tabs: Users, Customers, Platforms, Settings
+  - [x] RBAC enforced: Admin-only access to Admin panel
+  - [x] System info dashboard with metrics
+  - [x] Next: E.3.2 - Enhanced Import Platform (platform + data type selection)
+
 - [x] **v1.63** (2026-01-17) - **Fix: Import Module Path Resolution**
   - [x] Fixed ModuleNotFoundError in Docker for import_platform/import_customer
   - [x] Used importlib.util to load modules (avoids 'import' keyword conflict)
@@ -435,6 +446,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
+| **v1.64   ** | 2026-01-17 | **E.3.1: Admin Panel Management** - User/Customer/Platform management with 4 tabs
 | **v1.62   ** | 2026-01-17 | **E.2: Import UI Pages** - Frontend for platform/customer requirements import
 | **v1.61   ** | 2026-01-17 | **E.1: Backend Import Pipeline** - E.1: steps done
 | **v1.6.0  ** | 2026-01-17 | **All Agents Active + Resource Monitoring** - 9 computation agent scaffolds, CPU/RAM monitoring, visual resource bars in UI
