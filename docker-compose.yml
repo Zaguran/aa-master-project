@@ -2,6 +2,8 @@ version: '3.8'
 
 services:
   aat-web:
+    env_file:
+      - /root/config/.env  # Tady bude v bezpečí před Gitem
     build:
       context: .
       dockerfile: web/Dockerfile
