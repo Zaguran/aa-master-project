@@ -4,7 +4,7 @@ from psycopg2 import Error
 import logging
 import json
 
-# Version: 1.65 - E.3.2: Enhanced Import Platform
+# Version: 1.66 - H.1: Trace Engine + Coverage Classification
 
 # Nastavení logování
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s - %(message)s')

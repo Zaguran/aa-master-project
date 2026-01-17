@@ -2,7 +2,7 @@
 
 AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.6.0
+## Current Version: 1.66
 
 **Status:** ✅ **All Agents Active** - Active Development
 
@@ -136,6 +136,20 @@ docker logs aat-monitor-db
 ---
 
 ## Change Log
+
+- [x] **v1.66** (2026-01-17) - **H.1: Trace Engine + Coverage Classification + Graphviz**
+  - [x] Created agents/trace/trace_agent.py with trace engine
+  - [x] Implemented build_trace_for_requirements() - BFS traversal through nodes/links
+  - [x] Implemented generate_trace_graph() - Graphviz DOT generator
+  - [x] Extended agents/db_bridge/database.py with coverage functions
+  - [x] Added list_best_matches() - retrieves best match per customer req
+  - [x] Added classify_coverage() - GREEN/YELLOW/RED classification
+  - [x] Coverage thresholds: FULL_MATCH=0.85, PARTIAL_MATCH=0.65
+  - [x] Created web/components/coverage.py - compute_coverage_summary()
+  - [x] Created web/components/traceability.py - get_trace() + generate_svg()
+  - [x] Node shapes: ellipse (customer), box (platform/system), diamond (arch), note (code), hexagon (test)
+  - [x] Colors: GREEN #4CAF50, YELLOW #FFC107, RED #F44336, GRAY #BDBDBD
+  - [x] Next: H.2 - Trace UI visualization page
 
 - [x] **v1.65** (2026-01-17) - **E.3.2: Enhanced Import Platform + V-Model + id_type**
   - [x] Added platform dropdown (fetches from database)
@@ -474,6 +488,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
+| **v1.66   ** | 2026-01-17 | **H.1: Trace Engine + Coverage Classification** - Trace engine, Graphviz DOT generator, coverage classification
 | **v1.65   ** | 2026-01-17 | **E.3.2: Enhanced Import Platform + V-Model** - Platform dropdown + 13 V-Model data types
 | **v1.64   ** | 2026-01-17 | **E.3.1: Admin Panel Management** - User/Customer/Platform management with 4 tabs
 | **v1.62   ** | 2026-01-17 | **E.2: Import UI Pages** - Frontend for platform/customer requirements import

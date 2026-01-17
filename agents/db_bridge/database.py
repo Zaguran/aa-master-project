@@ -747,5 +747,93 @@ def delete_platform(platform_id: str) -> dict:
             conn.close()
 
 
+# ============================================================================
+# COVERAGE CLASSIFICATION FUNCTIONS (v1.66 - Task H.1)
+# ============================================================================
+
+# Coverage thresholds
+FULL_MATCH_THRESHOLD = 0.85
+PARTIAL_MATCH_THRESHOLD = 0.65
+
+
+def list_best_matches(model_id: int, rfq_id: str, platform_id: str) -> list:
+    """
+    Get best match for each customer requirement.
+    Returns the highest-ranked match (rank=1) per customer_req_id.
+
+    Args:
+        model_id: The embedding model ID used for matching
+        rfq_id: The RFQ/customer project ID
+        platform_id: The platform project ID
+
+    Returns:
+        List of dicts with customer_req_id, platform_req_id, cosine_similarity
+    """
+    try:
+        conn = get_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        cur.execute("""
+            SELECT DISTINCT ON (customer_req_id)
+                customer_req_id,
+                platform_req_id,
+                cosine_similarity
+            FROM req_match
+            WHERE model_id = %s
+              AND rfq_id = %s
+              AND platform_id = %s
+            ORDER BY customer_req_id, rank ASC
+        """, (model_id, rfq_id, platform_id))
+
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return [dict(row) for row in rows]
+    except Exception as e:
+        print(f"Error listing best matches: {e}")
+        return []
+
+
+def classify_coverage(full_th: float, partial_th: float, rows: list) -> list:
+    """
+    Classify coverage for each match row based on cosine similarity thresholds.
+
+    Args:
+        full_th: Threshold for GREEN (full match), e.g. 0.85
+        partial_th: Threshold for YELLOW (partial match), e.g. 0.65
+        rows: List of dicts with cosine_similarity key
+
+    Returns:
+        List of dicts with added 'color' field:
+        {
+            "customer_req_id": ...,
+            "platform_req_id": ...,
+            "similarity": ...,
+            "color": "GREEN" | "YELLOW" | "RED"
+        }
+    """
+    result = []
+    for row in rows:
+        similarity = row.get("cosine_similarity", 0.0)
+        if similarity is None:
+            similarity = 0.0
+
+        if similarity >= full_th:
+            color = "GREEN"
+        elif similarity >= partial_th:
+            color = "YELLOW"
+        else:
+            color = "RED"
+
+        result.append({
+            "customer_req_id": row.get("customer_req_id"),
+            "platform_req_id": row.get("platform_req_id"),
+            "similarity": similarity,
+            "color": color
+        })
+
+    return result
+
+
 if __name__ == "__main__":
     agent_loop()
