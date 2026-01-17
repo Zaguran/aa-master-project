@@ -4,7 +4,7 @@ from psycopg2 import Error
 import logging
 import json
 
-# Version: 1.61 - Backend Import Pipeline (Platform + Customer Requirements)
+# Version: 1.62 - E.2: Import UI Pages (Frontend for requirements import)
 
 # Nastavení logování
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s - %(message)s')

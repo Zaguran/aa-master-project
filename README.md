@@ -137,6 +137,16 @@ docker logs aat-monitor-db
 
 ## Change Log
 
+- [x] **v1.62** (2026-01-17) - **E.2: Import UI Pages**
+  - [x] Created web/pages/10_Import_Platform.py (admin-only)
+  - [x] Created web/pages/11_Import_Customer.py (admin-only)
+  - [x] File upload UI for CSV/JSONL requirements import
+  - [x] RBAC protection (admin role required)
+  - [x] Integration with backend import pipeline (v1.61)
+  - [x] Success/error handling with detailed feedback
+  - [x] Complete import pipeline: Backend (E.1) + Frontend (E.2)
+  - [x] Next: E.3 - Test import with sample CSV data
+
 - [x] **v1.61** (2026-01-17) - **E.1: Backend Import Pipeline**
   - [x] ✅ Extended agents/db_bridge/database.py with 4 new helper functions
   - [x] ✅ insert_or_update_platform_requirement() - Platform req import
@@ -345,6 +355,7 @@ The application now features a clean multi-tab Streamlit interface:
 web/
  ├─ app.py                    # Main entry point with layout loader
  ├─ pages/
+ │   ├─ 00_Login.py           # Authentication login page
  │   ├─ 01_Dashboard.py       # System overview and key metrics
  │   ├─ 02_Status.py          # Agent and system status monitoring
  │   ├─ 03_DB_Status.py       # Database health and statistics
@@ -353,15 +364,24 @@ web/
  │   ├─ 06_Trace.py           # Traceability analysis
  │   ├─ 07_Impact.py          # Git impact analysis
  │   ├─ 08_Reports.py         # Generate and view reports
- │   └─ 09_Chat.py            # AI chat interface (Type A)
+ │   ├─ 09_Chat.py            # AI chat interface (Type A)
+ │   ├─ 10_Import_Platform.py # Platform requirements import (E.2)
+ │   ├─ 11_Import_Customer.py # Customer requirements import (E.2)
+ │   └─ 99_Admin.py           # Admin panel
  ├─ components/
  │   ├─ layout.py             # Header rendering and layout utilities
- │   └─ utils.py              # Chat and utility functions
+ │   ├─ utils.py              # Chat and utility functions
+ │   └─ importer.py           # Import wrapper functions (E.1)
  ├─ static/
  │   ├─ css/
  │   │   └─ app.css           # Minimal styling
  │   └─ img/
  └─ requirements.txt
+
+agents/import/                 # Import modules (E.1)
+ ├─ __init__.py
+ ├─ import_platform.py        # Platform CSV/JSONL loader
+ └─ import_customer.py        # Customer CSV/JSONL loader
 ```
 
 ### Chat Type A
@@ -408,8 +428,9 @@ docker run -p 8501:8501 ai-requirements-extractor
 ## Release History
 
 | Tag | Date | Description |
-|-----|------|-------------|   
-| **v1.6.1  ** | 2026-01-17 | **E.1: Backend Import Pipeline** - E.1: steps done
+|-----|------|-------------|
+| **v1.62   ** | 2026-01-17 | **E.2: Import UI Pages** - Frontend for platform/customer requirements import
+| **v1.61   ** | 2026-01-17 | **E.1: Backend Import Pipeline** - E.1: steps done
 | **v1.6.0  ** | 2026-01-17 | **All Agents Active + Resource Monitoring** - 9 computation agent scaffolds, CPU/RAM monitoring, visual resource bars in UI
 | **v1.5    ** | 2026-01-17 | **Deploy Process Complete**
 | **v1.4.5.8** | 2026-01-17 | **CRITICAL: Missing 'agents' Directory in Container**. Verified and emphasized COPY agents/ instruction in Dockerfile, confirmed build context, added critical comments to prevent directory from being missed. |
