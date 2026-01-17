@@ -137,9 +137,13 @@ docker logs aat-monitor-db
 
 ## Change Log
 
-- [x] **v1.65** (2026-01-17) - **E.3.2: Enhanced Import Platform + V-Model**
+- [x] **v1.65** (2026-01-17) - **E.3.2: Enhanced Import Platform + V-Model + id_type**
   - [x] Added platform dropdown (fetches from database)
   - [x] Added data type selector with V-Model structure (13 types)
+  - [x] Added id_type attribute to nodes table (requirement/information)
+  - [x] Created migration: db/migrations/add_id_type_column.sql
+  - [x] Updated database helpers to handle id_type
+  - [x] Updated import logic (platform + customer) for id_type
   - [x] Enhanced importer.py to accept platform_id and data_type
   - [x] Dynamic platform list from Admin panel
   - [x] Warning if no platforms exist (redirect to Admin)
@@ -156,6 +160,9 @@ docker logs aat-monitor-db
       - Software Test Result, Software Integration Test Result
     - **Traceability:**
       - Traceability Links (all links in one CSV)
+  - [x] **Migration Required:**
+    - Run: `psql -U user -d trading -f db/migrations/add_id_type_column.sql`
+    - Must run AFTER deploy, BEFORE web start
   - [x] Next: H - Traceability Visualization
 
 - [x] **v1.64** (2026-01-17) - **E.3.1: Admin Panel Management**

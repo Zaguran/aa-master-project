@@ -165,6 +165,10 @@ st.info(f"""
 - Links between all layers (source_id, source_type, target_id, target_type, link_type)
 
 **Supported File Formats:** CSV, JSONL
+
+**id_type Column (Optional):**
+Include 'id_type' column in your CSV/JSONL: 'requirement' or 'information'
+(defaults to 'requirement' if not provided)
 """)
 
 # Show format details based on selected data type

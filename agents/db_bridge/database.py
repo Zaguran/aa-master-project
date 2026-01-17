@@ -94,11 +94,14 @@ def insert_or_update_platform_requirement(req: dict):
     """
     Insert or update platform requirement in nodes table.
     Expected keys: req_id, text, type, priority, asil, owner, version, baseline, status
+    Optional keys: id_type (defaults to 'requirement')
     """
     conn = None
     try:
         conn = get_connection()
         cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        id_type = req.get("id_type", "requirement")
 
         attributes = {
             "req_id": req.get("req_id"),
@@ -125,7 +128,8 @@ def insert_or_update_platform_requirement(req: dict):
                     asil = %s,
                     version = %s,
                     node_status = %s,
-                    attributes = %s
+                    attributes = %s,
+                    id_type = %s
                 WHERE node_uuid = %s
             """, (
                 req.get("text"),
@@ -133,18 +137,20 @@ def insert_or_update_platform_requirement(req: dict):
                 req.get("version"),
                 req.get("status"),
                 json.dumps(attributes),
+                id_type,
                 existing["node_uuid"]
             ))
         else:
             cur.execute("""
-                INSERT INTO nodes (project_id, type, scope, content, asil, version, node_status, attributes)
-                VALUES ('Platform_A', 'requirement', 'platform', %s, %s, %s, %s, %s)
+                INSERT INTO nodes (project_id, type, scope, content, asil, version, node_status, attributes, id_type)
+                VALUES ('Platform_A', 'requirement', 'platform', %s, %s, %s, %s, %s, %s)
             """, (
                 req.get("text"),
                 req.get("asil"),
                 req.get("version"),
                 req.get("status"),
-                json.dumps(attributes)
+                json.dumps(attributes),
+                id_type
             ))
 
         conn.commit()
@@ -163,6 +169,7 @@ def insert_or_update_customer_requirement(customer_id: str, req: dict):
     """
     Insert or update customer requirement in nodes table.
     Expected keys: req_id, text, priority, source_doc
+    Optional keys: id_type (defaults to 'requirement')
     """
     conn = None
     try:
@@ -170,6 +177,8 @@ def insert_or_update_customer_requirement(customer_id: str, req: dict):
         cur = conn.cursor(cursor_factory=RealDictCursor)
 
         project_id = f"Customer_{customer_id}"
+        id_type = req.get("id_type", "requirement")
+
         attributes = {
             "req_id": req.get("req_id"),
             "priority": req.get("priority"),
@@ -189,21 +198,24 @@ def insert_or_update_customer_requirement(customer_id: str, req: dict):
             cur.execute("""
                 UPDATE nodes SET
                     content = %s,
-                    attributes = %s
+                    attributes = %s,
+                    id_type = %s
                 WHERE node_uuid = %s
             """, (
                 req.get("text"),
                 json.dumps(attributes),
+                id_type,
                 existing["node_uuid"]
             ))
         else:
             cur.execute("""
-                INSERT INTO nodes (project_id, type, scope, content, attributes)
-                VALUES (%s, 'requirement', 'customer', %s, %s)
+                INSERT INTO nodes (project_id, type, scope, content, attributes, id_type)
+                VALUES (%s, 'requirement', 'customer', %s, %s, %s)
             """, (
                 project_id,
                 req.get("text"),
-                json.dumps(attributes)
+                json.dumps(attributes),
+                id_type
             ))
 
         conn.commit()

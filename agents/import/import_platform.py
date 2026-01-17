@@ -1,9 +1,10 @@
 """
 Platform Requirements Import Module
-Version: 1.61
+Version: 1.65
 
 Loads platform requirements from CSV or JSONL files into the database.
 Does NOT create embeddings or call Ollama - strictly a database loader.
+Supports id_type attribute (requirement/information).
 """
 
 import csv
@@ -19,6 +20,7 @@ def load_platform_csv(path: str) -> dict:
     """
     Load platform requirements from CSV file.
     Expected columns: req_id, text, type, priority, asil, owner, version, baseline, status
+    Optional columns: id_type (defaults to 'requirement')
     Returns: dict with 'inserted' and 'failed' counts
     """
     inserted = 0
@@ -27,7 +29,19 @@ def load_platform_csv(path: str) -> dict:
     with open(path, 'r', encoding='utf-8') as f:
         reader = csv.DictReader(f)
         for row in reader:
-            result = insert_or_update_platform_requirement(row)
+            req = {
+                'req_id': row.get('req_id', ''),
+                'text': row.get('text', ''),
+                'type': row.get('type', ''),
+                'priority': row.get('priority', ''),
+                'asil': row.get('asil', ''),
+                'owner': row.get('owner', ''),
+                'version': row.get('version', ''),
+                'baseline': row.get('baseline', ''),
+                'status': row.get('status', ''),
+                'id_type': row.get('id_type', 'requirement')
+            }
+            result = insert_or_update_platform_requirement(req)
             if result:
                 inserted += 1
             else:
@@ -40,6 +54,7 @@ def load_platform_jsonl(path: str) -> dict:
     """
     Load platform requirements from JSONL file.
     Each line is a JSON object with keys: req_id, text, type, priority, asil, owner, version, baseline, status
+    Optional keys: id_type (defaults to 'requirement')
     Returns: dict with 'inserted' and 'failed' counts
     """
     inserted = 0
@@ -51,6 +66,8 @@ def load_platform_jsonl(path: str) -> dict:
             if not line:
                 continue
             req = json.loads(line)
+            if 'id_type' not in req:
+                req['id_type'] = 'requirement'
             result = insert_or_update_platform_requirement(req)
             if result:
                 inserted += 1
