@@ -137,6 +137,18 @@ docker logs aat-monitor-db
 
 ## Change Log
 
+- [x] **v1.61** (2026-01-17) - **E.1: Backend Import Pipeline**
+  - [x] ✅ Extended agents/db_bridge/database.py with 4 new helper functions
+  - [x] ✅ insert_or_update_platform_requirement() - Platform req import
+  - [x] ✅ insert_or_update_customer_requirement() - Customer req import
+  - [x] ✅ create_customer_project() - Customer project creation
+  - [x] ✅ list_projects() - List all projects
+  - [x] ✅ Created agents/import/import_platform.py (CSV/JSONL loader)
+  - [x] ✅ Created agents/import/import_customer.py (CSV/JSONL loader)
+  - [x] ✅ Created web/components/importer.py (UI wrapper for imports)
+  - [x] Backend ready for E.2 (Windsurf will create UI pages)
+  - [x] Next: E.2 - Import UI pages (10_Import_Platform, 11_Import_Customer)
+  
 - [x] **v1.6.0** (2026-01-17) - **All Agents Active + Resource Monitoring**
   - [x] ✅ Created scaffolds for all 9 computation agents
   - [x] ✅ All agents running in daemon loop mode
