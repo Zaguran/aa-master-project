@@ -137,6 +137,12 @@ docker logs aat-monitor-db
 
 ## Change Log
 
+- [x] **v1.63** (2026-01-17) - **Fix: Import Module Path Resolution**
+  - [x] Fixed ModuleNotFoundError in Docker for import_platform/import_customer
+  - [x] Used importlib.util to load modules (avoids 'import' keyword conflict)
+  - [x] Added Docker path (/app/agents/import) with local fallback
+  - [x] Tested import functionality successfully
+
 - [x] **v1.62** (2026-01-17) - **E.2: Import UI Pages**
   - [x] Created web/pages/10_Import_Platform.py (admin-only)
   - [x] Created web/pages/11_Import_Customer.py (admin-only)

@@ -4,7 +4,7 @@ from psycopg2 import Error
 import logging
 import json
 
-# Version: 1.62 - E.2: Import UI Pages (Frontend for requirements import)
+# Version: 1.63 - Fix: Import module path resolution for Docker
 
 # Nastavení logování
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s - %(message)s')

@@ -1,6 +1,6 @@
 """
 Web Import Wrapper Module
-Version: 1.61
+Version: 1.63
 
 Provides safe wrapper functions for UI to import platform and customer requirements.
 All DB writes are delegated to import_platform and import_customer modules.
@@ -9,10 +9,48 @@ All DB writes are delegated to import_platform and import_customer modules.
 import os
 import sys
 import tempfile
+import importlib.util
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'agents', 'import'))
-from import_platform import load_platform_csv, load_platform_jsonl
-from import_customer import load_customer_csv, load_customer_jsonl
+# Add /app to path for Docker compatibility (PYTHONPATH=/app)
+# In Docker: agents/ is at /app/agents/
+# Locally: agents/ is at project_root/agents/
+if "/app" not in sys.path:
+    sys.path.insert(0, "/app")
+
+# Also add project root for local development
+_project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
+
+
+def _load_module_from_path(module_name: str, file_path: str):
+    """Load a Python module from file path (handles 'import' folder name issue)."""
+    spec = importlib.util.spec_from_file_location(module_name, file_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+# Resolve path to agents/import directory
+# Try Docker path first, then local path
+_import_dir = "/app/agents/import"
+if not os.path.exists(_import_dir):
+    _import_dir = os.path.join(_project_root, "agents", "import")
+
+# Load modules using importlib (avoids 'import' keyword conflict)
+_platform_module = _load_module_from_path(
+    "import_platform",
+    os.path.join(_import_dir, "import_platform.py")
+)
+_customer_module = _load_module_from_path(
+    "import_customer",
+    os.path.join(_import_dir, "import_customer.py")
+)
+
+load_platform_csv = _platform_module.load_platform_csv
+load_platform_jsonl = _platform_module.load_platform_jsonl
+load_customer_csv = _customer_module.load_customer_csv
+load_customer_jsonl = _customer_module.load_customer_jsonl
 
 
 def import_platform_file(uploaded_file_bytes: bytes, filetype: str) -> dict:
