@@ -2,7 +2,7 @@
 
 AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.8.1
+## Current Version: 1.8
 
 **Status:** ✅ **All Agents Active** - Active Development
 
@@ -137,30 +137,15 @@ docker logs aat-monitor-db
 
 ## Change Log
 
-- [x] **v1.8.1** (2026-01-18) - **Critical Bug Fixes (Hotfix)** 🔧
-  - [x] 🐛 **CRITICAL: Fixed Import Pages Crash**
-    - Fixed import paths in import_platform.py
-    - Fixed import paths in import_customer.py
-    - Added fallback imports for Docker compatibility
-    - Import Platform and Import Customer pages now work correctly
-  - [x] 🐛 **Fixed Status Page Issues:**
-    - Shows actual "READY" status instead of "SCAFFOLD"
-    - Fixed agent name truncation (full names now visible)
-    - Better layout: 4 agents per row (was 6 in one row)
-    - Improved readability
-  - [x] 🎨 **Enhanced Matching Page:**
-    - Added Customer Project selector
-    - Added Platform Project selector
-    - Button disabled until both projects selected
-    - Clear indication of what will be matched
-  - [x] 🎨 **Simplified Trace Page:**
-    - Added project selectors (Customer/Platform)
-    - Cleaner input layout
-    - Removed confusing multiple input fields
-  - [x] 🔧 **Version Updates:**
-    - app.py: 1.8 → 1.8.1
-    - manage_db_aa.py: 1.8 → 1.8.1
-
+- [x] **v1.81** (2026-01-18) - **Hotfix ** 🎉
+  - [x] 🎨 **Import Platform page loads without error**
+  - [x] 🎨 **Import Customer page loads without error**
+  - [x] 🎨 **Status page shows "READY" not "SCAFFOLD"**
+  - [x] 🎨 **Status page shows full agent names (4 per row)**
+  - [x] 🎨 **Matching page has Customer/Platform selectors **
+  - [x] 🎨 **Matching page has Customer/Platform selectors **
+  - [x] 🎨 **Trace page has simplified project selectors **
+  - [x] 🎨 **All pages load without Python errors **
 - [x] **v1.8** (2026-01-18) - **Final UI Complete - PoC v1 Finished** 🎉
   - [x] 🎨 **Dashboard Enhancements:**
     - System overview metrics (requirements, embeddings, matches, active agents)
@@ -615,7 +600,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
-| **v1.8.1  ** | 2026-01-18 | **Critical Bug Fixes (Hotfix)** - Import paths, Status page, Matching/Trace selectors
+| **v1.81   ** | 2026-01-18 | **Hotfix **
 | **v1.8    ** | 2026-01-18 | **Final UI Complete - PoC v1 Finished** - Dashboard metrics, Status monitoring, Embeddings UI, Matching UI, Trace enhancements
 | **v1.71   ** | 2026-01-18 | **pgvector Installation & Configuration**
 | **v1.70   ** | 2026-01-18 | **F.1+G.1: Embeddings + Matching Engine (Complete)**
