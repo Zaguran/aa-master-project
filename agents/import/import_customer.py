@@ -1,6 +1,6 @@
 """
 Customer Requirements Import Module
-Version: 1.65
+Version: 1.8.1
 
 Loads customer requirements from CSV or JSONL files into the database.
 Does NOT create embeddings or call Ollama - strictly a database loader.
@@ -12,8 +12,14 @@ import json
 import sys
 import os
 
+# Add both possible paths for database module
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'db_bridge'))
-from database import insert_or_update_customer_requirement, create_customer_project
+sys.path.insert(0, '/app/agents/db_bridge')
+
+try:
+    from database import insert_or_update_customer_requirement, create_customer_project
+except ImportError:
+    from agents.db_bridge.database import insert_or_update_customer_requirement, create_customer_project
 
 
 def load_customer_csv(customer_id: str, path: str) -> dict:

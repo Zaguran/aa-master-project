@@ -1,6 +1,6 @@
 """
 Traceability Visualization Page
-Version: 1.66
+Version: 1.8.1
 Task: H.2 - Interactive trace visualization UI
 Displays traceability chains across V-Model
 """
@@ -13,6 +13,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from components import auth, session, layout
 from components.traceability import get_trace, generate_svg, read_svg_content
+from agents.db_bridge.database import get_connection, list_projects
+from psycopg2.extras import RealDictCursor
 
 st.set_page_config(
     page_title="Traceability",
@@ -66,63 +68,50 @@ with st.expander("ℹ️ How to use", expanded=False):
 
 st.markdown("---")
 
-# Input section with dropdowns
+# Input section with project selectors
 st.markdown("### 🔍 Select Trace Parameters")
 
-from agents.db_bridge.database import list_projects, list_platforms
-
-# Get projects and platforms
+# Get projects
 try:
-    projects = list_projects()
-    platforms = list_platforms()
+    all_projects = list_projects()
+    customer_projects = [p['project_id'] for p in all_projects if p.get('type') == 'CUSTOMER']
+    platform_projects = [p['project_id'] for p in all_projects if p.get('type') == 'PLATFORM']
 except Exception as e:
-    projects = []
-    platforms = []
-    st.error(f"Error loading projects/platforms: {e}")
+    customer_projects = []
+    platform_projects = []
+    st.error(f"Error loading projects: {e}")
 
-col1, col2, col3 = st.columns(3)
+col1, col2 = st.columns(2)
 
 with col1:
-    # Project selector
-    if projects:
-        customer_projects = [p for p in projects if p.get('type') == 'CUSTOMER']
-        project_names = [p['project_id'] for p in customer_projects]
-        if project_names:
-            selected_project = st.selectbox(
-                "Project*",
-                options=project_names,
-                help="Select the customer project"
-            )
-        else:
-            selected_project = st.text_input("Project ID*", placeholder="e.g., Customer_A")
+    # Customer project selector
+    if customer_projects:
+        selected_customer_project = st.selectbox(
+            "Customer Project",
+            options=customer_projects,
+            help="Select the customer project"
+        )
     else:
-        selected_project = st.text_input("Project ID*", placeholder="e.g., Customer_A")
+        selected_customer_project = None
+        st.warning("No customer projects found")
 
 with col2:
     # Platform selector
-    if platforms:
-        platform_names = [p['platform_id'] for p in platforms]
-        selected_platform = st.selectbox(
-            "Platform (optional)",
-            options=[''] + platform_names,
-            help="Optional: Filter by platform"
+    if platform_projects:
+        selected_platform_project = st.selectbox(
+            "Platform Project",
+            options=platform_projects,
+            help="Select the platform project"
         )
     else:
-        selected_platform = ""
+        selected_platform_project = None
+        st.warning("No platform projects found")
 
-with col3:
-    # Node ID input
-    node_id = st.text_input(
-        "Node ID*",
-        placeholder="e.g., CR-001, REQ-PLAT-001",
-        help="Enter the node/requirement identifier"
-    )
-
-# Note about future RBAC
 st.caption("💡 Note: Role-based access control for projects/platforms will be added in future versions")
 
 st.markdown("---")
 
+# Requirement ID inputs
 col1, col2 = st.columns(2)
 
 with col1:

@@ -1,6 +1,6 @@
 """
 Matching Page with G.2 Matching Engine UI
-Version: 1.8
+Version: 1.8.1
 """
 
 import streamlit as st
@@ -11,6 +11,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from components import auth, session, layout
 from components.matching import run_matching, get_coverage_summary
+from agents.db_bridge.database import list_projects
 
 st.set_page_config(page_title="Matching", page_icon="🔗", layout="wide")
 
@@ -48,6 +49,45 @@ with st.expander("ℹ️ About Matching", expanded=False):
     """)
 
 st.markdown("---")
+st.subheader("📋 Select Projects to Match")
+
+# Get projects
+try:
+    all_projects = list_projects()
+
+    customer_projects = [p['project_id'] for p in all_projects if p.get('type') == 'CUSTOMER']
+    platform_projects = [p['project_id'] for p in all_projects if p.get('type') == 'PLATFORM']
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if customer_projects:
+            selected_customer = st.selectbox(
+                "Customer Project*",
+                options=customer_projects,
+                help="Select customer project to match"
+            )
+        else:
+            st.warning("No customer projects found. Please import customer data first.")
+            selected_customer = None
+
+    with col2:
+        if platform_projects:
+            selected_platform = st.selectbox(
+                "Platform Project*",
+                options=platform_projects,
+                help="Select platform to match against"
+            )
+        else:
+            st.warning("No platform projects found. Please import platform data first.")
+            selected_platform = None
+
+except Exception as e:
+    st.error(f"Error loading projects: {e}")
+    selected_customer = None
+    selected_platform = None
+
+st.markdown("---")
 st.subheader("🎯 Run Matching Engine")
 
 st.markdown("""
@@ -69,29 +109,35 @@ with col3:
     yellow_threshold = st.slider("YELLOW Threshold", min_value=0.5, max_value=1.0, value=0.65, step=0.05,
                                  help="Partial match threshold")
 
+# Only enable if projects are selected
+matching_enabled = selected_customer is not None and selected_platform is not None
+
 # Run matching
-if st.button("🚀 Run Matching", type="primary", use_container_width=True):
-    with st.spinner("Running matching engine..."):
-        try:
-            result = run_matching(
-                model='nomic-embed-text',
-                top_k=top_k,
-                full_threshold=green_threshold,
-                partial_threshold=yellow_threshold
-            )
+if st.button("🚀 Run Matching", type="primary", use_container_width=True, disabled=not matching_enabled):
+    if not matching_enabled:
+        st.error("❌ Please select both customer and platform projects")
+    else:
+        with st.spinner("Running matching engine..."):
+            try:
+                result = run_matching(
+                    model='nomic-embed-text',
+                    top_k=top_k,
+                    full_threshold=green_threshold,
+                    partial_threshold=yellow_threshold
+                )
 
-            st.success("✅ Matching completed!")
+                st.success("✅ Matching completed!")
 
-            col1, col2 = st.columns(2)
-            with col1:
-                st.metric("Matches Created", result.get('matched', 0))
-            with col2:
-                st.metric("Errors", result.get('errors', 0))
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.metric("Matches Created", result.get('matched', 0))
+                with col2:
+                    st.metric("Errors", result.get('errors', 0))
 
-        except Exception as e:
-            st.error(f"❌ Error running matching: {str(e)}")
-            with st.expander("Error Details"):
-                st.code(str(e))
+            except Exception as e:
+                st.error(f"❌ Error running matching: {str(e)}")
+                with st.expander("Error Details"):
+                    st.code(str(e))
 
 st.markdown("---")
 

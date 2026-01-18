@@ -1,6 +1,6 @@
 """
 System Status Page with Live Agent Monitoring
-Version: 1.8
+Version: 1.8.1
 """
 
 import streamlit as st
@@ -53,69 +53,59 @@ try:
     agent_data = list_agent_status()
 
     if agent_data:
-        # Create metrics row
-        num_agents = len(agent_data)
-        cols = st.columns(min(num_agents, 6))
+        # Create metrics in rows of 4 for better readability
+        agents_per_row = 4
+        for row_start in range(0, len(agent_data), agents_per_row):
+            row_agents = agent_data[row_start:row_start + agents_per_row]
+            cols = st.columns(len(row_agents))
 
-        for i, agent in enumerate(agent_data[:6]):
-            with cols[i]:
-                # Status indicator
-                status = agent.get('status', 'UNKNOWN')
-                details = agent.get('details', {})
-                if isinstance(details, str):
-                    try:
-                        details = json.loads(details)
-                    except:
-                        details = {}
+            for i, agent in enumerate(row_agents):
+                with cols[i]:
+                    # Get actual status from database
+                    status = agent.get('status', 'UNKNOWN')
 
-                # Check mode for scaffold agents
-                mode = details.get('mode', '')
-
-                if mode == 'scaffold':
-                    status_color = '🟡'
-                    status = 'SCAFFOLD'
-                elif status == 'ACTIVE' or status == 'READY':
-                    status_color = '🟢'
-                else:
-                    status_color = '🔴'
-
-                # Last heartbeat
-                last_hb = agent.get('last_heartbeat')
-                if last_hb:
-                    if last_hb.tzinfo:
-                        now = datetime.now(last_hb.tzinfo)
+                    # Determine status icon based on actual status
+                    if status == 'ACTIVE':
+                        status_color = '🟢'
+                    elif status == 'READY':
+                        status_color = '🟡'
                     else:
-                        now = datetime.now()
-                    time_diff = now - last_hb
-                    if time_diff < timedelta(minutes=5):
-                        hb_status = '✅'
+                        status_color = '🔴'
+
+                    # Get agent name (full, not truncated)
+                    agent_name = agent['agent_name'].replace('_', ' ').title()
+
+                    # Last heartbeat
+                    last_hb = agent.get('last_heartbeat')
+                    if last_hb:
+                        if last_hb.tzinfo:
+                            now = datetime.now(last_hb.tzinfo)
+                        else:
+                            now = datetime.now()
+                        time_diff = now - last_hb
+                        seconds_ago = int(time_diff.total_seconds())
+                        if seconds_ago < 300:
+                            hb_status = '✅'
+                        else:
+                            hb_status = '⚠️'
+                        if seconds_ago < 60:
+                            time_str = f"{seconds_ago}s ago"
+                        elif seconds_ago < 3600:
+                            time_str = f"{seconds_ago // 60}m ago"
+                        else:
+                            time_str = f"{seconds_ago // 3600}h ago"
                     else:
-                        hb_status = '⚠️'
-                    hb_seconds = time_diff.total_seconds()
-                else:
-                    hb_status = '❌'
-                    hb_seconds = None
+                        hb_status = '❌'
+                        time_str = "Never"
 
-                # Display
-                agent_name = agent['agent_name'].replace('_', ' ').title()
-                if len(agent_name) > 12:
-                    agent_name = agent_name[:12] + '...'
+                    # Display with FULL agent name
+                    st.metric(
+                        label=f"{status_color} {agent_name}",
+                        value=status,
+                        delta=f"Q: {agent.get('queue_size', 0)}"
+                    )
 
-                st.metric(
-                    label=f"{status_color} {agent_name}",
-                    value=status,
-                    delta=f"Q: {agent.get('queue_size', 0)}"
-                )
-
-                if hb_seconds is not None:
-                    if hb_seconds < 60:
-                        st.caption(f"{hb_status} {hb_seconds:.0f}s ago")
-                    elif hb_seconds < 3600:
-                        st.caption(f"{hb_status} {hb_seconds/60:.0f}m ago")
-                    else:
-                        st.caption(f"{hb_status} {hb_seconds/3600:.1f}h ago")
-                else:
-                    st.caption("❌ Never")
+                    st.caption(f"{hb_status} {time_str}")
 
         st.markdown("---")
 
