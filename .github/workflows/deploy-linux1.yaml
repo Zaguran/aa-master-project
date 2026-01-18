@@ -81,6 +81,23 @@ jobs:
           echo "=== [5/8] Checking .env file ==="
           cat .env
           
+          echo "=== [5.5/8] Installing pgvector extension ==="
+          # Check if pgvector is installed
+          if ! dpkg -l | grep -q postgresql-15-pgvector; then
+            echo "Installing pgvector..."
+            apt-get update -qq
+            DEBIAN_FRONTEND=noninteractive apt-get install -y postgresql-15-pgvector
+            systemctl restart postgresql
+            sleep 5
+            echo "pgvector installed and PostgreSQL restarted"
+          else
+            echo "pgvector already installed"
+          fi
+          
+          # Enable extension in database
+          echo "Enabling vector extension in database..."
+          sudo -u postgres psql -d trading -c "CREATE EXTENSION IF NOT EXISTS vector;" 2>/dev/null && echo "Vector extension enabled" || echo "Extension already exists or error occurred"
+          
           echo "=== [6/8] Stopping old containers ==="
           docker compose -f docker-compose.agents.yml down || true
           docker rm -f aat-monitor-db 2>/dev/null || true
