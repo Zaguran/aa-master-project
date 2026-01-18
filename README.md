@@ -137,19 +137,28 @@ docker logs aat-monitor-db
 
 ## Change Log
 
-- [x] **v1.66** (2026-01-17) - **H.1: Trace Engine + Coverage Classification + Graphviz**
-  - [x] Created agents/trace/trace_agent.py with trace engine
-  - [x] Implemented build_trace_for_requirements() - BFS traversal through nodes/links
-  - [x] Implemented generate_trace_graph() - Graphviz DOT generator
-  - [x] Extended agents/db_bridge/database.py with coverage functions
-  - [x] Added list_best_matches() - retrieves best match per customer req
-  - [x] Added classify_coverage() - GREEN/YELLOW/RED classification
-  - [x] Coverage thresholds: FULL_MATCH=0.85, PARTIAL_MATCH=0.65
-  - [x] Created web/components/coverage.py - compute_coverage_summary()
-  - [x] Created web/components/traceability.py - get_trace() + generate_svg()
+- [x] **v1.66** (2026-01-18) - **H: Traceability Visualization (Complete)**
+  - [x] H.1: Created agents/trace/trace_agent.py with trace engine
+  - [x] H.1: Implemented build_trace_for_requirements() - BFS traversal through nodes/links
+  - [x] H.1: Implemented generate_trace_graph() - Graphviz DOT generator
+  - [x] H.1: Extended agents/db_bridge/database.py with coverage functions
+  - [x] H.1: Added list_best_matches() - retrieves best match per customer req
+  - [x] H.1: Added classify_coverage() - GREEN/YELLOW/RED classification
+  - [x] H.1: Coverage thresholds: FULL_MATCH=0.85, PARTIAL_MATCH=0.65
+  - [x] H.1: Created web/components/coverage.py - compute_coverage_summary()
+  - [x] H.1: Created web/components/traceability.py - get_trace() + generate_svg()
+  - [x] H.2: Created 06_Trace.py - Interactive trace visualization page
+  - [x] H.2: Input fields for customer_req_id and platform_req_id
+  - [x] H.2: SVG graph display with download option
+  - [x] H.2: Trace summary statistics (nodes, links, tests)
+  - [x] H.2: Detailed node breakdown by category
+  - [x] H.2: RBAC: Admin and Visitor access
   - [x] Node shapes: ellipse (customer), box (platform/system), diamond (arch), note (code), hexagon (test)
   - [x] Colors: GREEN #4CAF50, YELLOW #FFC107, RED #F44336, GRAY #BDBDBD
-  - [x] Next: H.2 - Trace UI visualization page
+  - [x] Traverses links table to build complete V-Model chains
+  - [x] Supports all 13 V-Model data types
+  - [x] Graphviz integration for SVG export
+  - [x] Next: F - Embeddings + Matching Engine
 
 - [x] **v1.65** (2026-01-17) - **E.3.2: Enhanced Import Platform + V-Model + id_type**
   - [x] Added platform dropdown (fetches from database)
