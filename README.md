@@ -137,6 +137,33 @@ docker logs aat-monitor-db
 
 ## Change Log
 
+- [x] **v1.71** (2026-01-18) - **pgvector Installation & Configuration**
+  - [x] 🔧 PostgreSQL pgvector extension setup (v0.6.0)
+  - [x] 🔧 Installation steps for Ubuntu 24.04 + PostgreSQL 16:
+```bash
+    # Add PostgreSQL APT repository
+    curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql-archive-keyring.gpg
+    echo "deb [signed-by=/usr/share/keyrings/postgresql-archive-keyring.gpg] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list
+    
+    # Install pgvector
+    apt-get update
+    apt-get install -y postgresql-16-pgvector
+    
+    # Enable extension
+    sudo -u postgres psql -d trading -c "CREATE EXTENSION IF NOT EXISTS vector;"
+    
+    # Configure search_path
+    sudo -u postgres psql -d trading -c "ALTER DATABASE trading SET search_path TO work_aa, public;"
+    systemctl restart postgresql
+```
+  - [x] 🔧 Updated manage_db_aa.py: `SET search_path TO work_aa, public;`
+  - [x] 🔧 PostgreSQL configuration: search_path includes public schema for vector type
+  - [x] ✅ Verified: vector extension accessible in work_aa schema
+  - [x] ✅ Tables created: embedding_models (1 row), embeddings (0), matches (0)
+  - [x] 📝 **Note:** pgvector must be installed manually on Linux 1 (native PostgreSQL, not Docker)
+  - [x] 📝 GitHub Actions workflow cleanup: Remove automatic pgvector installation (failed due to repo issues)
+  - [x] Next: Upload test data → Generate embeddings → Run matching
+
 - [x] **v1.70** (2026-01-18) - **F+G: Embeddings + Matching Engine (Complete)**
   - [x] F: Integrated embeddings and matches tables into manage_db_aa.py
   - [x] F: pgvector extension support (VECTOR data type)
@@ -520,6 +547,8 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
+| **v1.71   ** | 2026-01-18 | **pgvector Installation & Configuration**
+| **v1.70   ** | 2026-01-18 | **F.1+G.1: Embeddings + Matching Engine (Complete)**
 | **v1.66   ** | 2026-01-17 | **H.1: Trace Engine + Coverage Classification** - Trace engine, Graphviz DOT generator, coverage classification
 | **v1.65   ** | 2026-01-17 | **E.3.2: Enhanced Import Platform + V-Model** - Platform dropdown + 13 V-Model data types
 | **v1.64   ** | 2026-01-17 | **E.3.1: Admin Panel Management** - User/Customer/Platform management with 4 tabs

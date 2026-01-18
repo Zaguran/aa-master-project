@@ -51,7 +51,7 @@ def init_aa_structure():
 
         logger.info(f"=== INICIALIZACE SCHÉMATU {schema_name.upper()} ===")
         cur.execute(f"CREATE SCHEMA IF NOT EXISTS {schema_name};")
-        cur.execute(f"SET search_path TO {schema_name};")
+        cur.execute(f"SET search_path TO {schema_name}, public;")
 
         # --- DEFINICE TABULEK (Zkráceno pro přehlednost, kód stejný jako dříve) ---
         cur.execute("CREATE TABLE IF NOT EXISTS customer (customer_id VARCHAR(50) PRIMARY KEY, full_name VARCHAR(255), contact VARCHAR(255));")
