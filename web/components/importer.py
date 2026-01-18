@@ -111,23 +111,23 @@ def import_platform_file(
         tmp_path = tmp.name
 
     try:
-        # All V-Model data types - placeholder for future implementation
+        # For now, all V-Model data types use platform requirements loader
+        # TODO: Implement specific loaders for each V-Model data type (architecture, code, tests, etc.)
         if data_type in vmodel_types:
-            # TODO: Implement specific loaders for each V-Model data type
-            return {
-                "inserted": 0,
-                "failed": 0,
-                "status": f"Data type '{data_type}' import is being prepared. Coming soon!",
-                "platform_id": platform_id,
-                "data_type": data_type
-            }
+            # Use platform requirements loader as default
+            if filetype == 'csv':
+                result = load_platform_csv(tmp_path)
+            elif filetype == 'jsonl':
+                result = load_platform_jsonl(tmp_path)
+            else:
+                return {"inserted": 0, "failed": 0, "status": f"Unsupported filetype: {filetype}"}
+            
+            result["status"] = "success"
+            result["platform_id"] = platform_id
+            result["data_type"] = data_type
+            return result
         else:
             return {"inserted": 0, "failed": 0, "status": f"Unknown data type: {data_type}"}
-
-        result["status"] = "success"
-        result["platform_id"] = platform_id
-        result["data_type"] = data_type
-        return result
     except Exception as e:
         return {"inserted": 0, "failed": 0, "status": f"Error: {str(e)}"}
     finally:
