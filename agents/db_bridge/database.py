@@ -835,5 +835,326 @@ def classify_coverage(full_th: float, partial_th: float, rows: list) -> list:
     return result
 
 
+# ============================================================================
+# EMBEDDING FUNCTIONS (v1.70 - Task F)
+# ============================================================================
+
+def get_or_create_embedding_model(model_name: str, vector_dims: int = 768, framework: str = 'ollama') -> int:
+    """
+    Get or create embedding model registry entry.
+
+    Returns:
+        model_id (int)
+    """
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+
+        # Try to get existing
+        cur.execute("""
+            SELECT model_id FROM embedding_models
+            WHERE model_name = %s
+        """, (model_name,))
+
+        row = cur.fetchone()
+        if row:
+            model_id = row[0]
+        else:
+            # Create new
+            cur.execute("""
+                INSERT INTO embedding_models (model_name, vector_dims, framework)
+                VALUES (%s, %s, %s)
+                RETURNING model_id
+            """, (model_name, vector_dims, framework))
+            model_id = cur.fetchone()[0]
+            conn.commit()
+
+        cur.close()
+        return model_id
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        print(f"Error managing embedding model: {e}")
+        return None
+    finally:
+        if conn:
+            conn.close()
+
+
+def get_nodes_for_embedding(scope: str = None, only_missing: bool = True, model_id: int = None, limit: int = None) -> list:
+    """
+    Get nodes that need embeddings.
+
+    Args:
+        scope: 'customer', 'platform', or None (all)
+        only_missing: If True, skip nodes that already have embeddings
+        model_id: Model ID to check for existing embeddings
+        limit: Maximum number of nodes to return
+
+    Returns:
+        List of node dicts
+    """
+    try:
+        conn = get_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        query = """
+            SELECT n.node_uuid, n.project_id, n.node_id, n.type, n.scope,
+                   n.content, n.attributes
+        """
+        # Add node_id from attributes if available
+        query += """
+            FROM nodes n
+            WHERE n.type = 'requirement'
+              AND n.content IS NOT NULL
+              AND n.content <> ''
+        """
+
+        params = []
+
+        if scope:
+            query += " AND n.scope = %s"
+            params.append(scope)
+
+        if only_missing and model_id:
+            query += """
+                AND NOT EXISTS (
+                    SELECT 1 FROM embeddings e
+                    WHERE e.node_uuid = n.node_uuid
+                      AND e.model_id = %s
+                )
+            """
+            params.append(model_id)
+
+        query += " ORDER BY n.created_at"
+
+        if limit:
+            query += " LIMIT %s"
+            params.append(limit)
+
+        cur.execute(query, params)
+        nodes = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        # Extract node_id from attributes if present
+        result = []
+        for n in nodes:
+            node_dict = dict(n)
+            if node_dict.get('attributes') and isinstance(node_dict['attributes'], dict):
+                node_dict['node_id'] = node_dict['attributes'].get('req_id', str(node_dict['node_uuid'])[:8])
+            else:
+                node_dict['node_id'] = str(node_dict['node_uuid'])[:8]
+            result.append(node_dict)
+
+        return result
+
+    except Exception as e:
+        print(f"Error getting nodes for embedding: {e}")
+        return []
+
+
+def insert_embedding(node_uuid: str, model_id: int, content_hash: str, embedding_vector: list) -> bool:
+    """
+    Insert embedding for a node.
+
+    Args:
+        node_uuid: Node UUID
+        model_id: Model ID
+        content_hash: SHA256 hash of content
+        embedding_vector: List of floats (vector)
+
+    Returns:
+        True if successful
+    """
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+
+        # Convert list to pgvector format
+        vector_str = '[' + ','.join(map(str, embedding_vector)) + ']'
+
+        cur.execute("""
+            INSERT INTO embeddings (node_uuid, model_id, content_hash, embedding)
+            VALUES (%s, %s, %s, %s::vector)
+            ON CONFLICT (node_uuid, model_id, content_hash) DO NOTHING
+        """, (node_uuid, model_id, content_hash, vector_str))
+
+        conn.commit()
+        cur.close()
+        return True
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        print(f"Error inserting embedding: {e}")
+        return False
+    finally:
+        if conn:
+            conn.close()
+
+
+# ============================================================================
+# MATCHING FUNCTIONS (v1.70 - Task G)
+# ============================================================================
+
+def get_embeddings_by_scope(model_id: int, scope: str) -> list:
+    """
+    Get all embeddings for nodes with given scope.
+
+    Args:
+        model_id: Model ID
+        scope: 'customer' or 'platform'
+
+    Returns:
+        List of dicts with node_uuid, node_id, content, embedding
+    """
+    try:
+        conn = get_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        cur.execute("""
+            SELECT n.node_uuid, n.attributes->>'req_id' as node_id, n.content, e.embedding
+            FROM embeddings e
+            JOIN nodes n ON e.node_uuid = n.node_uuid
+            WHERE e.model_id = %s AND n.scope = %s
+        """, (model_id, scope))
+
+        results = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        return [dict(r) for r in results] if results else []
+
+    except Exception as e:
+        print(f"Error getting embeddings: {e}")
+        return []
+
+
+def insert_match(model_id: int, customer_uuid: str, platform_uuid: str,
+                similarity: float, rank: int, classification: str) -> bool:
+    """
+    Insert matching result.
+
+    Args:
+        model_id: Model ID
+        customer_uuid: Customer node UUID
+        platform_uuid: Platform node UUID
+        similarity: Cosine similarity score
+        rank: Match rank (1 = best match)
+        classification: 'GREEN', 'YELLOW', or 'RED'
+
+    Returns:
+        True if successful
+    """
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+
+        cur.execute("""
+            INSERT INTO matches
+            (model_id, customer_node_uuid, platform_node_uuid,
+             similarity_score, match_rank, classification)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """, (model_id, customer_uuid, platform_uuid, similarity, rank, classification))
+
+        conn.commit()
+        cur.close()
+        return True
+
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        print(f"Error inserting match: {e}")
+        return False
+    finally:
+        if conn:
+            conn.close()
+
+
+def clear_matches(model_id: int) -> bool:
+    """Delete all matches for given model."""
+    conn = None
+    try:
+        conn = get_connection()
+        cur = conn.cursor()
+
+        cur.execute("DELETE FROM matches WHERE model_id = %s", (model_id,))
+        conn.commit()
+        cur.close()
+        return True
+    except Exception as e:
+        if conn:
+            conn.rollback()
+        print(f"Error clearing matches: {e}")
+        return False
+    finally:
+        if conn:
+            conn.close()
+
+
+def get_match_statistics(model_id: int = 1) -> dict:
+    """
+    Get match statistics for a model.
+
+    Args:
+        model_id: Embedding model ID
+
+    Returns:
+        Dict with GREEN, YELLOW, RED counts and percentages
+    """
+    try:
+        conn = get_connection()
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+
+        # Count by classification (rank 1 only = best match per customer)
+        cur.execute("""
+            SELECT classification, COUNT(*) as count
+            FROM matches
+            WHERE model_id = %s AND match_rank = 1
+            GROUP BY classification
+        """, (model_id,))
+
+        results = cur.fetchall()
+        cur.close()
+        conn.close()
+
+        counts = {'GREEN': 0, 'YELLOW': 0, 'RED': 0}
+        for row in results:
+            if row['classification'] in counts:
+                counts[row['classification']] = row['count']
+
+        total = sum(counts.values())
+
+        if total == 0:
+            return {
+                'total': 0,
+                'green': 0,
+                'yellow': 0,
+                'red': 0,
+                'pct_green': 0,
+                'pct_yellow': 0,
+                'pct_red': 0
+            }
+
+        return {
+            'total': total,
+            'green': counts['GREEN'],
+            'yellow': counts['YELLOW'],
+            'red': counts['RED'],
+            'pct_green': round(counts['GREEN'] / total * 100, 1),
+            'pct_yellow': round(counts['YELLOW'] / total * 100, 1),
+            'pct_red': round(counts['RED'] / total * 100, 1)
+        }
+
+    except Exception as e:
+        print(f"Error getting match statistics: {e}")
+        return {'total': 0, 'green': 0, 'yellow': 0, 'red': 0}
+
+
 if __name__ == "__main__":
     agent_loop()

@@ -2,7 +2,7 @@
 
 AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.66
+## Current Version: 1.70
 
 **Status:** ✅ **All Agents Active** - Active Development
 
@@ -136,6 +136,29 @@ docker logs aat-monitor-db
 ---
 
 ## Change Log
+
+- [x] **v1.70** (2026-01-18) - **F+G: Embeddings + Matching Engine (Complete)**
+  - [x] F: Integrated embeddings and matches tables into manage_db_aa.py
+  - [x] F: pgvector extension support (VECTOR data type)
+  - [x] F: Tables: embedding_models, embeddings, matches
+  - [x] F: Embedding agent (Ollama nomic-embed-text integration)
+  - [x] F: Text normalization and L2 vector normalization
+  - [x] F: Content hash deduplication
+  - [x] F: Batch processing with heartbeat updates
+  - [x] G: Matching agent (cosine similarity calculation)
+  - [x] G: Top-K matching (default K=5)
+  - [x] G: Coverage classification: GREEN (>=0.85), YELLOW (>=0.65), RED (<0.65)
+  - [x] Extended database.py with 8 new functions
+  - [x] Web components: embedding.py + matching.py
+  - [x] CLI tools for both agents (--loop, --dry-run modes)
+  - [x] Updated app.py version to 1.70
+  - [x] Agent status integration (embedding_agent, matching_agent)
+  - [x] Ready for: Upload data -> Generate embeddings -> Run matching -> View coverage
+  - [x] **Setup Required:**
+    - Ensure pgvector extension available in PostgreSQL Docker
+    - Run: `python db/db_setup/manage_db_aa.py` (on notebook)
+    - Verify new tables created
+  - [x] Next: H.3 - Update Trace with coverage % colors
 
 - [x] **v1.66** (2026-01-18) - **H: Traceability Visualization (Complete)**
   - [x] H.1: Created agents/trace/trace_agent.py with trace engine

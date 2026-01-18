@@ -4,7 +4,7 @@ from psycopg2 import Error
 import logging
 import json
 
-# Version: 1.66 - H.1: Trace Engine + Coverage Classification
+# Version: 1.70 - F+G: Embeddings + Matching Engine
 
 # Nastavení logování
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s - %(message)s')
@@ -41,7 +41,8 @@ def check_table_content(cur, schema_name, table_name):
 def init_aa_structure():
     conn = None
     schema_name = "work_aa"
-    tables = ["customer", "projects", "nodes", "links", "ai_analysis", "agent_status", "system_health"]
+    tables = ["customer", "projects", "nodes", "links", "ai_analysis", "agent_status", "system_health",
+              "embedding_models", "embeddings", "matches"]
     
     try:
         conn = get_connection()
@@ -186,6 +187,65 @@ def init_aa_structure():
                 disk_usage FLOAT,
                 timestamp TIMESTAMPTZ DEFAULT now()
             );
+        """)
+
+        # --- EMBEDDING & MATCHING TABLES (v1.70) ---
+
+        # Enable pgvector extension
+        cur.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+
+        # Embedding models registry
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS embedding_models (
+                model_id SERIAL PRIMARY KEY,
+                model_name TEXT UNIQUE NOT NULL,
+                vector_dims INT NOT NULL,
+                framework TEXT DEFAULT 'ollama',
+                created_at TIMESTAMPTZ DEFAULT NOW()
+            );
+        """)
+
+        # Node embeddings (requires pgvector extension)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS embeddings (
+                embedding_id SERIAL PRIMARY KEY,
+                node_uuid UUID NOT NULL REFERENCES nodes(node_uuid) ON DELETE CASCADE,
+                model_id INT NOT NULL REFERENCES embedding_models(model_id),
+                content_hash TEXT NOT NULL,
+                embedding VECTOR(768),
+                created_at TIMESTAMPTZ DEFAULT NOW(),
+                UNIQUE(node_uuid, model_id, content_hash)
+            );
+        """)
+
+        # Matching results
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS matches (
+                match_id SERIAL PRIMARY KEY,
+                model_id INT NOT NULL REFERENCES embedding_models(model_id),
+                customer_node_uuid UUID NOT NULL REFERENCES nodes(node_uuid),
+                platform_node_uuid UUID NOT NULL REFERENCES nodes(node_uuid),
+                similarity_score FLOAT NOT NULL,
+                match_rank INT NOT NULL,
+                classification TEXT CHECK (classification IN ('GREEN', 'YELLOW', 'RED')),
+                created_at TIMESTAMPTZ DEFAULT NOW()
+            );
+        """)
+
+        # Indexes for embedding & matching performance
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_embeddings_node ON embeddings(node_uuid);")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_embeddings_model ON embeddings(model_id);")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_embeddings_hash ON embeddings(content_hash);")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_matches_customer ON matches(customer_node_uuid);")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_matches_platform ON matches(platform_node_uuid);")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_matches_model ON matches(model_id);")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_matches_classification ON matches(classification);")
+
+        # Insert default embedding model
+        cur.execute("""
+            INSERT INTO embedding_models (model_name, vector_dims, framework)
+            VALUES ('nomic-embed-text', 768, 'ollama')
+            ON CONFLICT (model_name) DO NOTHING;
         """)
 
         # --- POMOCNÉ INDEXY ---
