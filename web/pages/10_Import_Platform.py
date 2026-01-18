@@ -144,31 +144,31 @@ st.markdown("### 📖 Instructions")
 
 st.info(f"""
 **Current Selection:**
-- Platform: **{selected_platform}** (`{platform_id}`)
-- Data Type: **{selected_data_type_label}**
+- Platform: {selected_platform}
+- Data Type: {selected_data_type_label}
 
 **V-Model Structure:**
 
-**Left Side (Requirements & Architecture):**
-- System Requirements -> System Architecture
-- Software Requirements -> Software Architecture
+Left Side (Requirements & Architecture):
+• System Requirements → System Architecture
+• Software Requirements → Software Architecture
 
-**Right Side (Testing):**
-- System Test -> System Integration Test
-- Software Test -> Software Integration Test
+Right Side (Testing):
+• System Test → System Integration Test
+• Software Test → Software Integration Test
 
-**Results:**
-- System Test Result, System Integration Test Result
-- Software Test Result, Software Integration Test Result
+Results:
+• System Test Result, System Integration Test Result
+• Software Test Result, Software Integration Test Result
 
-**Traceability:**
-- Links between all layers (source_id, source_type, target_id, target_type, link_type)
+Traceability:
+• Links between all layers (source_id, source_type, target_id, target_type, link_type)
 
-**Supported File Formats:** CSV, JSONL
-
-**id_type Column (Optional):**
-Include 'id_type' column in your CSV/JSONL: 'requirement' or 'information'
-(defaults to 'requirement' if not provided)
+**CSV Format includes:**
+- **id_type** column: 'requirement' (default) or 'information'
+  - requirement: Standard requirement nodes
+  - information: Supporting information nodes
+- Other columns vary by data type (see documentation)
 """)
 
 # Show format details based on selected data type

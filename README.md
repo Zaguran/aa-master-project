@@ -2,7 +2,7 @@
 
 AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.70
+## Current Version: 1.8
 
 **Status:** ✅ **All Agents Active** - Active Development
 
@@ -136,6 +136,50 @@ docker logs aat-monitor-db
 ---
 
 ## Change Log
+
+- [x] **v1.8** (2026-01-18) - **Final UI Complete - PoC v1 Finished** 🎉
+  - [x] 🎨 **Dashboard Enhancements:**
+    - System overview metrics (requirements, embeddings, matches, active agents)
+    - Quick action buttons for all main features
+    - Visual status indicators
+  - [x] 🎨 **Status Page Major Upgrade:**
+    - Live agent monitoring with refresh button
+    - Queue size visualization (bar charts)
+    - Agent heartbeat status with time indicators
+    - Detailed agent information table (RAM, CPU, mode)
+    - Database table sizes and row counts
+    - Status colors: 🟢 ACTIVE, 🟡 SCAFFOLD, 🔴 ERROR
+  - [x] 🎨 **F.2: Embeddings UI (NEW):**
+    - Generate Embeddings page (08_Embeddings.py)
+    - Scope selector (Customer/Platform/All)
+    - Batch size configuration
+    - Results summary (embedded/skipped/errors)
+    - Current embedding status overview
+    - Admin-only access
+  - [x] 🎨 **G.2: Matching UI (Enhanced):**
+    - Run Matching button with configuration
+    - Top-K slider (1-10 matches)
+    - GREEN/YELLOW threshold sliders
+    - Coverage summary metrics
+    - Coverage % pie chart (GREEN/YELLOW/RED)
+    - Results visualization
+  - [x] 🎨 **H.2+: Trace Enhancement:**
+    - Project dropdown selector
+    - Platform dropdown selector
+    - Node ID input
+    - Future RBAC note (role-based per project/platform)
+  - [x] 🐛 **Bug Fixes:**
+    - Import Platform legend: Added id_type explanation
+    - Import Customer legend: Added id_type explanation
+    - CSV format documentation updated
+  - [x] 🔧 **Version Updates:**
+    - app.py version: 1.71 → 1.8
+    - manage_db_aa.py version: 1.71 → 1.8
+  - [x] 📝 **PoC v1 Complete:**
+    - All core features implemented
+    - Full UI coverage
+    - Ready for production testing
+    - Next phase: User testing + data upload
 
 - [x] **v1.71** (2026-01-18) - **pgvector Installation & Configuration**
   - [x] 🔧 PostgreSQL pgvector extension setup (v0.6.0)
@@ -547,6 +591,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
+| **v1.8    ** | 2026-01-18 | **Final UI Complete - PoC v1 Finished** - Dashboard metrics, Status monitoring, Embeddings UI, Matching UI, Trace enhancements
 | **v1.71   ** | 2026-01-18 | **pgvector Installation & Configuration**
 | **v1.70   ** | 2026-01-18 | **F.1+G.1: Embeddings + Matching Engine (Complete)**
 | **v1.66   ** | 2026-01-17 | **H.1: Trace Engine + Coverage Classification** - Trace engine, Graphviz DOT generator, coverage classification

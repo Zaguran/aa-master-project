@@ -1,9 +1,23 @@
+"""
+System Status Page with Live Agent Monitoring
+Version: 1.8
+"""
+
 import streamlit as st
-from components import auth, session, layout, agents
+import time
+from datetime import datetime, timedelta
 import pandas as pd
 import json
+import sys
+import os
 
-st.set_page_config(page_title="Status", page_icon="🔄", layout="wide")
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+
+from components import auth, session, layout, agents
+from agents.db_bridge.database import get_connection, list_agent_status
+from psycopg2.extras import RealDictCursor
+
+st.set_page_config(page_title="Status", page_icon="📊", layout="wide")
 
 session.init_session_state()
 user = auth.get_current_user()
@@ -16,167 +30,165 @@ if not auth.is_authenticated():
 
 auth.require_role(["admin", "visitor"])
 
-layout.render_header("System & Agents Status")
+layout.render_header("System Status")
+st.title("📊 System Status")
 
-st.title("System & Agents Status")
+# Auto-refresh state
+if 'last_refresh' not in st.session_state:
+    st.session_state.last_refresh = time.time()
+
+# Refresh button
+col1, col2 = st.columns([6, 1])
+with col2:
+    if st.button("🔄 Refresh"):
+        st.session_state.last_refresh = time.time()
+        st.rerun()
 
 st.markdown("---")
 
-st.subheader("🤖 Agent Heartbeat")
-
-
-def render_resource_bar(value, label, color_thresholds=None):
-    """Render a simple progress bar for resource usage."""
-    if color_thresholds is None:
-        color_thresholds = {"low": 50, "medium": 80}
-
-    if value < color_thresholds["low"]:
-        color = "#28a745"  # green
-    elif value < color_thresholds["medium"]:
-        color = "#ffc107"  # yellow
-    else:
-        color = "#dc3545"  # red
-
-    bar_html = f"""
-    <div style="display: flex; align-items: center; margin-bottom: 5px;">
-        <span style="width: 40px; font-size: 12px;">{label}</span>
-        <div style="flex-grow: 1; background-color: #e0e0e0; border-radius: 4px; height: 16px; margin-left: 8px;">
-            <div style="width: {min(value, 100)}%; background-color: {color}; height: 100%; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
-                <span style="font-size: 10px; color: white; font-weight: bold;">{value:.1f}%</span>
-            </div>
-        </div>
-    </div>
-    """
-    return bar_html
-
-
-def parse_details(details):
-    """Parse details field - handle both string and dict."""
-    if details is None:
-        return {}
-    if isinstance(details, str):
-        try:
-            return json.loads(details)
-        except:
-            return {}
-    return details
-
+# Agent Status
+st.subheader("🤖 Agent Status")
 
 try:
-    agent_data = agents.get_agent_overview()
+    agent_data = list_agent_status()
 
     if agent_data:
-        # Create columns for cards layout
-        st.markdown("### Active Agents with Resource Monitoring")
+        # Create metrics row
+        num_agents = len(agent_data)
+        cols = st.columns(min(num_agents, 6))
 
-        # Group agents by status
-        active_agents = []
-        scaffold_agents = []
-        offline_agents = []
+        for i, agent in enumerate(agent_data[:6]):
+            with cols[i]:
+                # Status indicator
+                status = agent.get('status', 'UNKNOWN')
+                details = agent.get('details', {})
+                if isinstance(details, str):
+                    try:
+                        details = json.loads(details)
+                    except:
+                        details = {}
 
-        for agent in agent_data:
-            details = parse_details(agent.get('details', {}))
-            status = details.get('status', agent.get('status', 'unknown'))
-            mode = details.get('mode', '')
+                # Check mode for scaffold agents
+                mode = details.get('mode', '')
 
-            agent_info = {
-                'name': agent.get('agent', 'Unknown'),
-                'status': status,
-                'mode': mode,
-                'last_heartbeat': agent.get('last_heartbeat', 'N/A'),
-                'queue': agent.get('queue', 0),
-                'cpu_percent': details.get('cpu_percent'),
-                'ram_percent': details.get('ram_percent'),
-                'ram_mb': details.get('ram_mb'),
-                'version': details.get('version', 'N/A'),
-                'details': details
-            }
+                if mode == 'scaffold':
+                    status_color = '🟡'
+                    status = 'SCAFFOLD'
+                elif status == 'ACTIVE' or status == 'READY':
+                    status_color = '🟢'
+                else:
+                    status_color = '🔴'
 
-            if mode == 'scaffold':
-                scaffold_agents.append(agent_info)
-            elif status in ['healthy', 'active', 'READY']:
-                active_agents.append(agent_info)
-            else:
-                offline_agents.append(agent_info)
+                # Last heartbeat
+                last_hb = agent.get('last_heartbeat')
+                if last_hb:
+                    if last_hb.tzinfo:
+                        now = datetime.now(last_hb.tzinfo)
+                    else:
+                        now = datetime.now()
+                    time_diff = now - last_hb
+                    if time_diff < timedelta(minutes=5):
+                        hb_status = '✅'
+                    else:
+                        hb_status = '⚠️'
+                    hb_seconds = time_diff.total_seconds()
+                else:
+                    hb_status = '❌'
+                    hb_seconds = None
 
-        # Render Active Agents
-        if active_agents:
-            st.markdown("#### 🟢 Active Agents")
-            cols = st.columns(min(len(active_agents), 3))
-            for idx, agent_info in enumerate(active_agents):
-                with cols[idx % 3]:
-                    with st.container():
-                        st.markdown(f"**{agent_info['name']}**")
-                        st.markdown(f"Status: `{agent_info['status']}`")
+                # Display
+                agent_name = agent['agent_name'].replace('_', ' ').title()
+                if len(agent_name) > 12:
+                    agent_name = agent_name[:12] + '...'
 
-                        if agent_info['cpu_percent'] is not None:
-                            st.markdown(
-                                render_resource_bar(agent_info['cpu_percent'], "CPU"),
-                                unsafe_allow_html=True
-                            )
-                        if agent_info['ram_percent'] is not None:
-                            st.markdown(
-                                render_resource_bar(agent_info['ram_percent'], "RAM"),
-                                unsafe_allow_html=True
-                            )
-                            if agent_info['ram_mb']:
-                                st.caption(f"RAM: {agent_info['ram_mb']:.0f} MB")
+                st.metric(
+                    label=f"{status_color} {agent_name}",
+                    value=status,
+                    delta=f"Q: {agent.get('queue_size', 0)}"
+                )
 
-                        st.caption(f"Last: {agent_info['last_heartbeat']}")
-                        st.markdown("---")
+                if hb_seconds is not None:
+                    if hb_seconds < 60:
+                        st.caption(f"{hb_status} {hb_seconds:.0f}s ago")
+                    elif hb_seconds < 3600:
+                        st.caption(f"{hb_status} {hb_seconds/60:.0f}m ago")
+                    else:
+                        st.caption(f"{hb_status} {hb_seconds/3600:.1f}h ago")
+                else:
+                    st.caption("❌ Never")
 
-        # Render Scaffold Agents
-        if scaffold_agents:
-            st.markdown("#### 🟡 Scaffold Agents (Waiting for Implementation)")
-            cols = st.columns(min(len(scaffold_agents), 4))
-            for idx, agent_info in enumerate(scaffold_agents):
-                with cols[idx % 4]:
-                    with st.container():
-                        st.markdown(f"**{agent_info['name']}**")
-                        st.markdown(f"Mode: `scaffold`")
-
-                        if agent_info['cpu_percent'] is not None:
-                            st.markdown(
-                                render_resource_bar(agent_info['cpu_percent'], "CPU"),
-                                unsafe_allow_html=True
-                            )
-                        if agent_info['ram_percent'] is not None:
-                            st.markdown(
-                                render_resource_bar(agent_info['ram_percent'], "RAM"),
-                                unsafe_allow_html=True
-                            )
-
-                        st.caption(f"v{agent_info['version']}")
-                        st.markdown("---")
-
-        # Render Offline Agents
-        if offline_agents:
-            st.markdown("#### 🔴 Offline/Seeded Agents")
-            offline_names = [a['name'] for a in offline_agents]
-            st.markdown(", ".join([f"`{name}`" for name in offline_names]))
-
-        # Summary metrics
         st.markdown("---")
-        st.markdown("### 📊 Summary")
-        col1, col2, col3, col4 = st.columns(4)
 
-        with col1:
-            st.metric("Total Agents", len(agent_data))
-        with col2:
-            st.metric("Active", len(active_agents))
-        with col3:
-            st.metric("Scaffold", len(scaffold_agents))
-        with col4:
-            st.metric("Offline", len(offline_agents))
+        # Detailed agent table
+        st.subheader("📋 Detailed Agent Information")
 
-        # Detailed table view
-        with st.expander("📋 Detailed Agent Table"):
-            df = pd.DataFrame(agent_data)
-            df.columns = ["Agent", "Status", "Last Heartbeat", "Queue Size", "Details"]
-            st.dataframe(df, use_container_width=True, hide_index=True)
+        agent_table_data = []
+        for agent in agent_data:
+            last_hb = agent.get('last_heartbeat')
+            if last_hb:
+                if last_hb.tzinfo:
+                    now = datetime.now(last_hb.tzinfo)
+                else:
+                    now = datetime.now()
+                time_since = (now - last_hb).total_seconds()
+                if time_since < 60:
+                    hb_str = f"{time_since:.0f}s ago"
+                elif time_since < 3600:
+                    hb_str = f"{time_since/60:.0f}m ago"
+                else:
+                    hb_str = f"{time_since/3600:.1f}h ago"
+            else:
+                hb_str = "Never"
+
+            details = agent.get('details', {})
+            if isinstance(details, str):
+                try:
+                    details = json.loads(details)
+                except:
+                    details = {}
+
+            agent_table_data.append({
+                'Agent': agent['agent_name'],
+                'Status': agent.get('status', 'UNKNOWN'),
+                'Queue Size': agent.get('queue_size', 0),
+                'Last Heartbeat': hb_str,
+                'Mode': details.get('mode', 'N/A'),
+                'RAM (MB)': details.get('ram_mb', 'N/A'),
+                'CPU %': details.get('cpu_percent', 'N/A')
+            })
+
+        df = pd.DataFrame(agent_table_data)
+        st.dataframe(df, use_container_width=True, hide_index=True)
+
+        # Queue visualization
+        st.subheader("📊 Queue Status")
+
+        queue_data = []
+        for agent in agent_data:
+            queue_size = agent.get('queue_size', 0)
+            if queue_size > 0:
+                queue_data.append({
+                    'Agent': agent['agent_name'],
+                    'Queue': queue_size
+                })
+
+        if queue_data:
+            try:
+                import plotly.express as px
+                df_queue = pd.DataFrame(queue_data)
+                fig = px.bar(df_queue, x='Agent', y='Queue',
+                             title='Agent Queue Sizes',
+                             color='Queue',
+                             color_continuous_scale='Reds')
+                st.plotly_chart(fig, use_container_width=True)
+            except ImportError:
+                st.warning("Plotly not available for charts")
+                st.dataframe(pd.DataFrame(queue_data), use_container_width=True, hide_index=True)
+        else:
+            st.info("✅ All queues empty")
 
     else:
-        st.warning("No agent data available. Agents may not be running yet.")
+        st.warning("No agent status available")
 
 except Exception as e:
     st.error("⚠️ Unable to retrieve agent status. Database or agents may be offline.")
@@ -186,5 +198,51 @@ except Exception as e:
 
 st.markdown("---")
 
-st.subheader("💻 System Health")
-st.info("System-wide resource metrics aggregated from all agents are displayed above in the agent cards.")
+# Database Status
+st.subheader("💾 Database Status")
+
+try:
+    conn = get_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+
+    # Table sizes
+    cur.execute("""
+        SELECT
+            tablename,
+            pg_size_pretty(pg_total_relation_size('work_aa.' || tablename)) AS size
+        FROM pg_tables
+        WHERE schemaname = 'work_aa'
+        ORDER BY pg_total_relation_size('work_aa.' || tablename) DESC
+        LIMIT 10
+    """)
+
+    tables = cur.fetchall()
+
+    if tables:
+        table_data = []
+        for table in tables:
+            try:
+                cur.execute(f"SELECT COUNT(*) as count FROM work_aa.{table['tablename']}")
+                count = cur.fetchone()['count']
+            except:
+                count = 'N/A'
+
+            table_data.append({
+                'Table': table['tablename'],
+                'Rows': count,
+                'Size': table['size']
+            })
+
+        df_tables = pd.DataFrame(table_data)
+        st.dataframe(df_tables, use_container_width=True, hide_index=True)
+
+    cur.close()
+    conn.close()
+
+except Exception as e:
+    st.error(f"Error loading database status: {e}")
+
+# Auto-refresh timer
+st.markdown("---")
+st.caption(f"Last refresh: {datetime.fromtimestamp(st.session_state.last_refresh).strftime('%H:%M:%S')}")
+st.caption("Click Refresh button to update status")

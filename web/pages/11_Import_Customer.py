@@ -64,13 +64,25 @@ if st.button("Import Customer Requirements", type="primary"):
         st.warning("Please select a file first")
 
 st.markdown("---")
-st.markdown("### Instructions")
+st.markdown("### 📖 Instructions")
+
 st.info("""
 **Customer requirements** are needs from a specific customer project.
 
-**Customer ID**: Unique identifier for this customer (e.g., A, B, ProjectX)
+**CSV Format:**
+- req_id: Requirement identifier (e.g., CR-001)
+- text: Requirement description
+- priority: Priority level (HIGH, MEDIUM, LOW)
+- source_doc: Source document reference
+- category: Category/domain (optional)
+- **id_type**: 'requirement' (default) or 'information'
 
-**CSV Format**: req_id, text, priority, source_doc, category
+**JSONL Format:**
+One JSON object per line with the same fields.
 
-These requirements will be matched against platform capabilities.
+**Note on id_type:**
+- 'requirement': Standard requirement (used for matching)
+- 'information': Supporting information (not matched)
+
+Example files are available in the project documentation.
 """)

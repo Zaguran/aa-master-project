@@ -4,7 +4,7 @@ from psycopg2 import Error
 import logging
 import json
 
-# Version: 1.70 - F+G: Embeddings + Matching Engine
+# Version: 1.8 - Final UI Complete (PoC v1)
 
 # Nastavení logování
 logging.basicConfig(level=logging.INFO, format='[%(asctime)s] %(levelname)s - %(message)s')

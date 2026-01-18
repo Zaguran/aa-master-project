@@ -66,7 +66,63 @@ with st.expander("ℹ️ How to use", expanded=False):
 
 st.markdown("---")
 
-# Input section
+# Input section with dropdowns
+st.markdown("### 🔍 Select Trace Parameters")
+
+from agents.db_bridge.database import list_projects, list_platforms
+
+# Get projects and platforms
+try:
+    projects = list_projects()
+    platforms = list_platforms()
+except Exception as e:
+    projects = []
+    platforms = []
+    st.error(f"Error loading projects/platforms: {e}")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    # Project selector
+    if projects:
+        customer_projects = [p for p in projects if p.get('type') == 'CUSTOMER']
+        project_names = [p['project_id'] for p in customer_projects]
+        if project_names:
+            selected_project = st.selectbox(
+                "Project*",
+                options=project_names,
+                help="Select the customer project"
+            )
+        else:
+            selected_project = st.text_input("Project ID*", placeholder="e.g., Customer_A")
+    else:
+        selected_project = st.text_input("Project ID*", placeholder="e.g., Customer_A")
+
+with col2:
+    # Platform selector
+    if platforms:
+        platform_names = [p['platform_id'] for p in platforms]
+        selected_platform = st.selectbox(
+            "Platform (optional)",
+            options=[''] + platform_names,
+            help="Optional: Filter by platform"
+        )
+    else:
+        selected_platform = ""
+
+with col3:
+    # Node ID input
+    node_id = st.text_input(
+        "Node ID*",
+        placeholder="e.g., CR-001, REQ-PLAT-001",
+        help="Enter the node/requirement identifier"
+    )
+
+# Note about future RBAC
+st.caption("💡 Note: Role-based access control for projects/platforms will be added in future versions")
+
+st.markdown("---")
+
 col1, col2 = st.columns(2)
 
 with col1:
