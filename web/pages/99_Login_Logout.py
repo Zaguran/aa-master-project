@@ -1,7 +1,7 @@
 import streamlit as st
 from components import auth, session
 
-st.set_page_config(page_title="Login", page_icon="🔐", layout="centered")
+st.set_page_config(page_title="Login / Logout", page_icon="🔐", layout="centered")
 
 session.init_session_state()
 
@@ -26,7 +26,7 @@ if auth.is_authenticated():
 
     st.stop()
 
-st.title("🔐 AAT Login")
+st.title("🔐 Login / Logout")
 st.markdown("---")
 
 with st.form("login_form"):

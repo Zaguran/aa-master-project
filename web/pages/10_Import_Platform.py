@@ -18,7 +18,7 @@ user = auth.get_current_user()
 if not auth.is_authenticated():
     st.warning("Please login to access the application.")
     if st.button("Goto Login Page", type="primary"):
-        st.switch_page("pages/00_Login.py")
+        st.switch_page("pages/99_Login_Logout.py")
     st.stop()
 
 auth.require_role(["admin"])
@@ -40,7 +40,7 @@ except Exception as e:
 if not platforms:
     st.warning("No platforms found. Please create a platform in Admin panel first.")
     if st.button("Go to Admin Panel", type="primary"):
-        st.switch_page("pages/99_Admin.py")
+        st.switch_page("pages/98_Admin.py")
     st.stop()
 
 platform_options = {p['name']: p['platform_id'] for p in platforms}

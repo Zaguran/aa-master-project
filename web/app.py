@@ -7,7 +7,7 @@ from datetime import datetime
 from components import layout, auth, session
 from agents.db_bridge.database import list_agent_status
 
-APP_VERSION = "1.8.2"
+APP_VERSION = "1.8.3"
 
 # Startup logging for Docker debugging
 db_host = os.getenv('DB_HOST', 'LINUX_1_IP')
@@ -87,7 +87,7 @@ if not db_available or not auth.is_authenticated():
     else:
         st.warning("Please login to access the application.")
         if st.button("Goto Login Page", type="primary"):
-            st.switch_page("pages/00_Login.py")
+            st.switch_page("pages/99_Login_Logout.py")
         st.stop()
 else:
     user_roles = user.get('roles', [])

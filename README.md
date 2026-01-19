@@ -2,7 +2,7 @@
 
 AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.8.2
+## Current Version: 1.8.3
 
 **Status:** ✅ **All Agents Active** - Active Development
 
@@ -136,6 +136,32 @@ docker logs aat-monitor-db
 ---
 
 ## Change Log
+
+- [x] **v1.8.3** (2026-01-19) - **Navigation Fix (File Renaming)**
+  - [x] Fixed Navigation Order:
+    - Renamed files with number prefixes for correct ordering
+    - Workflow pages: 10-15 (Import -> Embeddings -> Matching -> Trace -> Chat)
+    - System pages: 80-82 (Status, DB Status, Table View)
+    - Admin: 98 (Admin Panel)
+    - Login/Logout: 99 (moved to last position)
+  - [x] File Renames:
+    - 08_Embeddings -> 12_Embeddings
+    - 05_Matching -> 13_Matching
+    - 06_Trace -> 14_Trace
+    - 09_Chat -> 15_Chat
+    - 02_Status -> 80_Status
+    - 03_DB_Status -> 81_DB_Status
+    - 04_TableView -> 82_TableView
+    - 12_Reports -> 90_Reports
+    - 99_Admin -> 98_Admin
+    - 00_Login -> 99_Login_Logout
+  - [x] Updated References:
+    - Fixed all st.switch_page() calls
+    - Updated Dashboard quick actions
+    - Removed non-functional pages.toml
+  - [x] Version Updates:
+    - app.py: 1.8.2 -> 1.8.3
+    - manage_db_aa.py: 1.8.2 -> 1.8.3
 
 - [x] **v1.8.2** (2026-01-19) - **Navigation Restructure + Workflow Visualization**
   - [x] Navigation Improvements:
@@ -544,28 +570,30 @@ docker logs aat-monitor-db
 
 ### Web Interface Structure
 
-The application features a clean, organized Streamlit interface with logical grouping:
+The application features a clean, organized Streamlit interface with logical page ordering:
 
 **Main Pages:**
 - **App** - Overview and workflow guide
-- **Dashboard** - System metrics and quick actions
+- **Dashboard** (01) - System metrics and quick actions
 
-**Core Workflow (Main Use Case):**
-1. **Import Platform** - Upload platform requirements, architecture, tests
-2. **Import Customer** - Upload customer requirements and RFQ documents
-3. **Embeddings** - Generate AI embeddings using Ollama
-4. **Matching** - Match customer requirements to platform capabilities
-5. **Trace** - Visualize traceability through V-Model
-6. **Chat** - AI-powered requirement analysis
+**Core Workflow (Sequential):**
+1. **Import Platform** (10) - Upload platform requirements, architecture, tests
+2. **Import Customer** (11) - Upload customer requirements and RFQ documents
+3. **Embeddings** (12) - Generate AI embeddings using Ollama
+4. **Matching** (13) - Match customer requirements to platform capabilities
+5. **Trace** (14) - Visualize traceability through V-Model
+6. **Chat** (15) - AI-powered requirement analysis
 
 **System & Utilities:**
-- **Login/Logout** - Authentication management
-- **Status** - Agent health monitoring
-- **DB Status** - Database statistics
-- **Table View** - Browse database tables
+- **Status** (80) - Agent health monitoring
+- **DB Status** (81) - Database statistics
+- **Table View** (82) - Browse database tables
 
 **Administration:**
-- **Admin Panel** - User and project management (admin only)
+- **Admin Panel** (98) - User and project management (admin only)
+- **Login/Logout** (99) - Authentication (last in menu)
+
+Page numbers indicate display order in the sidebar navigation.
 
 All pages include:
 - Role-based access control (admin/visitor)
@@ -575,36 +603,36 @@ All pages include:
 
 ```bash
 web/
- ├─ app.py                    # Main entry point with workflow guide
- ├─ .streamlit/
- │   └─ pages.toml            # Navigation ordering configuration
+ ├─ app.py                     # Main entry point with workflow guide
  ├─ pages/
- │   ├─ 00_Login.py           # Authentication login/logout page
- │   ├─ 01_Dashboard.py       # System overview and key metrics
- │   ├─ 02_Status.py          # Agent and system status monitoring
- │   ├─ 03_DB_Status.py       # Database health and statistics
- │   ├─ 04_TableView.py       # Browse database tables
- │   ├─ 05_Matching.py        # Requirements matching interface
- │   ├─ 06_Trace.py           # Traceability analysis
- │   ├─ 08_Embeddings.py      # Generate AI embeddings
- │   ├─ 09_Chat.py            # AI chat interface
- │   ├─ 10_Import_Platform.py # Platform requirements import
- │   ├─ 11_Import_Customer.py # Customer requirements import
- │   └─ 99_Admin.py           # Admin panel
+ │   ├─ 01_Dashboard.py        # System overview and key metrics
+ │   ├─ 07_Impact.py           # Git impact analysis (placeholder)
+ │   ├─ 10_Import_Platform.py  # Platform requirements import
+ │   ├─ 11_Import_Customer.py  # Customer requirements import
+ │   ├─ 12_Embeddings.py       # Generate AI embeddings
+ │   ├─ 13_Matching.py         # Requirements matching interface
+ │   ├─ 14_Trace.py            # Traceability analysis
+ │   ├─ 15_Chat.py             # AI chat interface
+ │   ├─ 80_Status.py           # Agent and system status monitoring
+ │   ├─ 81_DB_Status.py        # Database health and statistics
+ │   ├─ 82_TableView.py        # Browse database tables
+ │   ├─ 90_Reports.py          # Reports (placeholder)
+ │   ├─ 98_Admin.py            # Admin panel
+ │   └─ 99_Login_Logout.py     # Authentication login/logout page
  ├─ components/
- │   ├─ layout.py             # Header rendering and layout utilities
- │   ├─ utils.py              # Chat and utility functions
- │   └─ importer.py           # Import wrapper functions
+ │   ├─ layout.py              # Header rendering and layout utilities
+ │   ├─ utils.py               # Chat and utility functions
+ │   └─ importer.py            # Import wrapper functions
  ├─ static/
  │   ├─ css/
- │   │   └─ app.css           # Minimal styling
+ │   │   └─ app.css            # Minimal styling
  │   └─ img/
  └─ requirements.txt
 
-agents/import/                 # Import modules
+agents/import/                  # Import modules
  ├─ __init__.py
- ├─ import_platform.py        # Platform CSV/JSONL loader
- └─ import_customer.py        # Customer CSV/JSONL loader
+ ├─ import_platform.py         # Platform CSV/JSONL loader
+ └─ import_customer.py         # Customer CSV/JSONL loader
 ```
 
 ### Chat Type A
@@ -652,6 +680,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
+| **v1.8.3  ** | 2026-01-19 | **Navigation Fix (File Renaming)** - Renamed pages with number prefixes (10-15 workflow, 80-82 system, 98 admin, 99 login)
 | **v1.8.2  ** | 2026-01-19 | **Navigation Restructure + Workflow Visualization** - pages.toml navigation, workflow diagrams, logout button on login page
 | **v1.81   ** | 2026-01-18 | **Hotfix **
 | **v1.8    ** | 2026-01-18 | **Final UI Complete - PoC v1 Finished** - Dashboard metrics, Status monitoring, Embeddings UI, Matching UI, Trace enhancements

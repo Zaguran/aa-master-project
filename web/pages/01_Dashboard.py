@@ -19,7 +19,7 @@ user = auth.get_current_user()
 if not auth.is_authenticated():
     st.warning("Please login to access the application.")
     if st.button("Goto Login Page", type="primary"):
-        st.switch_page("pages/00_Login.py")
+        st.switch_page("pages/99_Login_Logout.py")
     st.stop()
 
 auth.require_role(["admin", "visitor"])
@@ -93,16 +93,16 @@ with col1:
 with col2:
     st.markdown("**🤖 AI Processing**")
     if st.button("Generate Embeddings", key="btn_embeddings"):
-        st.switch_page("pages/08_Embeddings.py")
+        st.switch_page("pages/12_Embeddings.py")
     if st.button("Run Matching", key="btn_matching"):
-        st.switch_page("pages/05_Matching.py")
+        st.switch_page("pages/13_Matching.py")
 
 with col3:
     st.markdown("**📊 Analysis**")
     if st.button("View Traceability", key="btn_trace"):
-        st.switch_page("pages/06_Trace.py")
+        st.switch_page("pages/14_Trace.py")
     if st.button("Check Status", key="btn_status"):
-        st.switch_page("pages/02_Status.py")
+        st.switch_page("pages/80_Status.py")
 
 st.markdown("---")
 
