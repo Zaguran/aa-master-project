@@ -123,10 +123,10 @@ st.info("Use the navigation menu on the left to access different modules.")
 
 st.markdown("---")
 
-st.subheader("What is AA PoC?")
+st.subheader("What is AAT PoC?")
 
 st.markdown("""
-**AA PoC (Automotive Acceptance Proof of Concept)** is an AI-powered platform for matching
+**AA PoC (Automotive Assistance Tool Proof of Concept)** is an AI-powered platform for matching
 customer requirements to platform capabilities in automotive development.
 
 **Key Features:**
