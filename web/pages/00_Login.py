@@ -6,10 +6,24 @@ st.set_page_config(page_title="Login", page_icon="🔐", layout="centered")
 session.init_session_state()
 
 if auth.is_authenticated():
-    st.success("You are already logged in!")
-    st.info("Use the navigation menu to access different modules.")
-    if st.button("Go to Dashboard"):
-        st.switch_page("pages/01_Dashboard.py")
+    user = auth.get_current_user()
+
+    st.success(f"Already logged in as: {user['full_name']} ({user['email']})")
+
+    st.markdown("---")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("Go to App", type="primary", use_container_width=True):
+            st.switch_page("app.py")
+
+    with col2:
+        if st.button("Logout", type="secondary", use_container_width=True):
+            auth.logout()
+            st.success("Logged out successfully!")
+            st.rerun()
+
     st.stop()
 
 st.title("🔐 AAT Login")

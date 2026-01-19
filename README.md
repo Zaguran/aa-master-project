@@ -2,7 +2,7 @@
 
 AI-driven Requirements Engineering Proof-of-Concept for automated requirements digitalization, matching, and traceability.
 
-## Current Version: 1.8
+## Current Version: 1.8.2
 
 **Status:** ✅ **All Agents Active** - Active Development
 
@@ -136,6 +136,29 @@ docker logs aat-monitor-db
 ---
 
 ## Change Log
+
+- [x] **v1.8.2** (2026-01-19) - **Navigation Restructure + Workflow Visualization**
+  - [x] Navigation Improvements:
+    - Created pages.toml for logical page ordering
+    - Grouped pages: Main -> Workflow -> System -> Admin
+    - Core workflow pages grouped together for clarity
+  - [x] Enhanced App Page:
+    - Added "What is AA PoC?" explanation
+    - Visual workflow diagram (3-column layout)
+    - ASCII process flow diagram
+    - Clear getting started guide
+    - Sequential workflow explanation
+  - [x] UI Improvements:
+    - Login page: Added logout button when already logged in
+    - Removed "(Type A)" from Chat description
+    - Clearer navigation structure
+  - [x] Documentation:
+    - Updated README.md Web Interface Structure section
+    - Reflects current page organization
+    - Clear description of each page's purpose
+  - [x] Version Updates:
+    - app.py: 1.8.1 -> 1.8.2
+    - manage_db_aa.py: 1.8.1 -> 1.8.2
 
 - [x] **v1.81** (2026-01-18) - **Hotfix ** 🎉
   - [x] 🎨 **Import Platform page loads without error**
@@ -520,36 +543,65 @@ docker logs aat-monitor-db
 ## Features
 
 ### Web Interface Structure
-The application now features a clean multi-tab Streamlit interface:
+
+The application features a clean, organized Streamlit interface with logical grouping:
+
+**Main Pages:**
+- **App** - Overview and workflow guide
+- **Dashboard** - System metrics and quick actions
+
+**Core Workflow (Main Use Case):**
+1. **Import Platform** - Upload platform requirements, architecture, tests
+2. **Import Customer** - Upload customer requirements and RFQ documents
+3. **Embeddings** - Generate AI embeddings using Ollama
+4. **Matching** - Match customer requirements to platform capabilities
+5. **Trace** - Visualize traceability through V-Model
+6. **Chat** - AI-powered requirement analysis
+
+**System & Utilities:**
+- **Login/Logout** - Authentication management
+- **Status** - Agent health monitoring
+- **DB Status** - Database statistics
+- **Table View** - Browse database tables
+
+**Administration:**
+- **Admin Panel** - User and project management (admin only)
+
+All pages include:
+- Role-based access control (admin/visitor)
+- Session management
+- Error handling
+- Consistent UI/UX
 
 ```bash
 web/
- ├─ app.py                    # Main entry point with layout loader
+ ├─ app.py                    # Main entry point with workflow guide
+ ├─ .streamlit/
+ │   └─ pages.toml            # Navigation ordering configuration
  ├─ pages/
- │   ├─ 00_Login.py           # Authentication login page
+ │   ├─ 00_Login.py           # Authentication login/logout page
  │   ├─ 01_Dashboard.py       # System overview and key metrics
  │   ├─ 02_Status.py          # Agent and system status monitoring
  │   ├─ 03_DB_Status.py       # Database health and statistics
  │   ├─ 04_TableView.py       # Browse database tables
  │   ├─ 05_Matching.py        # Requirements matching interface
  │   ├─ 06_Trace.py           # Traceability analysis
- │   ├─ 07_Impact.py          # Git impact analysis
- │   ├─ 08_Reports.py         # Generate and view reports
- │   ├─ 09_Chat.py            # AI chat interface (Type A)
- │   ├─ 10_Import_Platform.py # Platform requirements import (E.2)
- │   ├─ 11_Import_Customer.py # Customer requirements import (E.2)
+ │   ├─ 08_Embeddings.py      # Generate AI embeddings
+ │   ├─ 09_Chat.py            # AI chat interface
+ │   ├─ 10_Import_Platform.py # Platform requirements import
+ │   ├─ 11_Import_Customer.py # Customer requirements import
  │   └─ 99_Admin.py           # Admin panel
  ├─ components/
  │   ├─ layout.py             # Header rendering and layout utilities
  │   ├─ utils.py              # Chat and utility functions
- │   └─ importer.py           # Import wrapper functions (E.1)
+ │   └─ importer.py           # Import wrapper functions
  ├─ static/
  │   ├─ css/
  │   │   └─ app.css           # Minimal styling
  │   └─ img/
  └─ requirements.txt
 
-agents/import/                 # Import modules (E.1)
+agents/import/                 # Import modules
  ├─ __init__.py
  ├─ import_platform.py        # Platform CSV/JSONL loader
  └─ import_customer.py        # Customer CSV/JSONL loader
@@ -600,6 +652,7 @@ docker run -p 8501:8501 ai-requirements-extractor
 
 | Tag | Date | Description |
 |-----|------|-------------|
+| **v1.8.2  ** | 2026-01-19 | **Navigation Restructure + Workflow Visualization** - pages.toml navigation, workflow diagrams, logout button on login page
 | **v1.81   ** | 2026-01-18 | **Hotfix **
 | **v1.8    ** | 2026-01-18 | **Final UI Complete - PoC v1 Finished** - Dashboard metrics, Status monitoring, Embeddings UI, Matching UI, Trace enhancements
 | **v1.71   ** | 2026-01-18 | **pgvector Installation & Configuration**

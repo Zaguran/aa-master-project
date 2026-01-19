@@ -1,0 +1,71 @@
+# Navigation Structure for AA PoC
+# Version: 1.8.2
+
+# MAIN PAGES (Getting Started)
+[[pages]]
+path = "app.py"
+name = "App"
+icon = ":material/home:"
+
+[[pages]]
+path = "pages/01_Dashboard.py"
+name = "Dashboard"
+icon = ":material/dashboard:"
+
+# CORE WORKFLOW (Main Use Case)
+[[pages]]
+path = "pages/10_Import_Platform.py"
+name = "Import Platform"
+icon = ":material/download:"
+
+[[pages]]
+path = "pages/11_Import_Customer.py"
+name = "Import Customer"
+icon = ":material/download:"
+
+[[pages]]
+path = "pages/08_Embeddings.py"
+name = "Embeddings"
+icon = ":material/psychology:"
+
+[[pages]]
+path = "pages/05_Matching.py"
+name = "Matching"
+icon = ":material/link:"
+
+[[pages]]
+path = "pages/06_Trace.py"
+name = "Trace"
+icon = ":material/search:"
+
+[[pages]]
+path = "pages/09_Chat.py"
+name = "Chat"
+icon = ":material/chat:"
+
+# SYSTEM & UTILITIES
+[[pages]]
+path = "pages/00_Login.py"
+name = "Login/Logout"
+icon = ":material/lock:"
+
+[[pages]]
+path = "pages/02_Status.py"
+name = "Status"
+icon = ":material/monitoring:"
+
+[[pages]]
+path = "pages/03_DB_Status.py"
+name = "DB Status"
+icon = ":material/storage:"
+
+[[pages]]
+path = "pages/04_TableView.py"
+name = "Table View"
+icon = ":material/table:"
+
+# ADMIN
+[[pages]]
+path = "pages/99_Admin.py"
+name = "Admin Panel"
+icon = ":material/settings:"

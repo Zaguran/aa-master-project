@@ -7,7 +7,7 @@ from datetime import datetime
 from components import layout, auth, session
 from agents.db_bridge.database import list_agent_status
 
-APP_VERSION = "1.8.1"
+APP_VERSION = "1.8.2"
 
 # Startup logging for Docker debugging
 db_host = os.getenv('DB_HOST', 'LINUX_1_IP')
@@ -120,26 +120,134 @@ if st.session_state.get('logout_message'):
 st.markdown("---")
 st.success(f"Welcome, {user['full_name']}!")
 st.info("Use the navigation menu on the left to access different modules.")
+
 st.markdown("---")
 
-st.markdown("### Available Modules")
+st.subheader("What is AA PoC?")
 
-modules = [
-    ("Dashboard", "System overview and key metrics"),
-    ("Status", "Agent and system status monitoring"),
-    ("DB Status", "Database health and statistics"),
-    ("TableView", "Browse database tables"),
-    ("Matching", "Requirements matching interface"),
-    ("Trace", "Traceability analysis"),
-    ("Impact", "Git impact analysis"),
-    ("Reports", "Generate and view reports"),
-    ("Chat", "AI chat interface (Type A)")
-]
+st.markdown("""
+**AA PoC (Automotive Acceptance Proof of Concept)** is an AI-powered platform for matching
+customer requirements to platform capabilities in automotive development.
 
-if auth.has_role("admin"):
-    modules.append(("Admin Panel", "System administration (Admin only)"))
+**Key Features:**
+- Import requirements from customers and platforms
+- Generate AI embeddings for semantic understanding
+- Match customer needs to platform features
+- Trace requirements through V-Model (system -> architecture -> code -> tests)
+- AI chat interface for requirement analysis
+""")
 
-for name, desc in modules:
-    st.markdown(f"- **{name}** - {desc}")
-    
-#Vynucený build
+st.markdown("---")
+
+st.subheader("Core Workflow")
+
+st.markdown("""
+The system follows a sequential workflow:
+""")
+
+# Workflow visualization using columns
+col1, col2, col3 = st.columns([1, 1, 1])
+
+with col1:
+    st.markdown("### 1. Import Data")
+    st.info("""
+**Import Platform**
+- Platform requirements
+- Architecture documents
+- Test specifications
+
+**Import Customer**
+- Customer requirements
+- RFQ documents
+
+Both imports go into database in parallel.
+Platform data must exist before matching.
+""")
+
+with col2:
+    st.markdown("### 2. Process")
+    st.info("""
+**Generate Embeddings**
+- Convert text to vectors
+- Uses Ollama AI (nomic-embed-text)
+- Captures semantic meaning
+
+**Run Matching**
+- Compare customer <-> platform
+- Calculate similarity scores
+- Classify: GREEN/YELLOW/RED
+""")
+
+with col3:
+    st.markdown("### 3. Analyze")
+    st.info("""
+**View Trace**
+- Complete V-Model chain
+- Requirements -> Tests
+- Visual graph display
+
+**AI Chat**
+- Ask questions
+- Analyze requirements
+- Get recommendations
+""")
+
+st.markdown("---")
+
+st.markdown("### Process Flow")
+
+# Simple text-based flow for clarity
+flow_text = """
++-------------------+     +-------------------+
+| Import Platform   |---->|   Database        |
++-------------------+     |                   |
+                          |   PostgreSQL      |
++-------------------+     |   +               |
+| Import Customer   |---->|   pgvector        |
++-------------------+     +---------+---------+
+                                    |
+                                    v
+                          +-------------------+
+                          |  Embeddings       |
+                          |  (Ollama AI)      |
+                          +---------+---------+
+                                    |
+                                    v
+                          +-------------------+
+                          |   Matching        |
+                          |  (Similarity)     |
+                          +---------+---------+
+                                    |
+                                    v
+                          +-------------------+
+                          | Trace & Chat      |
+                          |  (Analysis)       |
+                          +-------------------+
+"""
+
+st.code(flow_text, language="text")
+
+st.markdown("---")
+
+st.subheader("Getting Started")
+
+st.markdown("""
+**New users should follow this sequence:**
+
+1. **Import Platform** - Upload platform requirements first
+2. **Import Customer** - Upload customer requirements
+3. **Embeddings** - Generate AI embeddings for all requirements
+4. **Matching** - Run matching engine
+5. **Dashboard** - View coverage statistics
+6. **Trace** - Explore requirement chains
+7. **Chat** - Ask AI about requirements
+
+**For monitoring:**
+- **Status** - Check agent health
+- **DB Status** - View database statistics
+
+**For administration:**
+- **Admin Panel** - Manage users, projects (admin only)
+""")
+
+st.markdown("---")
